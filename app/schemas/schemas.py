@@ -1,0 +1,158 @@
+from os import link
+from typing_extensions import Required
+from marshmallow import fields, validate, ValidationError, post_dump
+from marshmallow_sqlalchemy.fields import Nested
+from apiflask import Schema
+from apiflask.fields import Integer, String, DateTime, Boolean
+from apiflask.validators import Length, OneOf
+from flask_marshmallow import Marshmallow
+
+from ..models.alch_model import TipoTarea, Tarea
+
+ma = Marshmallow()
+
+##########Funciones de validación ##############################    
+
+def validate_fecha(f):
+    #print("Mes:",int(f[3:5]))
+    if int(f[3:5])>12:
+        #print("error en fechas")
+        raise ValidationError("Campo fecha inválido - Ingrese dd/mm/aaaa")
+
+def validate_expte(n):
+    nro_causa = n[0:1] + "-" + n[1:11].lstrip('0') + "/" + n[11:13]
+    #print(nro_causa)
+    return nro_causa
+
+
+##########Schemas para joins ###############################   
+class SmartNested(Nested):
+    def serialize(self, attr, obj, accessor=None):
+        if attr not in obj.__dict__:
+            return {"id": int(getattr(obj, attr + "_id"))}
+        return super(SmartNested, self).serialize(attr, obj, accessor)
+
+###############ApiFlask####################  
+###############Grupos####################
+class GrupoIn(Schema):
+    name = String(required=True, validate=Length(0, 10))
+    category = String(required=True, validate=OneOf(['dog', 'cat']))
+    test = String()
+
+class GrupoOut(Schema):
+    id = Integer()
+    name = String()
+    name3 = String()
+    category = String()
+###############Usuarios####################
+class UsuarioIn(Schema):
+    nombre = String(required=True)
+    apellido = String(required=True)
+    id_user_actualizacion = String(required=True)
+    id_persona_ext = String(required=True)
+
+class UsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = DateTime()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_persona_ext = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+################TipoTareas####################
+class TipoTareaIn(Schema):
+    codigo_humano = String(required=True)
+    descripcion = String(required=True)
+    id_usuario_actualizacion = String(required=True)
+
+class TipoTareaOut(Schema):
+    id = String()
+    codigo_humano = String()
+    descripcion = String()
+    id_usuario_actualizacion = String()    
+
+###############Tareas####################       
+class TareaOut(Schema):
+    id = String()
+    id_grupo = String()
+    prioridad = Integer()
+    id_actuacion = String()
+    titulo = String()
+    cuerpo = String()
+    id_expediente = String()
+    caratula_expediente = String()
+    id_tipo_tarea = String()
+    eliminable = Boolean()
+    fecha_eliminacion = DateTime()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "descripcion")) 
+    #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
+
+
+
+###############Marshmallow####################
+class TipoTareaSchema(ma.Schema):
+    class Meta:
+        model = TipoTarea
+        include_relationships = True
+        load_instance = True
+        include_fk=True
+    
+    id = fields.String()
+    codigo_humano = fields.String()
+    descripcion =fields.String() 
+    id_usuario_actualizacion = fields.String() 
+    fecha_actualizacion =fields.DateTime()
+
+
+                                          
+
+class TareaSchema(ma.Schema):
+    class Meta:
+        model = Tarea
+        include_relationships = True
+        load_instance = True
+        include_fk=True
+
+    id = fields.String()
+    id_grupo = fields.String()
+    id_prioridad = fields.String()
+    id_actuacion = fields.String()
+    titulo = fields.String()
+    cuerpo = fields.String()
+    id_expediente = fields.String()
+    caratula_expediente = fields.String()
+    id_tipo_tarea = fields.String()
+    eliminable = fields.Boolean()
+    fecha_eliminacion = fields.DateTime()
+    #tipo_tarea = fields.String() 
+    tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "descripcion"))  
+
+############## Schemas de Entrada de Datos ##############################
+    
+class LoadFechaSchema(ma.Schema):
+    class Meta:
+        ordered = True
+
+    #expte = fields.String(required = True, validate=validate.Length(min=6, max=13))
+    fecha_desde = fields.String(validate=validate_fecha)
+    fecha_hasta = fields.String(validate=validate_fecha)
+    expte = fields.String(validate=validate.Length(min=6, max=13))
+    primer = fields.Boolean()
+
+
+
+class LoadExpedienteSchema(ma.Schema):
+    class Meta:
+        ordered = True
+
+    expte = fields.String(required = True, validate=validate.Length(min=6, max=13))
+    fecha_desde = fields.String(validate=validate_fecha)
+    fecha_hasta = fields.String(validate=validate_fecha)
+    primer = fields.Boolean()
+
+    

@@ -3,9 +3,10 @@ from apiflask.fields import Integer, String
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
-from ..alch_model import Grupo,Tarea,Usuario
+from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario
 from sqlalchemy.sql import text
 from typing import List
+from ..schemas.schemas import GrupoIn, GrupoOut
 
 
 
@@ -20,17 +21,6 @@ from typing import List
 
 
 groups_b = APIBlueprint('groups_b', __name__)
-
-class GrupoIn(Schema):
-    name = String(required=True, validate=Length(0, 10))
-    category = String(required=True, validate=OneOf(['dog', 'cat']))
-    test = String()
-
-class GrupoOut(Schema):
-    id = Integer()
-    name = String()
-    name3 = String()
-    category = String()
 
 @groups_b.patch('/grupos/<int:grupo_id>')
 @groups_b.input(GrupoIn(partial=True))  # -> json_data
