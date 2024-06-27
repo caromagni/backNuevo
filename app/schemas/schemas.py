@@ -49,6 +49,9 @@ class GrupoOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
 
+class GroupCountOut(Schema):
+    count = Integer()
+    data = Nested(GrupoOut, many=True)
 
 class GrupoHOut(Schema):
     id_padre = String()

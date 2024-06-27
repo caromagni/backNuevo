@@ -4,7 +4,7 @@ from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario, HerarquiaGrupoGrupo
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo
 from ..common.error_handling import ValidationError
-from ..schemas.schemas import GrupoIn, GrupoOut
+from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut
 
 
 groups_b = APIBlueprint('groups_b', __name__)
@@ -34,12 +34,12 @@ def update_gr(grupo_id: str, json_data: dict):
     
 
 @groups_b.get('/grupos')
-@groups_b.output(GrupoOut(many=True))
+#@groups_b.output(GroupCountOut(many=True))
 def get_grupos():
     try:
         
-        res=get_all_grupos()
-
+        res, cant=get_all_grupos()
+       
         if res is None or len(res) == 0:
             
             result={
@@ -49,8 +49,13 @@ def get_grupos():
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             return result
-
-        return res 
+        res, cant=get_all_grupos()
+        data = {
+                "count": cant,
+                "data": GrupoOut().dump(res, many=True)
+            }
+        
+        return data
     
     except Exception as err:
         raise ValidationError(err)    

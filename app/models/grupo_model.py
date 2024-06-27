@@ -11,9 +11,7 @@ def get_all_grupos():
     session: scoped_session = current_app.session
     res =session.query(Grupo).offset(0).limit(3).all()
     cant=session.query(Grupo).count()
-    print(len(res))
-    print(cant)
-    return res
+    return res, cant
 
 def get_all_herarquia():
     session: scoped_session = current_app.session
