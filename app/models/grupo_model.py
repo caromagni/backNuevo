@@ -7,11 +7,17 @@ from flask import current_app
 from .alch_model import Grupo, HerarquiaGrupoGrupo
 
 
-def get_all_grupos():
+""" def get_all_grupos():
     session: scoped_session = current_app.session
     res =session.query(Grupo).offset(0).limit(3).all()
     cant=session.query(Grupo).count()
-    return res, cant
+    return res, cant """
+
+def get_all_grupos(page=1, per_page=10): #if no arguments are passed, the default values are used
+    session: scoped_session = current_app.session
+    total= session.query(Grupo).count()
+    result= session.query(Grupo).offset((page-1)*per_page).limit(per_page).all()
+    return result, total
 
 def get_all_herarquia():
     session: scoped_session = current_app.session

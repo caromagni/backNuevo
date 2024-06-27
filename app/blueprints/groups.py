@@ -1,10 +1,10 @@
 from apiflask import APIBlueprint
-from flask import current_app, jsonify
+from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Tarea,Usuario, TareaAsignadaUsuario, HerarquiaGrupoGrupo
 from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo
 from ..common.error_handling import ValidationError
-from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut
+from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn
 
 
 groups_b = APIBlueprint('groups_b', __name__)
@@ -33,8 +33,8 @@ def update_gr(grupo_id: str, json_data: dict):
         raise ValidationError(err)
     
 
-@groups_b.get('/grupos')
-#@groups_b.output(GroupCountOut(many=True))
+""" @groups_b.get('/grupos')
+@groups_b.output(GroupCountOut)
 def get_grupos():
     try:
         
@@ -58,9 +58,38 @@ def get_grupos():
         return data
     
     except Exception as err:
-        raise ValidationError(err)    
+        raise ValidationError(err)   """  
                                            
-   
+@groups_b.get('/grupos')
+#@groups_b.input(PageIn)
+@groups_b.output(GroupCountOut)
+def get_grupos():
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('page_size', default=10, type=int)
+    try:
+        
+        res, cant=get_all_grupos(page,page_size)
+       
+        if res is None or len(res) == 0:
+            
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontraron datos de grupos"
+                } 
+            return result
+       
+        data = {
+                "count": cant,
+                "data": GrupoOut().dump(res, many=True)
+            }
+        
+        return data
+    
+    except Exception as err:
+        raise ValidationError(err)   
+    
 
 @groups_b.get('/tareas/<string:tarea_id>/usuarios_asignados')
 def get_usuarios_asignados(tarea_id:str):

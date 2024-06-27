@@ -43,6 +43,10 @@ class GrupoIn(Schema):
     id_user_actualizacion = String(required=True)
     id_padre = String()    
 
+class PageIn(Schema):
+    page = Integer()
+    per_page = Integer()
+
 class GrupoOut(Schema):
     id = String()
     descripcion = String()
