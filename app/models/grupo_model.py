@@ -7,9 +7,11 @@ from flask import current_app
 from .alch_model import Grupo, HerarquiaGrupoGrupo
 
 
-def get_all_grupos():
+def get_all_grupos(page=1, per_page=10): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session
-    return session.query(Grupo).all()
+    total= session.query(Grupo).count()
+    result= session.query(Grupo).offset((page-1)*per_page).limit(per_page).all()
+    return result, total
 
 
 def update_grupo(id='', descripcion='', id_user_actualizacion=''):

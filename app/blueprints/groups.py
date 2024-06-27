@@ -52,9 +52,12 @@ def update_gr(grupo_id: str, json_data: dict):
 @groups_b.get('/grupos')
 @groups_b.output(GrupoOut(many=True))
 def get_grupos():
+    page = request.args.get('page', default=1, type=int)
+    page_size = request.args.get('page_size', default=10, type=int)
+        
     try:
         
-        res=get_all_grupos()
+        res=get_all_grupos(page,page_size)
 
         if res is None or len(res) == 0:
             
