@@ -1,6 +1,6 @@
 from apiflask import Schema, abort, APIBlueprint
 from flask import request
-from apiflask.fields import Integer, String
+from apiflask.fields import Integer, String, List, Nested
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
@@ -10,8 +10,7 @@ from ..common.error_handling import ValidationError
 from sqlalchemy.sql import text
 from typing import List
 from ..schemas.schemas import GrupoIn, GrupoOut
-
-
+import logging
 
 # from apiflask import Schema, abort, APIBlueprint, input, output
 # from apiflask.fields import Integer, String
@@ -50,15 +49,16 @@ def update_gr(grupo_id: str, json_data: dict):
     
 
 @groups_b.get('/grupos')
-@groups_b.output(GrupoOut(many=True))
+@groups_b.output({'data':GrupoOut, 'total_count': Integer()})
 def get_grupos():
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('page_size', default=10, type=int)
         
     try:
-        
-        res=get_all_grupos(page,page_size)
-
+        logging.info("Fetching grupos...")
+        res,total_count=get_all_grupos(page,page_size)
+        print("does this have something?")
+        print(len(res))
         if res is None or len(res) == 0:
             
             result={
@@ -69,9 +69,10 @@ def get_grupos():
                 } 
             return result
 
-        return res 
+        return {"data": res, "total_count": total_count} 
     
     except Exception as err:
+        logging.error(f"Error fetching grupos: {err}")
         raise ValidationError(err)                                           
 
 
