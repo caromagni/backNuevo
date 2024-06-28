@@ -31,8 +31,9 @@ def update_gr(grupo_id: str, json_data: dict):
     
 @groups_b.doc(description='Listado de Grupos existentes', summary='Listado de Grupos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos')
+@groups_b.input(PageIn, location='query')
 @groups_b.output(GroupCountOut)
-def get_grupos():
+def get_grupos(query_data: dict):
     try:
         page=int(request.args.get('page'))
         page_size=int(request.args.get('page_size'))

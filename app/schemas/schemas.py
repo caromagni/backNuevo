@@ -34,9 +34,9 @@ class SmartNested(Nested):
 
 ###############ApiFlask####################  
 class PageIn(Schema):
-    page = Integer()
-    per_page = Integer()
-    
+    page = Integer(default=1)
+    page_size = Integer(default=10)
+
 ###############Grupos####################
 class HerarquiaGrupoGrupoOut(Schema):
     id_padre = String()
