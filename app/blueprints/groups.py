@@ -35,8 +35,13 @@ def update_gr(grupo_id: str, json_data: dict):
 @groups_b.output(GroupCountOut)
 def get_grupos(query_data: dict):
     try:
-        page=int(request.args.get('page'))
-        page_size=int(request.args.get('page_size'))
+        page=1
+        page_size=10
+        if(request.args.get('page_size') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('page_size') is not None):
+            page_size=int(request.args.get('page_size'))
+            
         print("page_size:",page_size)
         print("page:",page)
         res, cant=get_all_grupos(page,page_size)
