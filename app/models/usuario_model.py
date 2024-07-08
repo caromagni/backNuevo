@@ -31,7 +31,7 @@ def get_grupos_by_usuario(id):
 
 
 
-def insert_usuario(id='', nombre='', apellido='', id_persona_ext='', id_user_actualizacion='', id_grupo=''):
+def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None):
     session: scoped_session = current_app.session
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)

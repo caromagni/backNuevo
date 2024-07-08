@@ -153,7 +153,21 @@ class ExpedienteOut(Schema):
     estado = String()
     
 
-###############Tareas####################       
+###############Tareas####################  
+class TareaIn(Schema):
+    id_grupo = String(required=True)
+    prioridad = Integer(required=True)
+    id_actuacion = String(required=True)
+    titulo = String(required=True)
+    cuerpo = String()
+    id_expediente = String()
+    caratula_expediente = String()
+    id_tipo_tarea = String(required=True)
+    eliminable = Boolean()
+    fecha_eliminacion = DateTime()
+    id_usuario_asignado = String()   
+    id_user_actualizacion = String(required=True)
+
 class TareaOut(Schema):
     id = String()
     id_grupo = String()
@@ -166,9 +180,9 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
-    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    #tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
-    #tipo_tarea = fields.Nested(TipoTareaSchema, only=("id", "nombre"))  
+    
 
 class TareaUsuarioOut(Schema):
     id = String()

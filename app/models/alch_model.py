@@ -3,7 +3,7 @@ from sqlalchemy import ARRAY, Boolean, CHAR, Column, DateTime, ForeignKey, Integ
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-
+import uuid
 Base = declarative_base()
 metadata = Base.metadata
 
@@ -234,7 +234,9 @@ class Tarea(Base):
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
-    id_usuario_asignado = Column(Integer)
+    id_usuario_asignado = Column(UUID)
+    id_user_actualizacion = Column(UUID)
+    fecha_actualizacion = Column(DateTime)
 
     tipo_tarea = relationship('TipoTarea')
 
