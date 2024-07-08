@@ -7,6 +7,8 @@ from .blueprints.groups import groups_b
 from .blueprints.usuario import usuario_b
 from .blueprints.tarea import tarea_b
 from .blueprints.herarquia import herarquia_b
+from .blueprints.actuacion import actuacion_b
+from .blueprints.expediente import expediente_b
 from .models.alch_model import Base
 from .config import Config
 
@@ -37,6 +39,8 @@ def create_app():
     app.register_blueprint(herarquia_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
+    app.register_blueprint(actuacion_b)
+    app.register_blueprint(expediente_b)
 
     # Register custom error handlers
     register_error_handlers(app)

@@ -132,6 +132,26 @@ class TipoTareaOut(Schema):
     codigo_humano = String()
     nombre = String()
     id_user_actualizacion = String()    
+################Actuaciones####################
+class TipoActuacionOut(Schema):
+    id = String()
+    nombre = String()
+
+class ActuacionOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    id_tipo_actuacion = String()
+    tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()  
+###############Expedientes####################
+class ExpedienteOut(Schema):    
+    id = String()
+    id_ext = String()
+    caratula = String()
+    estado = String()
+    
 
 ###############Tareas####################       
 class TareaOut(Schema):
