@@ -161,7 +161,6 @@ class TipoTarea(Base):
     nombre = Column(String, nullable=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    descripcion = Column(String)
 
 
 class Usuario(Base):
@@ -224,7 +223,8 @@ class Tarea(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_grupo = Column(UUID, nullable=False)
+    #id_grupo = Column(UUID, nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
     prioridad = Column(Integer, nullable=False, server_default=text("0"))
     id_actuacion = Column(UUID)
     titulo = Column(String)
@@ -239,6 +239,7 @@ class Tarea(Base):
     fecha_actualizacion = Column(DateTime)
 
     tipo_tarea = relationship('TipoTarea')
+    grupo = relationship('Grupo')
 
 
 class UsuarioGrupo(Base):

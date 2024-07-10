@@ -124,14 +124,14 @@ class UsuarioOut(Schema):
 class TipoTareaIn(Schema):
     codigo_humano = String(required=True)
     nombre = String(required=True)
-    descripcion = String()
     id_user_actualizacion = String(required=True)
 
 class TipoTareaOut(Schema):
     id = String()
-    codigo_humano = String()
     nombre = String()
-    id_user_actualizacion = String()    
+    codigo_humano = String()
+    id_user_actualizacion = String() 
+      
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
     id = String()
@@ -180,7 +180,7 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     fecha_eliminacion = DateTime()
-    #tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
     
 
