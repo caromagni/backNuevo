@@ -158,13 +158,59 @@ def get_grupos_recursivo():
 def get_grupos_all():
     session: scoped_session = current_app.session
     query = text("""
-              SELECT parent.id AS parent_id, 
-                parent.descripcion AS parent_descripcion, 
-       child.id AS child_id, 
-       child.descripcion AS child_descripcion
-FROM tareas.grupo AS parent
-LEFT JOIN tareas.herarquia_grupo_grupo AS hierarchy ON parent.id = hierarchy.id_padre
-LEFT JOIN tareas.grupo AS child ON hierarchy.id_hijo = child.id;
+             
+WITH RECURSIVE GroupTree AS (
+    -- Anchor member: Start with all parentless nodes
+    SELECT 
+        g.id AS id_padre,
+        g.id AS id_hijo,
+        g.descripcion AS parent_name,
+        g.descripcion AS child_name,
+        g.id::text AS path,
+        1 AS level,
+        true AS is_parentless
+    FROM 
+        tareas.grupo g
+    LEFT JOIN 
+        tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
+    WHERE 
+        hgg1.id_hijo IS NULL
+
+    UNION ALL
+
+    -- Recursive member: Join with the hierarchical table to find child groups
+    SELECT 
+        hgg.id_padre,
+        hgg.id_hijo,
+        gp_padre.descripcion AS parent_name,
+        gp_hijo.descripcion AS child_name,
+        gt.path || ' -> ' || hgg.id_hijo::text AS path,
+        gt.level + 1 AS level,
+        false AS is_parentless
+    FROM 
+        tareas.herarquia_grupo_grupo hgg
+    INNER JOIN 
+        GroupTree gt ON gt.id_hijo = hgg.id_padre
+    INNER JOIN 
+        tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
+    INNER JOIN 
+        tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+)
+
+-- Select from the CTE to get the full hierarchy
+SELECT 
+    gt.id_padre,
+    gt.parent_name,
+    gt.id_hijo,
+    gt.child_name,
+    gt.path,
+    gt.level,
+    gt.is_parentless
+FROM 
+    GroupTree gt
+ORDER BY 
+    gt.path;
+
 
 
                 """)

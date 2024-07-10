@@ -57,10 +57,11 @@ class HerarquiaOut(Schema):
     level = Integer()        
 
 class HerarquiaAllOut(Schema):
-    parent_id = String()
-    parent_descripcion = String()
-    child_id = String()
-    child_description = String()
+    id_padre = String()
+    parent_name = String()
+    id_hijo = String()
+    child_name = String()
+    path = String()
         
 
 
