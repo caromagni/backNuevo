@@ -71,7 +71,7 @@ class Grupo(Base):
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String)
     descripcion = Column(String)
-    cod_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
+    codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
 
     nomenclador = relationship('Nomenclador')
 

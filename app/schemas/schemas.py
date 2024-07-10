@@ -73,7 +73,7 @@ class GrupoIn(Schema):
     descripcion= String()
     id_user_actualizacion = String(required=True)
     id_padre = String()  
-    nomenclador = String()  
+    codigo_nomenclador = String()  
 
 class GrupoOut(Schema):
     id = String()
