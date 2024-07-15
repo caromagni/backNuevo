@@ -21,10 +21,21 @@ def validate_fecha(f):
 
 def validate_expte(n):
     nro_causa = n[0:1] + "-" + n[1:11].lstrip('0') + "/" + n[11:13]
-    #print(nro_causa)
     return nro_causa
 
+def validate_char(f):
+    s = f.trim()
+    if not s.isalpha():
+        raise ValidationError("El campo debe contener sólo letras y espacios")
 
+def validate_char_num(f):
+    if f.len() < 6 or f.len() > 250:
+            raise ValidationError("El campo debe ser mayor a 6 y menor a 250 caracteres")
+
+def validate_num(f):
+    if not f.isdigit():
+        raise ValidationError("El campo debe contener sólo números")
+    
 ##########Schemas para joins ###############################   
 class SmartNested(Nested):
     def serialize(self, attr, obj, accessor=None):
@@ -69,11 +80,19 @@ class HerarquiaAllOut(Schema):
     path = String()
         
 class GrupoIn(Schema):
-    nombre = String(required=True)
-    descripcion= String()
+    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
+    nombre= String(required=True, validate=[
+        validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+    ])
+    descripcion= String(required=True, validate=[
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")
+    ])
     id_user_actualizacion = String(required=True)
     id_padre = String()  
-    codigo_nomenclador = String()  
+    codigo_nomenclador = String(validate=[
+        validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
+        validate_num  
+    ])
 
 class GrupoOut(Schema):
     id = String()
@@ -106,18 +125,16 @@ class UsuariosGrupoOut(Schema):
 
 ###############Usuarios####################
 class UsuarioIn(Schema):
-    nombre = String(required=True)
-    apellido = String(required=True)
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+    ])
+    apellido = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+    ])
     id_user_actualizacion = String()
     id_persona_ext = String()
     id_grupo = String()
 
-class UsuarioInPatch(Schema):
-    nombre = String()
-    apellido = String()
-    id_user_actualizacion = String()
-    id_persona_ext = String()
-    id_grupo = String()
 
 class UsuarioOut(Schema):
     id = String()
@@ -137,8 +154,13 @@ class UsuarioOut(Schema):
     
 ################TipoTareas####################
 class TipoTareaIn(Schema):
-    codigo_humano = String(required=True)
-    nombre = String(required=True)
+    codigo_humano = String(required=True, validate=[
+        validate.Length(min=4, max=20, error="El campo debe ser mayor a 4 caracteres y menor a 20 caracteres")
+    ])
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
     id_user_actualizacion = String(required=True)
 
 class TipoTareaOut(Schema):
@@ -171,12 +193,16 @@ class ExpedienteOut(Schema):
 ###############Tareas####################  
 class TareaIn(Schema):
     id_grupo = String(required=True)
-    prioridad = Integer(required=True)
+    prioridad = Integer(required=True, validate=[
+        validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String(required=True)
-    titulo = String(required=True)
-    cuerpo = String()
+    titulo = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
-    caratula_expediente = String()
+    caratula_expediente = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_tipo_tarea = String(required=True)
     eliminable = Boolean()
     fecha_eliminacion = DateTime()

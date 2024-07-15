@@ -15,11 +15,10 @@ class Auditoria(Base):
     nombre_tabla = Column(String, nullable=False)
     id_registro = Column(UUID, nullable=False)
     operacion = Column(String, nullable=False)
-    #datos_anteriores = Column(ARRAY(String()))
     datos_anteriores = Column(JSONB)
     datos_nuevos = Column(JSONB)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    usuario_actualizacion = Column(UUID, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)
 
 class Nomenclador(Base):
@@ -265,6 +264,7 @@ class UsuarioGrupo(Base):
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     id_usuario = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
 
     grupo = relationship('Grupo')
     usuario = relationship('Usuario')
