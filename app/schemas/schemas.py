@@ -8,7 +8,7 @@ from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
 from ..models.alch_model import TipoTarea, Tarea
-
+import re
 #ma = Marshmallow()
 
 ##########Funciones de validación ##############################    
@@ -24,9 +24,11 @@ def validate_expte(n):
     return nro_causa
 
 def validate_char(f):
-    s = f.trim()
-    if not s.isalpha():
-        raise ValidationError("El campo debe contener sólo letras y espacios")
+    cadena = f [:2]
+    #if not f.isalpha():
+    print("Validate char:",cadena)
+    if not re.match(r'^[a-zA-Z]+$', cadena):
+        raise ValidationError("El campo debe comenzar con letras")
 
 def validate_char_num(f):
     if f.len() < 6 or f.len() > 250:
@@ -82,10 +84,12 @@ class HerarquiaAllOut(Schema):
 class GrupoIn(Schema):
     #nombre = String(required=True, validate=validate.Length(min=6, max=30))
     nombre= String(required=True, validate=[
-        validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres")
+        validate.Length(min=6, max=30, error="El campo debe ser mayor a 6 y menor a 30 caracteres"),
+        validate_char
     ])
     descripcion= String(required=True, validate=[
-        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")
+        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
+        validate_char
     ])
     id_user_actualizacion = String(required=True)
     id_padre = String()  
