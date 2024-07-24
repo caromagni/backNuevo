@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from flask import current_app
 
-from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Nomenclador
 
 
 """ def get_all_grupos():
@@ -13,6 +13,42 @@ from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario
     res =session.query(Grupo).offset(0).limit(3).all()
     cant=session.query(Grupo).count()
     return res, cant """
+def get_grupo_by_id(id):
+    GrupoPadre = aliased(Grupo)
+    GrupoHijo = aliased(Grupo)
+    HP = aliased(HerarquiaGrupoGrupo)
+    HH = aliased(HerarquiaGrupoGrupo)
+    session: scoped_session = current_app.session
+    #res = session.query(Grupo).filter(Grupo.id == id).first()
+    res = session.query(
+        Grupo.id.label("id"),
+        Grupo.nombre.label("nombre"),
+        Grupo.descripcion.label("descripcion"),
+        #Grupo.nomenclador.label("nomenclador"),
+        Grupo.codigo_nomenclador.label("codigo_nomenclador"),
+        HP.id_hijo.label("id_hijo"),
+        HH.id_padre.label("id_padre"),
+        HH.id_hijo.label("hh_id_hijo"),
+        GrupoPadre.nombre.label("nombre_padre"),
+        GrupoHijo.nombre.label("nombre_hijo"),
+        Nomenclador.desclarga.label("nomenclador"),
+        UsuarioGrupo.id_usuario.label("id_usuario"),
+        Usuario.nombre.label("nombre_usuario"),
+        Usuario.apellido.label("apellido_usuario")
+    ).outerjoin(
+        HP, Grupo.id == HP.id_padre
+    ).outerjoin(
+        HH, Grupo.id == HH.id_hijo
+    ).outerjoin(
+        GrupoPadre, GrupoPadre.id == HH.id_padre
+    ).outerjoin(
+        GrupoHijo, GrupoHijo.id == HH.id_hijo
+    ).outerjoin(Nomenclador, Nomenclador.nomenclador == Grupo.codigo_nomenclador  
+    ).outerjoin(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+    ).outerjoin(Usuario, Usuario.id == UsuarioGrupo.id_usuario                        
+    ).filter(Grupo.id == id).all()
+
+    return res
 
 def get_all_grupos(first=1, rows=10): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session

@@ -103,6 +103,32 @@ class GrupoOut(Schema):
     fecha_actualizacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
 
+class UsuarioGrupoIdOut(Schema):
+    id = String()
+    fecha_actualizacion = DateTime()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_persona_ext = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+
+class GrupoIdOut(Schema):
+    id = String()
+    nombre = String()
+    descripcion = String()
+    id_padre = String()
+    nombre_padre = String()
+    id_hijo = String()
+    nombre_hijo = String()
+    nomenclador = String()
+    codigo_nomenclador = String()
+    id_usuario = String()
+    nombre_usuario = String()
+    apellido_usuario = String()
+    #nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
+    #usuario = Nested(UsuarioGrupoIdOut, only=("id", "nombre", "apellido"))
+    #hijo = Nested(GrupoOut, only=("id", "nombre", "descripcion"))
+    
 
 class GroupCountOut(Schema):
     count = Integer()
@@ -227,8 +253,8 @@ class TareaIn(Schema):
     fecha_eliminacion = DateTime()
     id_usuario_asignado = String()   
     id_user_actualizacion = String(required=True)
-    #fecha_inicio = DateTime()
-    #fecha_fin = DateTime()
+    fecha_inicio = DateTime()
+    fecha_fin = DateTime()
     plazo = Integer(default=0)
 
 class TareaOut(Schema):

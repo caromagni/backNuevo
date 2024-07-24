@@ -94,11 +94,14 @@ class HerarquiaGrupoGrupo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_padre = Column(UUID)
-    id_hijo = Column(UUID)
+    #id_padre = Column(UUID)
+    #id_hijo = Column(UUID)
+    id_padre = Column(UUID, ForeignKey('grupo.id'))
+    id_hijo = Column(UUID, ForeignKey('grupo.id'))
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
-
+    padre = relationship('Grupo', foreign_keys=[id_padre])
+    hijo = relationship('Grupo', foreign_keys=[id_hijo])
 
 class Label(Base):
     __tablename__ = 'label'
