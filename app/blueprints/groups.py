@@ -78,7 +78,7 @@ def get_grupos(query_data: dict):
     except Exception as err:
         raise ValidationError(err)   
 
-@groups_b.doc(description='Consulta de grupos. Ejemplo de url: /grupo?id=', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Consulta de grupos. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GrupoIdOut(many=True))
 def get_grupo(id: str):

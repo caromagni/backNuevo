@@ -3,7 +3,7 @@ from typing_extensions import Required
 from marshmallow import fields, validate, ValidationError, post_dump
 #from marshmallow_sqlalchemy.fields import Nested
 from apiflask import Schema
-from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested
+from apiflask.fields import Integer, String, DateTime, Date, Boolean, Nested, List
 from apiflask.validators import Length, OneOf
 #from flask_marshmallow import Marshmallow
 
@@ -71,6 +71,8 @@ class HerarquiaOut(Schema):
     path = String()
     level = Integer()        
 
+
+
 class HerarquiaAllOut(Schema):
     id_padre = String()
     parent_name = String()
@@ -112,23 +114,28 @@ class UsuarioGrupoIdOut(Schema):
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
 
+class UsuarioGOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+
+class HerarquiaGrupoOut(Schema):
+    id = String()
+    id_hijo = String()
+    nombre_hijo = String()
+    id_padre = String()
+    nombre_padre = String()
+
+
 class GrupoIdOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
-    id_padre = String()
-    nombre_padre = String()
-    id_hijo = String()
-    nombre_hijo = String()
-    nomenclador = String()
-    codigo_nomenclador = String()
-    id_usuario = String()
-    nombre_usuario = String()
-    apellido_usuario = String()
-    #nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
-    #usuario = Nested(UsuarioGrupoIdOut, only=("id", "nombre", "apellido"))
-    #hijo = Nested(GrupoOut, only=("id", "nombre", "descripcion"))
-    
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
+    hijos = List(Nested(HerarquiaGrupoOut, only=("id_hijo","nombre_hijo")))
+    padre = List(Nested(HerarquiaGrupoOut, only=("id_padre","nombre_padre")))
+    usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
+  
 
 class GroupCountOut(Schema):
     count = Integer()
