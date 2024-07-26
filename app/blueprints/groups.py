@@ -4,11 +4,11 @@ from apiflask.fields import Integer, String, List, Nested
 from apiflask.validators import Length, OneOf
 from flask import current_app, jsonify
 from sqlalchemy.orm import scoped_session
-from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo
+from ..models.grupo_model import get_all_grupos, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id
 from ..common.error_handling import ValidationError
 from sqlalchemy.sql import text
 from typing import List
-from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn, UsuariosGrupoOut
+from ..schemas.schemas import GrupoIn, GrupoOut, GroupCountOut, PageIn, UsuariosGrupoOut, GrupoIdOut
 import logging
 
 
@@ -77,7 +77,25 @@ def get_grupos(query_data: dict):
     
     except Exception as err:
         raise ValidationError(err)   
-    
+
+@groups_b.doc(description='Consulta de grupos. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.get('/grupo/<string:id>')
+@groups_b.output(GrupoIdOut(many=True))
+def get_grupo(id: str):
+        res = get_grupo_by_id(id)
+        if res is None:
+            print("Grupo no encontrado")  
+            result={
+                    "valido":"fail",
+                    "ErrorCode": 800,
+                    "ErrorDesc":"Grupo no encontrado",
+                    "ErrorMsg":"No se encontró el grupo"
+                } 
+            return result
+
+        return res
+
+
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')

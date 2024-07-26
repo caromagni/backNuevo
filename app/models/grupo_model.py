@@ -2,17 +2,109 @@ import uuid
 from sqlalchemy.orm import scoped_session, aliased
 from datetime import datetime
 from sqlalchemy import text
+from sqlalchemy.dialects import postgresql
 
 from flask import current_app
 
-from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario
+from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Nomenclador
 
 
-""" def get_all_grupos():
+def get_grupo_by_id(id):
+
     session: scoped_session = current_app.session
-    res =session.query(Grupo).offset(0).limit(3).all()
-    cant=session.query(Grupo).count()
-    return res, cant """
+    res = session.query(Grupo).filter(Grupo.id == id).first()
+    results=[]
+    hijos=[]
+    padres=[]
+    usuarios=[]
+
+    if res is not None:
+        #Traigo el padre
+        res_padre = session.query(HerarquiaGrupoGrupo.id_padre, Grupo.nombre
+                                  ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_padre).filter(HerarquiaGrupoGrupo.id_hijo == res.id).all()
+        
+        #Traigo los grupos hijos
+        res_hijos = session.query(HerarquiaGrupoGrupo.id_hijo, Grupo.nombre
+                                  ).join(Grupo, Grupo.id==HerarquiaGrupoGrupo.id_hijo).filter(HerarquiaGrupoGrupo.id_padre == res.id).all()
+        
+        res_usuario = session.query(UsuarioGrupo.id,
+                                    UsuarioGrupo.id_grupo,
+                                    UsuarioGrupo.id_usuario,
+                                    Usuario.id,
+                                    Usuario.nombre,
+                                    Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id).all()
+        
+        if res_hijos is not None:
+            for row in res_hijos:
+                hijo = {
+                    "id_hijo": row.id_hijo,
+                    "nombre_hijo": row.nombre
+                }
+                hijos.append(hijo)
+
+        if res_padre is not None:
+            for row in res_padre:
+                padre = {
+                    "id_padre": row.id_padre,
+                    "nombre_padre": row.nombre
+                }
+                padres.append(padre)
+
+        if res_usuario is not None:
+            for row in res_usuario:
+                usuario = {
+                    "id": row.id,
+                    "nombre": row.nombre,
+                    "apellido": row.apellido
+                }
+                usuarios.append(usuario)
+
+        ###################Formatear el resultado####################
+        result = {
+            "id": res.id,
+            "nombre": res.nombre,
+            "descripcion": res.descripcion,
+            "padre": padres,
+            "hijos": hijos,
+            "usuarios": usuarios,
+            "nomenclador": res.nomenclador
+        }
+
+        results.append(result)
+   
+    
+    return results    
+
+    """ res = session.query(
+        Grupo.id.label("id"),
+        Grupo.nombre.label("nombre"),
+        Grupo.descripcion.label("descripcion"),
+        Grupo.nomenclador.label("nomenclador"),
+        Grupo.codigo_nomenclador.label("codigo_nomenclador"),
+        HP.id_hijo.label("id_hijo"),
+        HH.id_padre.label("id_padre"),
+        HH.id_hijo.label("hh_id_hijo"),
+        GrupoPadre.nombre.label("nombre_padre"),
+        GrupoHijo.nombre.label("nombre_hijo"),
+        Nomenclador.nomenclador.label("nomenclador"),
+        Nomenclador.desclarga.label("desclarga"),
+        UsuarioGrupo.id_usuario.label("id_usuario"),
+        Usuario.nombre.label("nombre_usuario"),
+        Usuario.apellido.label("apellido_usuario")
+    ).outerjoin(
+        HP, Grupo.id == HP.id_padre
+    ).outerjoin(
+        HH, Grupo.id == HH.id_hijo
+    ).outerjoin(
+        GrupoPadre, GrupoPadre.id == HH.id_padre
+    ).outerjoin(
+        GrupoHijo, GrupoHijo.id == HH.id_hijo
+    ).outerjoin(Nomenclador, Nomenclador.nomenclador == Grupo.codigo_nomenclador  
+    ).outerjoin(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+    ).outerjoin(Usuario, Usuario.id == UsuarioGrupo.id_usuario                        
+    ).filter(Grupo.id == id).all() """
+
+    
 
 def get_all_grupos(first=1, rows=10): #if no arguments are passed, the default values are used
     session: scoped_session = current_app.session

@@ -9,13 +9,13 @@ from flask import current_app
 from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo
 
 
-def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, plazo=0):
+def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo='', id_expediente='', caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0):
 
     
     session: scoped_session = current_app.session
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
-    #print("fecha_inicio:",fecha_inicio)
+    print("fecha_inicio:",fecha_inicio)
     nuevoID=uuid.uuid4()
     print("nuevoID:",nuevoID)
     nueva_tarea = Tarea(
@@ -33,8 +33,8 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion='', titulo='', cuerpo=
         id_user_actualizacion=id_user_actualizacion,
         fecha_eliminacion=fecha_eliminacion,
         fecha_actualizacion=datetime.now(),
-        #fecha_inicio=fecha_inicio,
-        #fecha_fin=fecha_fin,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
         fecha_creacion=datetime.now(),
         plazo=plazo
     )
