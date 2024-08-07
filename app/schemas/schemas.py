@@ -98,15 +98,7 @@ class HerarquiaAllOut(Schema):
     is_parentless = Boolean()
     group_id = String()
 
-class GrupoIn1(Schema):
-    nombre = String(required=True, validate=validate.Length(min=6, max=30))
-    descripcion = String(required=True, validate=validate.Length(min=6, max=250))
-    id_user_actualizacion = String(required=True)
-    id_padre = String()  
-    codigo_nomenclador = String(validate=validate.Length(min=6, max=6))
-
 class GrupoIn(Schema):
-    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
     nombre= String(required=True, validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -123,7 +115,6 @@ class GrupoIn(Schema):
     ])
 
 class GrupoPatchIn(Schema):
-    #nombre = String(required=True, validate=validate.Length(min=6, max=30))
     nombre= String(validate=[
         validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
@@ -194,6 +185,11 @@ class GroupCountOut(Schema):
     count = Integer()
     data = Nested(GrupoOut, many=True)
 
+class MsgErrorOut(Schema):
+    valido = String()
+    ErrorCode = Integer()
+    ErrorDesc = String()
+    ErrorMsg = String()
 
 class GruposUsuarioOut(Schema):
     id_usuario = String()
