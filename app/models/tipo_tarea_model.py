@@ -4,7 +4,7 @@ from datetime import datetime
 
 from flask import current_app
 
-from .alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
+from .alch_model import TipoTarea
 
 
 def get_tipo_tarea_by_id(id):
@@ -12,10 +12,7 @@ def get_tipo_tarea_by_id(id):
     
     res = session.query(tipo_tarea).filter(tipo_tarea.id == id).first()
     
-    results = []
-    tareas=[]
-    grupos=[]
- 
+    results = [] 
 
     if res is not None:
         # #Traigo los grupos del tipo_tarea
