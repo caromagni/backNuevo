@@ -351,6 +351,29 @@ class TareaUsuarioOut(Schema):
     id_grupo = String()
     grupo = String()
         
+class TareaIdOut(Schema):
+    id = String()
+    titulo = String()
+    cuerpo = String()
+    id_grupo = String()
+    grupo = Nested(GrupoOut, only=("id", "nombre"))
+    prioridad = Integer()
+    id_actuacion = String()
+    id_expediente = String()
+    #caratula_expediente = String()
+    id_tipo_tarea = String()
+    eliminable = Boolean()
+    eliminado = Boolean()
+    fecha_eliminacion = DateTime()
+    fecha_inicio = DateTime()
+    fecha_fin = DateTime()
+    plazo = Integer()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    grupos = List(Nested(GrupoOut, only=("id", "nombre")))
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
+    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
+    usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))
+
 
 ###############Marshmallow####################
 class TipoTareaSchema(Schema):
