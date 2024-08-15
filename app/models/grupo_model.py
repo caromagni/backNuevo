@@ -96,7 +96,7 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
         result = session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).offset(first-1).limit(rows).all()
+        ).order_by(Grupo.nombre).offset(first-1).limit(rows).all()
         todo= session.query(Grupo).filter(
             Grupo.nombre.ilike(f"%{nombre}%"),
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
@@ -105,7 +105,7 @@ def get_all_grupos(first=1, rows=10, nombre="", fecha_desde='01/01/2000', fecha_
     else:
         result= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)
-        ).offset((first-1)).limit(rows).all()
+        ).order_by(Grupo.nombre).offset((first-1)).limit(rows).all()
         todo= session.query(Grupo).filter(
             Grupo.fecha_actualizacion.between(fecha_desde, fecha_hasta)).all()
         total= len(todo)
@@ -237,10 +237,9 @@ def insert_grupo(id='', nombre='', descripcion='', codigo_nomenclador='', id_use
     session: scoped_session = current_app.session
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
-    print(nuevoID)
     nuevo_grupo = Grupo(
         id=nuevoID_grupo,
-        nombre=nombre,
+        nombre=nombre.upper(),
         descripcion=descripcion,
         codigo_nomenclador=codigo_nomenclador,
         id_user_actualizacion=id_user_actualizacion,

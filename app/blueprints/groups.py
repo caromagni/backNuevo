@@ -104,8 +104,9 @@ def get_grupos_fechas(query_data: dict):
         first=1
         rows=10
         nombre=""
-        fecha_desde="01/01/1900"
-        fecha_hasta=datetime.now().strftime("%d/%m/%Y")
+        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        #fecha_hasta=datetime.now().strftime("%d/%m/%Y")
+        fecha_hasta=datetime.now()
         print("query_data:",query_data)
         if(request.args.get('first') is not None):
             first=int(request.args.get('first'))
@@ -135,12 +136,13 @@ def get_grupos_fechas(query_data: dict):
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GrupoIdOut())
 def get_grupo(id: str):
-        try:
-            print("id:",id)
-            res = get_grupo_by_id(id)
-           
-            return res
-        except Exception as err:
+    try:
+        print("id:",id)
+        res = get_grupo_by_id(id)
+        
+        return res
+    except Exception as err:
+        raise ValidationError(err)
         
 
 
