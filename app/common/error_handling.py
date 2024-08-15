@@ -87,7 +87,7 @@ def register_error_handlers(app):
     @app.errorhandler(DataError)
     def handle_obs_error(e):
         print("DataError")
-        return jsonify(error="DataError",error_description=e, code = e.code)
+        return jsonify(error="DataError",error_description=str(e.desc), code = e.code)
     
     @app.errorhandler(DataNotFound)
     def handle_obs_error(e):
