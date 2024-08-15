@@ -11,18 +11,6 @@ import os
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
-"""
-AUTH_URL=os.getenv('AUTH_URL')
-REALM=os.getenv('REALM')
-
-@groups_b.before_request
-def before_request():
-    get_public_key(AUTH_URL,REALM)
-#    print("Antes de la petición")
-"""
-#@jwt_required
-
-
 
 @auth.verify_token
 def verify_token():
@@ -43,10 +31,8 @@ def verify_token():
         except jwt.ExpiredSignatureError:
             raise ValidationError( 'Token expirado. Inicie sesión nuevamente.')
         except jwt.InvalidTokenError as e:
-            print("Error:",e)
             raise ValidationError( 'Token inválido. Inicie sesión nuevamente.')
         except Exception as e:
-            print("Error:",e)
             raise ValidationError( 'Error al decodificar el token. Inicie sesión nuevamente.')
     else:
         raise ValidationError( 'No se encontró el token de autorización.' )
@@ -62,7 +48,7 @@ def verify_token():
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GrupoPatchIn) 
-#@groups_b.output(GrupoOut)
+@groups_b.output(GrupoOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
@@ -73,18 +59,12 @@ def patch_grupo(id_grupo: str, json_data: dict):
         #print("json_data:",json_data)
         res = update_grupo(id_grupo, **json_data)
         if res is None:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontraron datos de grupos"
-                } 
-            res = MsgErrorOut().dump(result)
-            return res 
-
-       #return GrupoOut().dump(res)
+            raise DataNotFound("Grupo no encontrado")
+            
         return res
     
+    except DataNotFound as err:
+        raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
     
@@ -139,19 +119,7 @@ def get_grupos_fechas(query_data: dict):
             fecha_hasta=request.args.get('fecha_hasta')  
 
         res, cant=get_all_grupos(first,rows, nombre, fecha_desde, fecha_hasta)
-        
-        #print("res:", res)
-        
-        # if res is None or len(res) == 0:
-            
-        #     result={
-        #             "valido":"fail",
-        #             "ErrorCode": 800,
-        #             "ErrorDesc":"Grupos no encontrado",
-        #             "ErrorMsg":"No se encontraron datos de grupos"
-        #         } 
-        #     res = MsgErrorOut().dump(result)
-        #     return res
+       
        
         data = {
                 "count": cant,
@@ -167,21 +135,13 @@ def get_grupos_fechas(query_data: dict):
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GrupoIdOut())
 def get_grupo(id: str):
-        print("id:",id)
-        res = get_grupo_by_id(id)
-        # if res is None:
-            
-        #     result={
-        #             "valido":"fail",
-        #             "ErrorCode": 800,
-        #             "ErrorDesc":"Grupo no encontrado",
-        #             "ErrorMsg":"No se encontró el grupo"
-        #         } 
-        #     res = MsgErrorOut().dump(result)
-        #     return res
-        print("res:",res)
+        try:
+            print("id:",id)
+            res = get_grupo_by_id(id)
+           
+            return res
+        except Exception as err:
         
-        return res
 
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -190,22 +150,8 @@ def get_grupo(id: str):
 @groups_b.output(UsuariosGrupoOut(many=True))
 def get_usrsbygrupo(id_grupo: str):
     try:
-        print("id_grupo:",id_grupo)
         res = get_usuarios_by_grupo(id_grupo)
         
-        
-        """ if res is None == 0:
-            
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupo sin usuarios",
-                    "ErrorMsg":"No se encontraron datos de grupos"
-                } 
-            res = MsgErrorOut().dump(result)
-            return res """
-        
-        #return UsuariosGrupoOut().dump(res)
         return res
     
     except Exception as err:
@@ -223,9 +169,9 @@ def post_grupo(json_data: dict):
         if res is None:
             result={
                     "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Error en insert grupo",
-                    "ErrorMsg":"No se pudo insertar el grupo"
+                    "code": 800,
+                    "error":"Error en insert grupo",
+                    "error_description":"No se pudo insertar el grupo"
                 } 
             res = MsgErrorOut().dump(result)
             return res
@@ -241,20 +187,14 @@ def post_grupo(json_data: dict):
 #@groups_b.output(GrupoOut)
 def del_grupo(id: str):
     try:
-        #eliminar tel grupo con sus hijos
+        #eliminar el grupo con sus hijos
         todos=True
         #elimina solo el grupo
         # todos=False
         res = delete_grupo(id, todos)
         if res is None:
-            result={
-                    "valido":"fail",
-                    "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo a eliminar"
-                } 
-            res = MsgErrorOut().dump(result)
-            return res
+            raise DataNotFound("Grupo no encontrado")
+            
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -263,6 +203,7 @@ def del_grupo(id: str):
                 } 
         
         return result
-    
+    except DataNotFound as err:
+        raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
