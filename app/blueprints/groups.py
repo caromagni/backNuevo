@@ -62,17 +62,17 @@ def verify_token():
 @groups_b.doc(description='Update de un Grupo', summary='Update de un Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GrupoPatchIn) 
-@groups_b.output(GrupoOut)
+#@groups_b.output(GrupoOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        token_payload = verify_token()
-        print("token_payload:",token_payload)
-        nombre_usuario=token_payload['preferred_username']
-        print("nombre_usuario:",nombre_usuario)
+        #token_payload = verify_token()
+        #print("token_payload:",token_payload)
+        #nombre_usuario=token_payload['preferred_username']
+        #print("nombre_usuario:",nombre_usuario)
         #print("json_data:",json_data)
         res = update_grupo(id_grupo, **json_data)
-        """ if res is None:
+        if res is None:
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -80,9 +80,9 @@ def patch_grupo(id_grupo: str, json_data: dict):
                     "ErrorMsg":"No se encontraron datos de grupos"
                 } 
             res = MsgErrorOut().dump(result)
-            return res """
+            return res 
 
-        #return GrupoOut().dump(res)
+       #return GrupoOut().dump(res)
         return res
     
     except Exception as err:
