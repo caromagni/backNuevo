@@ -65,8 +65,22 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
     
     if id_grupo is not None:
         print("filtro por grupo:", id_grupo)
-        todo =  session.query(Grupo.id.label("id_grupo"),
+        todo = session.query(Usuario.id.label("id"),
+                    Usuario.nombre.label("nombre"),
+                    Usuario.apellido.label("apellido"),
+                    Usuario.fecha_actualizacion.label("fecha_actualizacion"),
+                    Usuario.id_persona_ext.label("id_persona_ext"),  
+                    Grupo.id.label("id_grupo"),
+                    Grupo.nombre.label("nombre_grupo"),
+                    Grupo.eliminado.label("grupo_eliminado")
+                    ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
+                    ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id       
+                    ).filter(UsuarioGrupo.id_grupo == id_grupo
+                    ).order_by(Usuario.apellido         
+                    ).all()
+        """ todo =  session.query(Grupo.id.label("id_grupo"),
                   Grupo.nombre.label("nombre_grupo"),
+                  Grupo.eliminado.label("grupo_eliminado"),
                   Usuario.nombre.label("nombre"),
                   Usuario.apellido.label("apellido"),
                   Usuario.id.label("id"),
@@ -75,19 +89,22 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None)
                   ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
                   ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
                   ).filter(Grupo.id == id_grupo
-                  ).order_by(Usuario.apellido).all() 
+                  ).order_by(Usuario.apellido).all()  """
         
-        query = session.query(Grupo.id.label("id_grupo"),
-                  Grupo.nombre.label("nombre_grupo"),
-                  Usuario.nombre.label("nombre"),
-                  Usuario.apellido.label("apellido"),
-                  Usuario.id.label("id"),
-                  Usuario.fecha_actualizacion.label("fecha_actualizacion"),
-                  Usuario.id_persona_ext.label("id_persona_ext")                  
-                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
-                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
-                  ).filter(Grupo.id == id_grupo
-                  ).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()  
+        query = session.query(Usuario.id.label("id"),
+                    Usuario.nombre.label("nombre"),
+                    Usuario.apellido.label("apellido"),
+                    Usuario.fecha_actualizacion.label("fecha_actualizacion"),
+                    Usuario.id_persona_ext.label("id_persona_ext"), 
+                    UsuarioGrupo.id_grupo.label("grupo"),
+                    Grupo.id.label("id_grupo"),
+                    Grupo.nombre.label("nombre_grupo"),
+                    Grupo.eliminado.label("grupo_eliminado")
+                    ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
+                    ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id       
+                    ).filter(UsuarioGrupo.id_grupo == id_grupo
+                    ).order_by(Usuario.apellido
+                    ).offset((page-1)*per_page).limit(per_page).all()  
     
     else:    
         if nombre != "" and apellido != "":

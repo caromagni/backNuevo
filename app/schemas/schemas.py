@@ -253,7 +253,9 @@ class UsuarioOut(Schema):
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
     #id_grupo = Nested(GrupoOut, only=("id", "nombre")) 
-    
+    nombre_grupo = String()
+    id_grupo = String()
+    grupo_eliminado = Boolean()
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
