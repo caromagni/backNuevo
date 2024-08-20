@@ -236,15 +236,23 @@ class UsuarioInPatch(Schema):
     id_persona_ext = String()
     id_grupo = String()
 
+class UsuarioGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    nombre = String(default="")
+    apellido = String(default="")
+    id_grupo = String()
+   
+
 class UsuarioOut(Schema):
     id = String()
-    fecha_actualizacion = DateTime()
+    fecha_actualizacion = String()
     id_user_actualizacion = String()
     nombre = String()
     apellido = String()
     id_persona_ext = String()
     nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
-    id_grupo = Nested(GrupoOut, only=("id", "nombre")) 
+    #id_grupo = Nested(GrupoOut, only=("id", "nombre")) 
     
 
     @post_dump
@@ -252,10 +260,14 @@ class UsuarioOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
     
+class UsuarioCountOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioOut, many=True) 
+
 class TareaUsuarioIn(Schema):
     id_tarea = String(required=True)
     id_usuario = String(required=True)
-    id_usuario_actualizacion = String(required=True)
+    id_user_actualizacion = String(required=True)
     notas = String(validate=[
         validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
         validate_char
@@ -354,10 +366,14 @@ class TareaOut(Schema):
     id_tipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()
-    fecha_eliminacion = DateTime()
+    #fecha_eliminacion = DateTime()
+    fecha_eliminacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     grupo = Nested(GrupoOut, only=("id", "nombre"))
-    
+
+class TareaCountOut(Schema):
+    count = Integer()
+    data = Nested(TareaOut, many=True)      
 
 class TareaUsuarioOut(Schema):
     id = String()
@@ -378,7 +394,7 @@ class TareaIdOut(Schema):
     prioridad = Integer()
     id_actuacion = String()
     id_expediente = String()
-    #caratula_expediente = String()
+    caratula_expediente = String()
     id_tipo_tarea = String()
     eliminable = Boolean()
     eliminado = Boolean()

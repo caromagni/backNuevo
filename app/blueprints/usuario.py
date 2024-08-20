@@ -5,13 +5,14 @@ from flask import current_app, jsonify, request
 from sqlalchemy.orm import scoped_session
 from ..models.alch_model import Grupo,Usuario
 from ..models.usuario_model import get_all_usuarios, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id
-from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioOut, GruposUsuarioOut, UsuarioIdOut
+from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut, UsuarioOut, GruposUsuarioOut, UsuarioIdOut
 from ..common.error_handling import ValidationError
+from datetime import datetime
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
 
 @usuario_b.doc(description='Listado de Usuarios', summary='Usuarios', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.get('/usuarios')
+@usuario_b.get('/usuarios_all')
 @usuario_b.output(UsuarioOut(many=True))
 def get_usuarios():
     try:
@@ -115,4 +116,45 @@ def get_usuario(id: str):
             return result
 
         return res
+
+#############Consulta por varios campos################    
+@usuario_b.doc(description='Consulta de usuario con filtros', summary='Consulta de usuario por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@usuario_b.get('/usuarios')
+@usuario_b.input(UsuarioGetIn, location='query')
+@usuario_b.output(UsuarioCountOut)
+def get_usuarios_nombre(query_data: dict):
+    try:
+        page=1
+        per_page=10
+        nombre=""
+        apellido=""
+        id_grupo=None
+        cant=0
+        
+        print("query_data:",query_data)
+        
+        if(request.args.get('page') is not None):
+            page=int(request.args.get('page'))
+        if(request.args.get('per_page') is not None):
+            per_page=int(request.args.get('per_page'))
+        if(request.args.get('id_grupo') is not None):
+            id_grupo=request.args.get('id_grupo')    
+        if(request.args.get('nombre') is not None):
+            nombre=request.args.get('nombre')
+        if(request.args.get('apellido') is not None):
+            apellido=request.args.get('apellido')    
+        
+
+        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo)
+
+        
+        data = {
+                "count": cant,
+                "data": UsuarioOut().dump(res, many=True)
+            }
+        
+        return data
+    
+    except Exception as err:
+        raise ValidationError(err)  
 #################DELETE####################

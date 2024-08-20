@@ -60,9 +60,60 @@ def get_usuario_by_id(id):
     
     return results 
 
-def get_all_usuarios():
+def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None):
     session: scoped_session = current_app.session
-    return session.query(Usuario).all()
+    
+    if id_grupo is not None:
+        print("filtro por grupo:", id_grupo)
+        todo =  session.query(Grupo.id.label("id_grupo"),
+                  Grupo.nombre.label("nombre_grupo"),
+                  Usuario.nombre.label("nombre"),
+                  Usuario.apellido.label("apellido"),
+                  Usuario.id.label("id"),
+                  Usuario.fecha_actualizacion.label("fecha_actualizacion"),
+                  Usuario.id_persona_ext.label("id_persona_ext")                   
+                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+                  ).filter(Grupo.id == id_grupo
+                  ).order_by(Usuario.apellido).all() 
+        
+        query = session.query(Grupo.id.label("id_grupo"),
+                  Grupo.nombre.label("nombre_grupo"),
+                  Usuario.nombre.label("nombre"),
+                  Usuario.apellido.label("apellido"),
+                  Usuario.id.label("id"),
+                  Usuario.fecha_actualizacion.label("fecha_actualizacion"),
+                  Usuario.id_persona_ext.label("id_persona_ext")                  
+                  ).join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo
+                  ).join(Usuario, UsuarioGrupo.id_usuario == Usuario.id
+                  ).filter(Grupo.id == id_grupo
+                  ).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()  
+    
+    else:    
+        if nombre != "" and apellido != "":
+            print("filtro por nombre y apellido")
+            query = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%"), Usuario.apellido.ilike(f"%{apellido}%"))
+        else:
+            if nombre != "":
+                print("filtro por nombre")
+                todo = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%")).all()
+                query = session.query(Usuario).filter(Usuario.nombre.ilike(f"%{nombre}%")).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
+            else:
+                if apellido != "":
+                    print("filtro por apellido")
+                    todo = session.query(Usuario).filter(Usuario.apellido.ilike(f"%{apellido}%")).all()
+                    query = session.query(Usuario).filter(Usuario.apellido.ilike(f"%{apellido}%")).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
+                
+                else:
+                    print("sin filtro")
+                    todo = session.query(Usuario).all()
+                    query = session.query(Usuario).order_by(Usuario.apellido).offset((page-1)*per_page).limit(per_page).all()
+                    #filter(Usuario.fecha_actualizacion.between(fecha_desde, fecha_hasta))    
+
+    total = len(todo)
+    print("total:",total)
+    return query, total
+
 
 def get_grupos_by_usuario(id):
     session: scoped_session = current_app.session
