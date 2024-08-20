@@ -98,14 +98,13 @@ def get_grupos(query_data: dict):
 @groups_b.doc(description='Consulta de grupos por fecha y descripción. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por fechas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo')
 @groups_b.input(GroupGetIn, location='query')
-#@groups_b.output(GroupCountOut)
+@groups_b.output(GroupCountOut)
 def get_grupos_fechas(query_data: dict):
     try:
         page=1
         per_page=10
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        #fecha_hasta=datetime.now().strftime("%d/%m/%Y")
         fecha_hasta=datetime.now()
         print("query_data:",query_data)
         if(request.args.get('page') is not None):

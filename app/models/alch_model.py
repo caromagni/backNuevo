@@ -274,7 +274,7 @@ class Tarea(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
+    id_grupo = Column(ForeignKey('tareas.grupo.id'))
     prioridad = Column(Integer, nullable=False, server_default=text("0"))
     id_actuacion = Column(ForeignKey('tareas.actuacion_ext.id'))
     titulo = Column(String)
@@ -392,7 +392,7 @@ class TareaXGrupo(Base):
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'))
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
-    id_user = Column(UUID)
+    id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
 
     grupo = relationship('Grupo')
