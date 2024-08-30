@@ -23,7 +23,7 @@ def get_expedientes():
                     "ErrorMsg":"No se encontraron datos de expedientes"
                 } 
             return result
-            
+        current_app.server.remove()    
         return res
     
     except Exception as err:

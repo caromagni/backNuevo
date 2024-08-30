@@ -64,7 +64,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
 
     session.add(nueva_tarea)
     session.commit()
-    print("Tarea ingresada:",nueva_tarea)
     return nueva_tarea
 
 

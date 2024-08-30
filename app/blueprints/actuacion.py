@@ -23,7 +23,8 @@ def get_actuaciones():
                     "ErrorMsg":"No se encontraron datos de actuaciones"
                 } 
             return result
-            
+
+        current_app.server.remove()    
         return res
     
     except Exception as err:
@@ -32,7 +33,7 @@ def get_actuaciones():
 @actuacion_b.doc(description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/tipo_actuaciones')
 @actuacion_b.output(TipoActuacionOut(many=True))
-def get_tactuaciones():
+def get_tipoactuaciones():
     try:
         res = get_all_tipoactuaciones()
         if res is None:
@@ -43,7 +44,8 @@ def get_tactuaciones():
                     "ErrorMsg":"No se encontraron datos de tipos de actuaciones"
                 } 
             return result
-            
+        
+        current_app.server.remove()    
         return res
     
     except Exception as err:

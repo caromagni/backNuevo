@@ -3,6 +3,7 @@ from ..models.grupo_model import get_all_herarquia, get_grupos_herarquia_labels,
 from typing import List
 from ..schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaOut,HerarquiaAllOut
 from ..common.error_handling import ValidationError
+from flask import current_app
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
@@ -46,6 +47,7 @@ def get_gruposh():
                 } 
             return result
 
+        current_app.server.remove()
         return res 
     
     except Exception as err:
@@ -66,8 +68,10 @@ def get_niveles():
                     "ErrorCode": 800,
                     "ErrorDesc":"No existen jerarquías de grupos",
                 } 
+            
             return result
 
+        current_app.server.remove()
         return res 
  
     
@@ -89,7 +93,8 @@ def herarquias_all_():
                     "ErrorDesc":"No existen jerarquías de grupos",
                 } 
             return result
-
+        
+        current_app.server.remove()
         return res 
  
     

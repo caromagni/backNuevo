@@ -229,7 +229,6 @@ class TipoTareaOut(Schema):
     eliminado = Boolean()
 
 class TareaIn(Schema):
-    id_grupo = String()
     prioridad = Integer(required=True, validate=[
         validate.OneOf([1, 2, 3], error="El campo debe ser 1, 2 o 3")])
     id_actuacion = String()
@@ -245,7 +244,6 @@ class TareaIn(Schema):
     ])
     id_tipo_tarea = String(required=True)
     eliminable = Boolean()
-    id_usuario_asignado = String()   
     id_user_actualizacion = String(required=True)
     plazo = Integer(default=0)
 
