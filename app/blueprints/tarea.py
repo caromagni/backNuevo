@@ -41,6 +41,7 @@ def get_tipoTareas(query_data: dict):
                 "data": TipoTareaOut().dump(res, many=True)
             }
         
+        current_app.session.remove()
         return data
     
    
@@ -133,6 +134,7 @@ def get_tareas(query_data: dict):
                 "data": TareaOut().dump(res, many=True)
             }
         
+        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -147,6 +149,7 @@ def get_tarea(id_tarea:str):
         if res is None or len(res) == 0:
             raise DataNotFound("Tarea no encontrada")
 
+        current_app.session.remove()
         return res
     
     except DataNotFound as err:
@@ -162,6 +165,7 @@ def get_usuarios_asignados(tarea_id:str):
         print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
+        current_app.session.remove()
         return res
 
     except Exception as err:
@@ -192,7 +196,7 @@ def post_usuario_tarea(json_data: dict):
                     "id_tarea": res.id_tarea,
                     "Msg":"Tarea asignada"
                 } 
-        
+        current_app.session.remove()
         return result
     
     except Exception as err:
@@ -206,7 +210,9 @@ def post_usuario_tarea(json_data: dict):
 @tarea_b.output(TareaOut)
 def post_tarea(json_data: dict):
     try:
-    
+        print("#"*50)
+        print(json_data)
+        print("#"*50)
         res = insert_tarea(**json_data)
         if res is None:
             result = {

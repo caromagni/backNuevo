@@ -9,11 +9,11 @@ from flask import current_app
 from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo
 
 
-def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0):
+def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
 
     
     session: scoped_session = current_app.session
-
+    print("Usuario:", usuario)
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
     print("fecha_inicio:",fecha_inicio)
@@ -24,20 +24,7 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
 
     nuevoID_tarea=uuid.uuid4()
 
-    if id_grupo is not None:
-        grupo = session.query(Grupo).filter(Grupo.id == id_grupo).first()
-        if grupo is None:
-            msg = "Grupo no encontrado"
-            id_grupo=None
-        else:    
-            nuevoID_tareaxgrupo=uuid.uuid4()
-            tareaxgrupo= TareaXGrupo(
-                id=nuevoID_tareaxgrupo,
-                id_grupo=id_grupo,
-                id_tarea=nuevoID_tarea,
-                id_user_actualizacion=id_user_actualizacion,
-                fecha_actualizacion=datetime.now()
-            )    
+     
 
     
     nueva_tarea = Tarea(
@@ -61,10 +48,40 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
         plazo=plazo
     )
 
-
     session.add(nueva_tarea)
+
+    if grupo is not None:
+        for group in grupo:
+            id_grupo=group['id_grupo']
+            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
+           
+            if existe_grupo is not None:
+                nuevoID_tareaxgrupo=uuid.uuid4()
+                tareaxgrupo= TareaXGrupo(
+                    id=nuevoID_tareaxgrupo,
+                    id_grupo=id_grupo,
+                    id_tarea=nuevoID_tarea,
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_actualizacion=datetime.now()
+                ) 
+                session.add(tareaxgrupo)  
+
+    if usuario is not None:
+        for user in usuario:
+            id_usuario = user['id_usuario']
+            existe_usuario = session.query(Usuario).filter(Usuario.id == id_usuario, Usuario.eliminado==False).first()
+            if existe_usuario is not None:
+                nuevoID=uuid.uuid4()
+                asigna_usuario = TareaAsignadaUsuario(
+                    id=nuevoID,
+                    id_tarea=nuevoID_tarea,
+                    id_usuario=user['id_usuario'],
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(asigna_usuario)
+        
     session.commit()
-    print("Tarea ingresada:",nueva_tarea)
     return nueva_tarea
 
 
