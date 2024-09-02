@@ -210,7 +210,9 @@ def post_usuario_tarea(json_data: dict):
 @tarea_b.output(TareaOut)
 def post_tarea(json_data: dict):
     try:
-    
+        print("#"*50)
+        print(json_data)
+        print("#"*50)
         res = insert_tarea(**json_data)
         if res is None:
             result = {
