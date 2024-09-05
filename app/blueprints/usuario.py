@@ -14,11 +14,12 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/grupo_usuario/<string:id_usuario>')
-@usuario_b.output(GroupsUsuarioOut(many=True))
+#@usuario_b.output(GroupsUsuarioOut(many=True))
 def get_grupos_by_usr(id_usuario: str):
     try:
         res = get_grupos_by_usuario(id_usuario)
-        if res is None:
+        print("res:",res)
+        if res is None or len(res)==0:
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -26,8 +27,10 @@ def get_grupos_by_usr(id_usuario: str):
                     "ErrorMsg":"No se encontraron datos de usuarios"
                 } 
             return result
+        
         current_app.session.remove()    
-        return res
+        #return res
+        return GroupsUsuarioOut().dump(res, many=True)
     
     except Exception as err:
         raise ValidationError(err) 
@@ -86,7 +89,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
 @usuario_b.output(UsuarioIdOut(many=True))
 def get_usuario_id(id: str):
         res = get_usuario_by_id(id)
-        if res is None:
+        if res is None or len(res)==0:
             print("Usuario no encontrado")  
             result={
                     "valido":"fail",
@@ -111,6 +114,8 @@ def get_usuario(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nombre=""
         apellido=""
+        dni=""
+        username=""
         id_grupo=None
         cant=0
         
@@ -125,10 +130,14 @@ def get_usuario(query_data: dict):
         if(request.args.get('nombre') is not None):
             nombre=request.args.get('nombre')
         if(request.args.get('apellido') is not None):
-            apellido=request.args.get('apellido')    
+            apellido=request.args.get('apellido')  
+        if(request.args.get('dni') is not None):
+            dni=request.args.get('dni') 
+        if(request.args.get('username') is not None):
+            username=request.args.get('username')           
         
 
-        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo)
+        res, cant=get_all_usuarios(page, per_page, nombre, apellido, id_grupo, dni, username)
 
         data = {
                 "count": cant,
@@ -153,6 +162,8 @@ def get_usuarios_nombre(query_data: dict):
         nombre=""
         apellido=""
         id_grupo=None
+        dni=""
+        username=""
         cant=0
         
         print("query_data:",query_data)
@@ -167,9 +178,12 @@ def get_usuarios_nombre(query_data: dict):
             nombre=request.args.get('nombre')
         if(request.args.get('apellido') is not None):
             apellido=request.args.get('apellido')    
-        
+        if(request.args.get('dni') is not None):
+            dni=request.args.get('dni')
+        if(request.args.get('username') is not None):
+            username=request.args.get('username')        
 
-        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo)
+        res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username)
 
         data = {
                 "count": cant,
