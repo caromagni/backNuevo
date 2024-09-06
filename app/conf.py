@@ -1,3 +1,10 @@
+
+import os
+import sys
+
+# Add the blueprint folder to sys.path
+sys.path.insert(0, os.path.abspath('.'))
+# sys.setrecursionlimit(1500)
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -29,5 +36,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'alabaster'
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
 html_static_path = ['_static']
 

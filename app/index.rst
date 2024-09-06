@@ -11,9 +11,10 @@ Add your content using ``reStructuredText`` syntax. See the
 documentation for details.
 
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
 
-   api.rst
+   app
 
