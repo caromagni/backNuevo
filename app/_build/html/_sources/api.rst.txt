@@ -1,0 +1,9 @@
+API Documentation
+=================
+
+.. automodule:: expediente.expediente_b
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   
+   
