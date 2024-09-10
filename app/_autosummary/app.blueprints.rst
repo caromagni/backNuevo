@@ -1,7 +1,7 @@
-﻿app
-===
+app.blueprints
+==============
 
-.. automodule:: app
+.. automodule:: app.blueprints
   
    
    
@@ -28,8 +28,11 @@
    :template: custom-module-template.rst                
    :recursive:
 
-   blueprints
-   conf
-   config
-   main
+   actuacion
+   expediente
+   fix_stuck_in_idle_connections
+   groups
+   herarquia
+   tarea
+   usuario
 
