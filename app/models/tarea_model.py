@@ -46,7 +46,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
 
     ########################################################
     
-    
     print("Usuario:", usuario)
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
@@ -57,6 +56,27 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
        return None, msg
 
     nuevoID_tarea=uuid.uuid4()
+
+    nueva_tarea = Tarea(
+        id=nuevoID_tarea,
+        prioridad=prioridad,
+        id_actuacion=id_actuacion,
+        titulo=titulo,
+        cuerpo=cuerpo,
+        id_expediente=id_expediente,
+        caratula_expediente=caratula_expediente,
+        id_tipo_tarea=id_tipo_tarea,
+        eliminable=eliminable,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_eliminacion=fecha_eliminacion,
+        fecha_actualizacion=datetime.now(),
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        fecha_creacion=datetime.now(),
+        plazo=plazo
+    )
+
+    session.add(nueva_tarea)
 
     if grupo is not None:
         for group in grupo:
@@ -89,26 +109,6 @@ def insert_tarea(id_grupo=None, prioridad=0, id_actuacion=None, titulo='', cuerp
                 )
                 session.add(asigna_usuario)
     
-    nueva_tarea = Tarea(
-        id=nuevoID_tarea,
-        prioridad=prioridad,
-        id_actuacion=id_actuacion,
-        titulo=titulo,
-        cuerpo=cuerpo,
-        id_expediente=id_expediente,
-        caratula_expediente=caratula_expediente,
-        id_tipo_tarea=id_tipo_tarea,
-        eliminable=eliminable,
-        id_user_actualizacion=id_user_actualizacion,
-        fecha_eliminacion=fecha_eliminacion,
-        fecha_actualizacion=datetime.now(),
-        fecha_inicio=fecha_inicio,
-        fecha_fin=fecha_fin,
-        fecha_creacion=datetime.now(),
-        plazo=plazo
-    )
-
-    session.add(nueva_tarea)
        
     session.commit()
     return nueva_tarea
