@@ -2,7 +2,7 @@
 from sqlalchemy import event
 from sqlalchemy.orm import Session, scoped_session
 from sqlalchemy.inspection import inspect
-from datetime import datetime
+from datetime import datetime, date
 from ..models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
 import json
 import uuid
@@ -13,6 +13,8 @@ modelos = {Tarea, Usuario, UsuarioGrupo, Grupo, TipoTarea, HerarquiaGrupoGrupo}
 
 def convert_to_serializable(value):
     if isinstance(value, datetime):
+        return value.isoformat()
+    elif isinstance(value, date):
         return value.isoformat()
     elif isinstance(value, uuid.UUID):
         return str(value)
@@ -26,10 +28,10 @@ def convert_to_serializable(value):
 
 def get_serializable_dict(instance):
     return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
-    try:
+    """  try:
         return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
     except Exception as e:
-        return ""    
+        return ""     """
     #return {key: convert_to_serializable(value) for key, value in instance.__dict__.items() if not key.startswith('_sa_')}
 
 @event.listens_for(scoped_session, 'after_flush')
@@ -61,7 +63,6 @@ def after_flush(session, flush_context):
                 id_registro=instance.id,
                 operacion='INSERT',
                 datos_nuevos=get_serializable_dict(instance),
-                datos_nuevos="",
                 fecha_actualizacion=datetime.now(),
                 usuario_actualizacion=get_user_actualizacion(instance),
                 ip_usuario=ip
