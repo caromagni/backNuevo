@@ -1,56 +1,53 @@
-
 import os
 import sys
 
-# Add the blueprint folder to sys.path
+# Agregar la carpeta de blueprints a sys.path
 sys.path.insert(0, os.path.abspath('..'))
-# sys.setrecursionlimit(1500)
-# Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
-
-# # Debugging: Print the current working directory and sys.path
-# print("Current working directory:", os.getcwd())
-# print("sys.path:", sys.path)
-
-
-# import pkgutil
-
-# # List all importable modules in sys.path
-# print("Importable modules in sys.path:")
-# for module_info in pkgutil.iter_modules():
-#     print(module_info.name)
+# Archivo de configuración para el generador de documentación Sphinx
 
 project = 'tareas'
-copyright = '2024, Silvia Imperiale,Mauro Bonadeo,Carolina Magni,Martin Diaz'
-author = 'Silvia Imperiale,Mauro Bonadeo,Carolina Magni,Martin Diaz'
-
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+copyright = '2024, Silvia Imperiale, Mauro Bonadeo, Carolina Magni, Martin Diaz'
+author = 'Silvia Imperiale, Mauro Bonadeo, Carolina Magni, Martin Diaz'
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinxcontrib.httpdomain' # To handle HTTP APIs better in docs
+    'sphinxcontrib.httpdomain'
 ]
-
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
 html_theme = 'alabaster'
-#html_theme = 'sphinx_rtd_theme'
-#html_theme = 'flask'
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
 html_static_path = ['_static']
 
+# Configuración de las páginas del manual
+master_doc = 'index'
+
+# Crear el contenido para el archivo index.rst
+index_content = '''
+¡Bienvenido a la documentación de Tareas!
+=========================================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contenido:
+
+   introduccion
+   arquitectura
+   referencia_api
+
+Índices y tablas
+================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+'''
+
+# Escribir el archivo index.rst
+with open(os.path.join(os.path.dirname(__file__), 'index.rst'), 'w') as f:
+    f.write(index_content)
+
+# Configurar el idioma a español
+language = 'es'
