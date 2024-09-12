@@ -1,5 +1,5 @@
 
-¡Bienvenido a la documentación de Tareas!
+Documentación de Tareas
 =========================================
 
 .. toctree::

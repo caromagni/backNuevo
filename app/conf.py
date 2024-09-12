@@ -18,7 +18,9 @@ extensions = [
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
+html_theme = 'conestack'
+
 html_static_path = ['_static']
 
 # Configuración de las páginas del manual
@@ -26,7 +28,7 @@ master_doc = 'index'
 
 # Crear el contenido para el archivo index.rst
 index_content = '''
-¡Bienvenido a la documentación de Tareas!
+Documentación de Tareas
 =========================================
 
 .. toctree::
