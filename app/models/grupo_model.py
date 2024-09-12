@@ -87,6 +87,14 @@ def get_grupo_by_id(id):
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
     print("#"*50)
     print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
+    print("get_all_grupos_nivel")
     print("Path_name:", path_name)
     print("#"*50)
     cursor=None
