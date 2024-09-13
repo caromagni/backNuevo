@@ -424,6 +424,9 @@ class CasoUso(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    #id_rol= Column(UUID)
+    id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
     url_api = Column(String, nullable=False)
     descripcion_ext = Column(String)
-    id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
+    #id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
+    

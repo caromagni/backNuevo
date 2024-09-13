@@ -9,6 +9,8 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from ..common.usher import get_roles
+import uuid
+import json
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
 ###############
@@ -35,10 +37,74 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
             #######Consultar Api Usher##########
             print("#"*50)
             roles = get_roles(token)
-            for r in roles:
-                print("Roles:",r)
-
-            print("Roles de la api:",roles)
+            for r in roles['lista_roles_cus']:
+                nuevoIDRol=uuid.uuid4()
+                descripcion_rol = r['descripcion_rol']
+                print(f"Rol: {descripcion_rol}-{nuevoIDRol}")
+                    
+                nuevo_rol = Rol(
+                    id=nuevoIDRol, 
+                    id_usuario=id_usuario, 
+                    vencimiento=datetime.now()+tiempo_vencimiento,
+                    rol=r['descripcion_rol'],
+                    id_rol_ext=r['id_usuario_sistema_rol']
+                )
+                session.add(nuevo_rol)
+                session.commit()
+                print("Nuevo Rol Guardado:",nuevo_rol.id)
+                for cu in r['casos_de_uso']:
+                    match cu['descripcion_corta_cu']:
+                        case 'crear-tarea':
+                            urlCU='post/tarea'
+                        case 'borrar-tarea':
+                            urlCU='delete/tarea'
+                        case 'consulta-tarea':
+                            urlCU='get/tarea'
+                        case 'asignar-tarea':
+                            urlCU='get/tarea'
+                        case 'crear-grupo':
+                            urlCU='post/grupo'
+                        case 'crear-usuario':
+                            urlCU='post/usuario'
+                        case 'modificar-usuario':
+                            urlCU='patch/tipo_tarea'
+                        case 'eliminar-tipo-tarea':
+                            urlCU='delete/tipo_tarea'
+                        case 'consulta_usuario_tarea':
+                            urlCU='get/tarea_usr'
+                        case 'alta_usuario_tarea':
+                            urlCU='post/tarea_usr'
+                        case 'consulta_usuarios_tarea':
+                            urlCU='get/tarea_usr'
+                        case 'consulta_tarea_id':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_usuario':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_grupo':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_expediente':
+                            urlCU='get/tarea'
+                        case 'consulta_tareas_tipo':
+                            urlCU='get/tipo_tarea'
+                        case 'eliminar-datos':
+                            urlCU='delete/tarea'
+                        case 'modificar-datos':
+                            urlCU='patch/tarea'        
+                        
+                    
+                    nuevoID_CU=uuid.uuid4()
+                    nuevoCU=CasoUso(
+                        id=nuevoID_CU,
+                        id_rol=nuevoIDRol,
+                        descripcion_ext=cu['descripcion_corta_cu'],
+                        url_api=urlCU
+                    )
+                    session.add(nuevoCU)
+                    print("Nuevo Caso de Uso Guardado:",nuevoCU.id_rol)
+                    #print("Rol Guardado")
+                session.commit()
+            
+            print("Commit")
             print("#"*50)
             return True
         else:

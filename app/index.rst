@@ -21,7 +21,6 @@ Documentación de Tareas
    /modulos/tareas_programadas
    /modulos/tareas_recurrentes
    /modulos/visibilidad_externa
-   tareas_api
    loindex
 
 Índices y tablas
