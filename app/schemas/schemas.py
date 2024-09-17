@@ -356,7 +356,7 @@ class UsuarioInPatch(Schema):
         validate_char
     ])
     suspendido = Boolean()
-    id_user_actualizacion = String()
+    id_user_actualizacion = String(required=True)
     id_persona_ext = String()
     grupo = List(Nested(ListGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])

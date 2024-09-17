@@ -647,6 +647,10 @@ def eliminar_grupo_recursivo(id):
 def delete_grupo(id,todos=False):
     print("Borrando grupo con id:", id)
     session = current_app.session
+    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
+    if grupo is None:
+        raise Exception("Grupo no encontrado")
+    
     if todos:
         # Eliminar todos los hijos
         print("Eliminar todos los hijos")
@@ -654,6 +658,7 @@ def delete_grupo(id,todos=False):
         grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
         if grupo:
             grupo.eliminado = True
+
     else:    
         # Eliminar solo el grupo
         print("Eliminar solo el grupo")
