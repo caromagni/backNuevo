@@ -74,8 +74,8 @@ def patch_usuario(usuario_id: str, json_data: dict):
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo a modificar"
+                    "ErrorDesc":"Usuario no encontrado",
+                    "ErrorMsg":"No se encontró el usuario a modificar"
                 } 
             return result
         return UsuarioOut().dump(res)    

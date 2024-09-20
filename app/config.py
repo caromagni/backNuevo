@@ -11,6 +11,7 @@ class Config:
     # Database configuration
     POSGRESS_USER = os.environ.get('postgres_user') 
     POSGRESS_PASSWORD = os.environ.get('postgres_password')
+    POSGRESS_BASE = os.environ.get('postgres_base')
 
     PROPAGATE_EXCEPTIONS = True
 
