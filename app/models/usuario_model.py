@@ -20,7 +20,7 @@ def get_usuario_by_id(id):
     if res is not None:
         #Traigo los grupos del usuario
         res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
-                                  ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
+                                  ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False).all()
         
         #Traigo los grupos hijos
         res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
