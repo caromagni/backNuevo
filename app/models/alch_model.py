@@ -201,6 +201,7 @@ class TipoNota(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
     habilitado = Column(Boolean)
+    eliminado = Column(Boolean)
 
 
 class TipoTarea(Base):
@@ -370,14 +371,17 @@ class Nota(Base):
 
     id = Column(UUID, primary_key=True)
     id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
+    titulo = Column(String)
     nota = Column(String)
+    fecha_creacion = Column(DateTime, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_usuario_actualizacion = Column(UUID)
-    habilitado = Column(Boolean)
+    fecha_eliminacion = Column(DateTime, nullable=False)
+    id_user_creacion = Column(UUID)
+    eliminado = Column(Boolean)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-
     tarea = relationship('Tarea')
     tipo_nota = relationship('TipoNota')
+
 
 
 class TareaAsignadaUsuario(Base):
