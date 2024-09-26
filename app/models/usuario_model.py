@@ -74,7 +74,7 @@ def get_usuario_by_id(id):
     
     return results 
 
-def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username=""):
+def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     session: scoped_session = current_app.session
 
     query = session.query(Usuario)
@@ -93,12 +93,18 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None,
     if username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))    
 
+    if eliminado is not None:
+        query = query.filter(Usuario.eliminado == eliminado)
+
+    if suspendido is not None:
+        query = query.filter(Usuario.suspendido == suspendido)
+
     total= len(query.all())
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page).all()
     return query, total
 
 
-def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username=""):
+def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     session: scoped_session = current_app.session
 
     query = session.query(Usuario)
@@ -120,6 +126,11 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     if username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))
 
+    if eliminado is not None:
+        query = query.filter(Usuario.eliminado == eliminado)
+
+    if suspendido is not None:
+        query = query.filter(Usuario.suspendido == suspendido)
 
     total= len(query.all())
 
