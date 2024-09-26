@@ -362,9 +362,9 @@ def get_tareas(query_data: dict):
         if(request.args.get('id_actuacion') is not None):
             id_actuacion=request.args.get('id_actuacion')    
         if(request.args.get('prioridad') is not None):
-            prioridad=request.args.get('prioridad')  
+            prioridad=int(request.args.get('prioridad'))  
         if(request.args.get('estado') is not None):
-            estado=request.args.get('estado')    
+            estado=int(request.args.get('estado'))    
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
@@ -434,9 +434,9 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('id_actuacion') is not None):
             id_actuacion=request.args.get('id_actuacion')    
         if(request.args.get('prioridad') is not None):
-            prioridad=request.args.get('prioridad') 
+            prioridad=int(request.args.get('prioridad')) 
         if(request.args.get('estado') is not None):
-            estado=request.args.get('estado')    
+            estado=int(request.args.get('estado'))    
         if(request.args.get('eliminado') is not None):
             eliminado=request.args.get('eliminado')           
         if(request.args.get('fecha_desde') is not None):
