@@ -1,8 +1,8 @@
 from datetime import date, timedelta
-from ..schemas.schemas import TipoNotaIn, NotaGetIn, TipoNotaOut, NotaIn, NotaOut, NotaCountOut, NotaIdOut, MsgErrorOut, PageIn, TipoNotaCountOut, NotaCountAllOut, NotaAllOut, NotaPatchIn
+from ..schemas.schemas import TipoNotaIn, NotaGetIn, TipoNotaOut, NotaIn, NotaOut, NotaCountOut, NotaIdOut, MsgErrorOut, PageIn, TipoNotaCountOut, NotaCountAllOut, NotaAllOut, NotaPatchIn, NotaIdOut
 from ..models.nota_model import get_all_nota, get_all_tipo_nota, get_nota_by_id, insert_nota, delete_nota, delete_tipo_nota, update_nota, insert_tipo_nota
 from app.common.error_handling import DataError, DataNotFound, ValidationError
-from ..models.alch_model import Usuario, Rol
+from ..models.alch_model import Usuario, Rol, Nota
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
@@ -95,46 +95,50 @@ def del_tipo_nota(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
-################################TAREAS################################
+
+################################ NOTAS ################################
 @nota_b.doc(description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota')
 @nota_b.input(NotaGetIn, location='query')
 @nota_b.output(NotaCountOut)
 def get_notas(query_data: dict):
     try:
-        
-        page=1
-        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
-        cant=0
-        titulo=""
-        eliminado=None
-        id_tipo_nota=None
-        id_usuario_creacion=None
-        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
-        fecha_hasta=datetime.now()
+        page = 1
+        per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant = 0
+        titulo = ""
+        eliminado = None
+        id_tipo_nota = None
+        id_user_creacion = None
+        id_tarea = None
+        fecha_desde = "01/01/1900"
+        fecha_hasta = datetime.now().strftime("%d/%m/%Y")
 
-        if(request.args.get('page') is not None):
-            page=int(request.args.get('page'))
-        if(request.args.get('per_page') is not None):
-            per_page=int(request.args.get('per_page'))
-        if(request.args.get('id_usuario_creacion') is not None):
-            id_usuario_creacion=request.args.get('id_usuario_creacion')       
-        if(request.args.get('titulo') is not None):
-            titulo=request.args.get('titulo')
-        if(request.args.get('id_tipo_nota') is not None):
-            id_tipo_nota=request.args.get('id_tipo_nota') 
-        if(request.args.get('eliminado') is not None):
-            eliminado=request.args.get('eliminado')           
-        if(request.args.get('fecha_desde') is not None):
-            fecha_desde=request.args.get('fecha_desde')
-        if(request.args.get('fecha_hasta') is not None):
-            fecha_hasta=request.args.get('fecha_hasta') 
-        res,cant = get_all_nota(page,per_page, titulo, id_tipo_nota, id_usuario_creacion, fecha_desde, fecha_hasta, eliminado)    
+        if request.args.get('page') is not None:
+            page = int(request.args.get('page'))
+        if request.args.get('per_page') is not None:
+            per_page = int(request.args.get('per_page'))
+        if request.args.get('id_user_creacion') is not None:
+            id_user_creacion = request.args.get('id_user_creacion')       
+        if request.args.get('titulo') is not None:
+            titulo = request.args.get('titulo')
+        if request.args.get('id_tipo_nota') is not None:
+            id_tipo_nota = request.args.get('id_tipo_nota') 
+        if request.args.get('id_tarea') is not None:
+            id_tarea = request.args.get('id_tarea') 
+        if request.args.get('eliminado') is not None:
+            eliminado = request.args.get('eliminado')           
+        if request.args.get('fecha_desde') is not None:
+            fecha_desde = request.args.get('fecha_desde')
+        if request.args.get('fecha_hasta') is not None:
+            fecha_hasta = request.args.get('fecha_hasta') 
+
+        res, cant = get_all_nota(page, per_page, titulo, id_tipo_nota, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado)    
 
         data = {
-                "count": cant,
-                "data": NotaOut().dump(res, many=True)
-            }
+            "count": cant,
+            "data": NotaAllOut().dump(res, many=True)
+        }
         
         current_app.session.remove()
         return data
@@ -145,21 +149,22 @@ def get_notas(query_data: dict):
 
 @nota_b.doc(description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota/<string:id>')
-@nota_b.output(NotaIdOut(many=True))
+@nota_b.output(NotaIdOut)
 def get_nota(id:str):
+    print('nota.py')
     try:
-        res = get_nota_by_id(id) 
+        res = get_nota_by_id(id)
         if res is None:
             raise DataNotFound("Nota no encontrada")
 
+        result = NotaIdOut().dump(res)
         current_app.session.remove()
-        return res
+        return result
     
     except DataNotFound as err:
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err) 
-
 
 
 @nota_b.doc(description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -207,4 +212,4 @@ def del_nota(id: str):
     except DataNotFound as err:
         raise DataError(800, err)
     except Exception as err:
-        raise ValidationError(err)    
+        raise ValidationError(err)

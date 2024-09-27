@@ -681,4 +681,12 @@ def delete_grupo(id,todos=False):
     session.commit()
 
     return grupo
-    
+
+def undelete_grupo(id):
+    session = current_app.session
+    grupo = session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
+    if grupo is None:
+        raise Exception("Grupo no encontrado")
+    grupo.eliminado = False
+    session.commit()
+    return grupo    
