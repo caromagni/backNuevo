@@ -592,6 +592,7 @@ class TipoTareaCountOut(Schema):
 class SubtipoTareaCountOut(Schema):
     count = Integer()
     data = Nested(SubtipoTareaOut, many=True)       
+   
 
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
@@ -718,4 +719,116 @@ class LoadExpedienteSchema(Schema):
     fecha_hasta = fields.String(validate=validate_fecha)
     primer = fields.Boolean()
 
+
+
+############### Notas y Tipo de Notas Base####################  
+
+class TipoNotaIn(Schema):
+   
+    nombre = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    id_user_actualizacion = String(required=True)
+    habilitado = Boolean()
+    eliminado = Boolean()
+
+class TipoNotaOut(Schema):
+    id = String()
+    nombre = String()
+    id_user_actualizacion = String()
+    eliminado = Boolean()
+    habilitado = Boolean()
+
+class TipoNotaCountOut(Schema):
+    count = Integer()
+    data = Nested(TipoNotaOut, many=True)   
+ 
     
+class NotaIn(Schema):    
+    titulo = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
+    id_tipo_nota = String(required=True)
+    eliminado = Boolean()
+    id_user_creacion = String(required=True)
+    fecha_creacion = String(validate=validate_fecha)
+    id_tarea = String()
+    fecha_eliminacion = String(validate=validate_fecha)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+
+class NotaPatchIn(Schema):
+    titulo = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
+    nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
+    id_tipo_nota = String()
+    eliminado = Boolean()
+    id_user_creacion = String(required=True)
+    fecha_creacion= String(validate=validate_fecha)
+    fecha_eliminacion = String(validate=validate_fecha)
+    fecha_actualizacion = String(validate=validate_fecha)
+
+    
+class NotaOut(Schema):
+    id = String()
+    titulo = String()
+    nota = String()
+    id_tipo_nota = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String()
+    fecha_actualizacion = String()
+    tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
+    id_user_creacion = String()
+
+class NotaAllOut(Schema):
+    id = String()
+    titulo = String()
+    nota = String()
+    id_tipo_nota = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_actualizacion = String()
+    fecha_creacion = String()
+    tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
+    id_tarea = String()
+
+
+class NotaIdOut(Schema):
+    id = String()
+    titulo = String()
+    nota = String()
+    id_tipo_nota = String()
+    eliminado = Boolean()
+    fecha_eliminacion = String()
+    fecha_creacion = String() 
+    fecha_actualizacion = String()   
+    tipo_nota = Nested(TipoNotaOut, only=("id", "nombre")) 
+    id_tarea = String()
+
+    
+class NotaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    titulo = String(default="")
+    id_tipo_nota = String()
+    fecha_desde = String(validate=validate_fecha)
+    fecha_hasta = String(validate=validate_fecha)
+    id_usuario_creacion = String()
+    id_tarea = String()
+    eliminado = Boolean()
+    fecha_creacion = String()
+
+class NotaCountAllOut(Schema):
+    count = Integer()
+    data = Nested(NotaAllOut, many=True)
+    
+
+class NotaCountOut(Schema):
+    count = Integer()
+    data = Nested(NotaOut, many=True)    

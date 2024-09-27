@@ -196,11 +196,13 @@ class TipoNota(Base):
     __tablename__ = 'tipo_nota'
     __table_args__ = {'schema': 'tareas'}
 
-    id = Column(UUID, primary_key=True)
-    nombre = Column(String, nullable=False)
+    eliminado = Column(Boolean)
     fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
+    fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
+    id = Column(UUID, primary_key=True)
+    id_user_actualizacion = Column(UUID)
+    nombre = Column(String, nullable=False)
 
 
 class TipoTarea(Base):
@@ -385,16 +387,19 @@ class Nota(Base):
     __tablename__ = 'nota'
     __table_args__ = {'schema': 'tareas', 'comment': 'campo libre de notas que puede tener en principio 3 niveles de visibilidad, personal, juzgado y externo(abogados)'}
 
-    id = Column(UUID, primary_key=True)
-    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
-    nota = Column(String)
+    eliminado = Column(Boolean)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_usuario_actualizacion = Column(UUID)
-    habilitado = Column(Boolean)
+    fecha_creacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=False)
+    id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-
+    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
+    id_user_creacion = Column(UUID)
+    nota = Column(String)
     tarea = relationship('Tarea')
     tipo_nota = relationship('TipoNota')
+    titulo = Column(String)
+
 
 
 class TareaAsignadaUsuario(Base):
