@@ -5,7 +5,7 @@ from ..common.functions import controla_fecha
 
 from flask import current_app
 
-from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea
+from .alch_model import Tarea, TipoTarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 
 def es_habil(fecha):
     if fecha.weekday() >= 5:
@@ -24,7 +24,35 @@ def calcular_fecha_vencimiento(fecha, plazo):
 
 def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None):
     session: scoped_session = current_app.session
-   ###########Calculo de plazo################
+    ##############Validaciones################
+    if id_expediente is not None:
+        expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
+        if expediente is None:
+            raise Exception("Expediente no encontrado")
+    if id_actuacion is not None:
+        actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion).first()
+        if actuacion is None:
+            raise Exception("Actuacion no encontrada")    
+    if id_tipo_tarea is not None:
+        tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
+        if tipo_tarea is None:
+            raise Exception("Tipo de tarea no encontrado")
+        nombre_tipo=tipo_tarea.nombre
+        if id_subtipo_tarea is not None:
+            subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
+            if subtipo_tarea is None:
+                raise Exception("Subtipo de tarea no encontrado")
+            nombre_subtipo = subtipo_tarea.nombre
+            subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.id_tipo == id_tipo_tarea).first()
+            if subtipo_tarea is None:
+                raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
+        
+    if id_user_actualizacion is not None:
+        qryusuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion).first()
+        if qryusuario is None:
+            raise Exception("Usuario de actualizacion no encontrado")   
+         
+    ####################Calculo de plazo##################
     print("###############Calculo de plazo################")
     con_plazo=False
     if fecha_inicio is None:
@@ -46,9 +74,7 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
         print("fecha_fin:",fecha_fin)
 
-    ########################################################
     
-    print("Usuario:", usuario)
     #fecha_inicio = controla_fecha(fecha_inicio)
     #fecha_fin = controla_fecha(fecha_fin)   
     print("fecha_inicio:",fecha_inicio)
@@ -81,27 +107,43 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
     )
 
     session.add(nueva_tarea)
-
+    print("#"*50)
+    print("Arma grupos")
     if grupo is not None:
         for group in grupo:
             id_grupo=group['id_grupo']
             existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
-           
-            if existe_grupo is not None:
-                nuevoID_tareaxgrupo=uuid.uuid4()
-                tareaxgrupo= TareaXGrupo(
-                    id=nuevoID_tareaxgrupo,
-                    id_grupo=id_grupo,
-                    id_tarea=nuevoID_tarea,
-                    id_user_actualizacion=id_user_actualizacion,
-                    fecha_actualizacion=datetime.now()
-                ) 
-                session.add(tareaxgrupo)  
+            if existe_grupo is None:
+                raise Exception("Error en el ingreso de grupos. Grupo no existente")
+            
+            if existe_grupo.eliminado==True:
+                raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
+            
+            if existe_grupo.suspendido==True:
+                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre)
+
+            
+            nuevoID_tareaxgrupo=uuid.uuid4()
+            tareaxgrupo= TareaXGrupo(
+                id=nuevoID_tareaxgrupo,
+                id_grupo=id_grupo,
+                id_tarea=nuevoID_tarea,
+                id_user_actualizacion=id_user_actualizacion,
+                fecha_actualizacion=datetime.now()
+            ) 
+            session.add(tareaxgrupo)  
 
     if usuario is not None:
         for user in usuario:
             id_usuario = user['id_usuario']
             existe_usuario = session.query(Usuario).filter(Usuario.id == id_usuario, Usuario.eliminado==False).first()
+            if existe_usuario is None:
+                raise Exception("Error en el ingreso de Usuario. Usuario no existente")
+            
+            if existe_usuario.eliminado==True:
+                raise Exception("Error en el ingreso de Usuarios. Usuario eliminado: " + existe_usuario.apelllido)
+
+            
             if existe_usuario is not None:
                 nuevoID=uuid.uuid4()
                 asigna_usuario = TareaAsignadaUsuario(
@@ -132,13 +174,34 @@ def update_tarea(id='', **kwargs):
     if 'eliminable' in kwargs:
         tarea.eliminable = kwargs['eliminable']
     if 'id_actuacion' in kwargs:
+        actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
+        if actuacion is None:
+            raise Exception("Actuacion no encontrada")
         tarea.id_actuacion = kwargs['id_actuacion']
     if 'id_expediente' in kwargs:
+        expediente = session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
+        if expediente is None:
+            raise Exception("Expediente no encontrado")
         tarea.id_expediente = kwargs['id_expediente']           
     if 'id_tipo_tarea' in kwargs:
-        tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
-    if 'id_subtipo_tarea' in kwargs:
-        tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
+        tipo = session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
+        if tipo is  None:
+            raise Exception("Tipo de tarea no encontrado")
+        
+        nombre_tipo=tipo.nombre
+
+        if 'id_subtipo_tarea' in kwargs:
+            subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
+            if subtipo is None:
+                raise Exception("Subtipo de tarea no encontrado")
+            nombre_subtipo = subtipo.nombre
+            subtipo = session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.id_tipo == kwargs['id_tipo_tarea']).first()
+            if subtipo is None:
+                raise Exception("El tipo de tarea '" + nombre_tipo + "' y el subtipo de tarea '" + nombre_subtipo +"' no se corresponden")
+           
+            tarea.id_tipo_tarea = kwargs['id_tipo_tarea']
+            tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']  
+
     if 'plazo' in kwargs:
         tarea.plazo = kwargs['plazo']
     if 'prioridad' in kwargs:
@@ -147,6 +210,11 @@ def update_tarea(id='', **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper()  
+    if 'id_user_actualizacion' in kwargs:
+        usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario de actualizacion no encontrado")
+        tarea.id_user_actualizacion = kwargs['id_user_actualizacion']  
         
     tarea.fecha_actualizacion = datetime.now()
     usuarios=[]
@@ -169,10 +237,12 @@ def update_tarea(id='', **kwargs):
             if existe_grupo.eliminado==True:
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
+            if existe_grupo.suspendido==True:
+                raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre)
+
             nuevoID=uuid.uuid4()
             tareaxgrupo = session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id, TareaXGrupo.id_grupo==group['id_grupo']).first()
             if tareaxgrupo is None:
-                print("Argrego grupo - ", group['id_grupo'])
                 nuevo_tarea_grupo = TareaXGrupo(
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
@@ -262,7 +332,14 @@ def get_all_tipo_tarea(page=1, per_page=10):
 
 def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
+    if id_user_actualizacion is not None:
+        usuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion, Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario de actualizacion no encontrado")
+    
+    
     nuevoID=uuid.uuid4()
+
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
@@ -331,6 +408,16 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
 
 def insert_subtipo_tarea(id_tipo='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
+    if id_user_actualizacion is not None:
+        usuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion, Usuario.eliminado==False).first()
+        if usuario is None:
+            raise Exception("Usuario de actualizacion no encontrado")
+    if id_tipo is not None:
+        tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo, TipoTarea.eliminado==False).first()
+        if tipo_tarea is None:
+            raise Exception("Tipo de tarea no encontrado")
+
+
     nuevoID=uuid.uuid4()
     nuevo_subtipo_tarea = SubtipoTarea(
         id=nuevoID,
