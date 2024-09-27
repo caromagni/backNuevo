@@ -196,11 +196,13 @@ class TipoNota(Base):
     __tablename__ = 'tipo_nota'
     __table_args__ = {'schema': 'tareas'}
 
-    id = Column(UUID, primary_key=True)
-    nombre = Column(String, nullable=False)
+    eliminado = Column(Boolean)
     fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
+    fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
+    id = Column(UUID, primary_key=True)
+    id_user_actualizacion = Column(UUID)
+    nombre = Column(String, nullable=False)
 
 
 class TipoTarea(Base):
@@ -214,7 +216,21 @@ class TipoTarea(Base):
     eliminado = Column(Boolean, nullable=False, default=False)
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    base = Column(Boolean, default=False)
 
+class SubtipoTarea(Base):
+    __tablename__ = 'subtipo_tarea'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tipo = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    nombre = Column(String)
+    eliminado = Column(Boolean, default=False)
+    id_user_actualizacion = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    base = Column(Boolean, default=False)
+
+    tipo_tarea = relationship('TipoTarea')
 
 class Usuario(Base):
     __tablename__ = 'usuario'
@@ -291,6 +307,7 @@ class Tarea(Base):
     id_expediente = Column(ForeignKey('tareas.expediente_ext.id'))
     caratula_expediente = Column(String)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    id_subtipo_tarea = Column(ForeignKey('tareas.subtipo_tarea.id'))
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
@@ -301,8 +318,10 @@ class Tarea(Base):
     fecha_fin = Column(DateTime)
     plazo = Column(Integer)
     eliminado = Column(Boolean, default=False)
+    estado = Column(Integer)
 
     tipo_tarea = relationship('TipoTarea')
+    subtipo_tarea = relationship('SubtipoTarea')
     grupo = relationship('Grupo')
     expediente = relationship('ExpedienteExt')
     actuacion = relationship('ActuacionExt')
@@ -368,16 +387,19 @@ class Nota(Base):
     __tablename__ = 'nota'
     __table_args__ = {'schema': 'tareas', 'comment': 'campo libre de notas que puede tener en principio 3 niveles de visibilidad, personal, juzgado y externo(abogados)'}
 
-    id = Column(UUID, primary_key=True)
-    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
-    nota = Column(String)
+    eliminado = Column(Boolean)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_usuario_actualizacion = Column(UUID)
-    habilitado = Column(Boolean)
+    fecha_creacion = Column(DateTime, nullable=False)
+    fecha_eliminacion = Column(DateTime, nullable=False)
+    id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-
+    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
+    id_user_creacion = Column(UUID)
+    nota = Column(String)
     tarea = relationship('Tarea')
     tipo_nota = relationship('TipoNota')
+    titulo = Column(String)
+
 
 
 class TareaAsignadaUsuario(Base):
@@ -407,3 +429,18 @@ class TareaXGrupo(Base):
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
+
+class Rol(Base):
+    __tablename__ = 'rol'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    email = Column(String)
+    rol = Column(String, nullable=False)
+    id_rol_ext= Column(UUID)
+    id_organismo = Column(UUID)
+    url_api = Column(String, nullable=False)
+    descripcion_ext = Column(String)
+    fecha_actualizacion = Column(DateTime)
+    

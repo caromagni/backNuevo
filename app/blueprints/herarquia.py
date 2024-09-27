@@ -10,7 +10,7 @@ herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
 @herarquia_b.doc(description='Listado de Grupos padres - Hijos', summary='Grupos padres - hijos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @herarquia_b.get('/herarquias')
-@herarquia_b.output(GroupHOut(many=True))
+#@herarquia_b.output(GroupHOut(many=True))
 def get_gruposh():
     try:
         #res=get_grupos_herarquia()
@@ -25,15 +25,20 @@ def get_gruposh():
                 } 
             return result
 
+        res = {
+                "data": GroupHOut().dump(res, many=True)
+            }
+        
         current_app.session.remove()
-        return res 
+        return res
+       
     
     except Exception as err:
         raise ValidationError(err)   
     
 @herarquia_b.doc(description='Listado de Grupos padres e hijos con niveles', summary='Grupos Padres - Hijos con Niveles', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})    
 @herarquia_b.get('/niveles_grupos')
-@herarquia_b.output(HerarquiaOut(many=True))
+#@herarquia_b.output(HerarquiaOut(many=True))
 def get_niveles():
     try:
         #res=get_grupos_herarquia()
@@ -48,7 +53,9 @@ def get_niveles():
                 } 
             
             return result
-
+        res = {
+                "data": HerarquiaOut().dump(res, many=True)
+            }
         current_app.session.remove()
         return res 
  
@@ -59,7 +66,7 @@ def get_niveles():
 
 @herarquia_b.get('/herarquias_all')
 @herarquia_b.input(HerarquiaGroupGroupInput, location='query')
-@herarquia_b.output(HerarquiaAllOut(many=True))
+#@herarquia_b.output(HerarquiaAllOut(many=True))
 def herarquias_all_(query_data: dict):
     try:
         #res=get_grupos_herarquia()
@@ -77,7 +84,9 @@ def herarquias_all_(query_data: dict):
                     "ErrorDesc":"No existen jerarquías de grupos",
                 } 
             return result
-        
+        res = {
+                "data": HerarquiaAllOut().dump(res, many=True)
+            }
         current_app.session.remove()
         return res 
  

@@ -10,6 +10,7 @@ from .blueprints.tarea import tarea_b
 from .blueprints.herarquia import herarquia_b
 from .blueprints.actuacion import actuacion_b
 from .blueprints.expediente import expediente_b
+from .blueprints.nota import nota_b
 from .blueprints.fix_stuck_in_idle_connections import fix_b
 from .models.alch_model import Base
 from .common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
@@ -34,7 +35,7 @@ def create_app():
     #jwt = JWTManager(app=app)
 
     app.config['DEBUG'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@psql.beta.hwc.pjm.gob.ar:5432/tareas"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{Config.POSGRESS_USER}:{Config.POSGRESS_PASSWORD}@{Config.POSGRESS_BASE}"
     app.config['SERVERS'] = Config.SERVERS
     app.config['DESCRIPTION'] = Config.DESCRIPTION
     app.config['MAX_ITEMS_PER_RESPONSE'] = Config.MAX_ITEMS_PER_RESPONSE
@@ -66,6 +67,8 @@ def create_app():
     app.register_blueprint(fix_b)
     app.register_blueprint(actuacion_b)
     app.register_blueprint(expediente_b)
+    app.register_blueprint(nota_b)
+
     # Register custom error handlers
     register_error_handlers(app)
 

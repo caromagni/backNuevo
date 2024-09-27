@@ -1,6 +1,6 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
-from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel
+from ..models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from ..common.error_handling import ValidationError, DataError, DataNotFound
 from typing import List
 from ..schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
@@ -217,7 +217,7 @@ def post_grupo(json_data: dict):
 def del_grupo(id: str):
     try:
         #eliminar el grupo con sus hijos
-        todos=True
+        todos=False
         #elimina solo el grupo
         # todos=False
         res = delete_grupo(id, todos)
@@ -232,6 +232,28 @@ def del_grupo(id: str):
                 } 
         
         return result
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err)
+    
+##################UNDELETE####################
+@groups_b.doc(description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
+@groups_b.patch('/grupo_undelete/<string:id>')
+def restaura_grupo(id: str):
+    try:
+        todos=False
+        res = undelete_grupo(id)
+        if res is None:
+            raise DataNotFound("Grupo no encontrado")
+
+        result={
+                    "Msg":"Registro restaurado",
+                    "Id grupo": id,
+                    "grupo": res.nombre
+                }    
+        return result
+    
     except DataNotFound as err:
         raise DataError(800, err)
     except Exception as err:
