@@ -16,8 +16,6 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    print("Antes de la petición")
-    print(request.headers)
     if not verificar_header():
         #raise UnauthorizedError("Token o api-key no validos")   
         print("Token o api key no validos")  

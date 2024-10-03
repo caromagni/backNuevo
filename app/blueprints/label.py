@@ -9,15 +9,20 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from ..common.usher import get_roles
+from ..common.auth import verificar_header
 import uuid
 import json
 
 label_b = APIBlueprint('label_blueprint', __name__)
+
 ###############
 @label_b.before_request
+#################Before requests ##################
 def before_request():
-    print("Antes de la petición")
-    print(request.headers)
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")  
+####################################################
 
 ################################ NOTAS ################################
 @label_b.doc(description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
