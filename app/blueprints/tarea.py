@@ -11,15 +11,18 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from ..common.usher import get_roles
+from ..common.auth import verificar_header
 import uuid
 import json
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
-###############
+
+#################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    print("Antes de la petición")
-    print(request.headers)
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):

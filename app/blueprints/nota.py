@@ -9,15 +9,17 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from ..common.usher import get_roles
+from ..common.auth import verificar_header
 import uuid
 import json
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
-###############
+#################Before requests ##################
 @nota_b.before_request
 def before_request():
-    print("Antes de la petición")
-    print(request.headers)
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos") 
 
 
 ####################TIPO DE NOTA######################
