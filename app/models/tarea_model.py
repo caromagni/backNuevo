@@ -2,6 +2,7 @@ import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from ..common.functions import controla_fecha
+from sqlalchemy import text
 
 from flask import current_app
 
@@ -736,6 +737,63 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
     
     return results, total         
 
+def get_all_tarea1(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
+    session : scoped_session = current_app.session
+    print("id_usuario_asignado:", id_usuario_asignado)
+    subquery = text("""SELECT * FROM tareas.tarea
+                WHERE tarea.fecha_creacion BETWEEN :fecha_desde AND :fecha_hasta
+                AND (:id_tipo_tarea IS NULL OR tarea.id_tipo_tarea = :id_tipo_tarea)
+                AND (:id_expediente IS NULL OR tarea.id_expediente = :id_expediente)
+                AND (:id_actuacion IS NULL OR tarea.id_actuacion = :id_actuacion)
+                AND (:prioridad IS NULL OR tarea.prioridad = :prioridad)
+                AND (:estado IS NULL OR tarea.estado = :estado)
+                AND (:eliminado IS NULL OR tarea.eliminado = :eliminado)
+                AND (
+                    :id_usuario_asignado IS NULL 
+                    OR EXISTS (
+                        SELECT tarea_asignada_usuario.id_usuario
+                        FROM tareas.tarea_asignada_usuario 
+                        WHERE tarea_asignada_usuario.id_tarea = tarea.id_tarea
+                        AND tarea_asignada_usuario.id_usuario = :id_usuario_asignado
+                    )
+                )
+                AND (
+                    :id_grupo IS NULL
+                    OR EXISTS (
+                        SELECT tareasxgrupo.id_grupo 
+                        FROM tareas.tareasxgrupo 
+                        WHERE tareasxgrupo.id_tarea = tarea.id_tarea
+                        AND tareasxgrupo.id_grupo = :id_grupo
+                    )
+                );""")
+    cursor = session.execute(
+        subquery,
+        {
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'id_tipo_tarea': id_tipo_tarea,
+            'id_expediente': id_expediente,
+            'id_actuacion': id_actuacion,
+            'prioridad': prioridad,
+            'estado': estado,
+            'eliminado': eliminado,
+            'id_usuario_asignado': id_usuario_asignado,
+            'id_grupo': id_grupo
+        }
+    )
+
+    # Obtener los resultados
+    result = cursor.fetchall()
+
+    return result
+    cursor=session.execute(subquery)
+    result = cursor.fetchall()
+    total = result.count()
+
+    result = cursor.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
+
+    return result, total
+
 
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
     session: scoped_session = current_app.session
@@ -760,10 +818,10 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         else:
             us = True
             print("agrega columna reasignada_usr")
-            query = query.outerjoin(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)\
-                .add_columns(TareaAsignadaUsuario.eliminado.label('reasignada_usr'))\
+            query = query.join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)\
                 .filter(TareaAsignadaUsuario.id_usuario == id_usuario_asignado)
             
+            #.add_columns(TareaAsignadaUsuario.eliminado.label('reasignada_usr'))\
 
     if id_grupo is not None:
         grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
@@ -773,9 +831,8 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
             gr = True
             print("agrega columna reasignada_grupo")
             query = query.outerjoin(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)\
-                .add_column(TareaXGrupo.eliminado.label('reasignada_grupo'))\
                 .filter(TareaXGrupo.id_grupo == id_grupo)
-
+            #.add_column(TareaXGrupo.eliminado.label('reasignada_grupo'))\
     print("usuario y grupo:", us, gr)    
     if prioridad > 0:
         query = query.filter(Tarea.prioridad == prioridad)
@@ -791,8 +848,10 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     #print("result:", result)
     final_result = []
-    #for row in result:
-    #    print("row:", row.id)
+    if result is not None:
+        for row in result:
+            print("#"*50)
+            print("row:", row.id)
     """  tarea = row[0] if isinstance(row, tuple) else row
         tarea_dict = {
             "id": tarea.id,
