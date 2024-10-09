@@ -677,10 +677,10 @@ class TareaIdOut(Schema):
     plazo = Integer()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
-    grupos = List(Nested(GroupOut, only=("id", "nombre")))
+    grupos = List(Nested(GroupTareaOut))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
-    usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))
+    usuarios = List(Nested(UsuarioTareaOut))
 
 
 ###############Marshmallow####################

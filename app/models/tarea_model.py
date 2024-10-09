@@ -556,11 +556,11 @@ def get_tarea_by_id(id):
     if res is not None:
         #Consulto los usuarios asignados a la tarea
         print("Tarea encontrada:", res)
-        res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido
+        res_usuarios = session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                   ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== res.id).all()
         
         #Consulto los grupos asignados a la tarea
-        res_grupos = session.query(Grupo.id, Grupo.nombre
+        res_grupos = session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                   ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== res.id).all()
 
         
@@ -570,7 +570,9 @@ def get_tarea_by_id(id):
                 usuario = {
                     "id": row.id,
                     "nombre": row.nombre,
-                    "apellido": row.apellido
+                    "apellido": row.apellido,
+                    "asignada": not(row.reasignada),
+                    "fecha_asignacion": row.fecha_asignacion
                 }
                 usuarios.append(usuario)
 
@@ -578,7 +580,9 @@ def get_tarea_by_id(id):
             for row in res_grupos:
                 grupo = {
                     "id": row.id,
-                    "nombre": row.nombre
+                    "nombre": row.nombre,
+                    "asignada": not(row.reasignada),
+                    "fecha_asignacion": row.fecha_asignacion
                 }
                 grupos.append(grupo)
 
@@ -606,8 +610,6 @@ def get_tarea_by_id(id):
             "fecha_eliminacion": res.fecha_eliminacion,
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
-            "id_grupo": res.id_grupo,
-            "grupo": res.grupo,
             "grupos": grupos,
             "usuarios": usuarios
         }
@@ -749,6 +751,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
 
     if id_usuario_asignado is not None:
+        print ("id_usuario_asignado:", id_usuario_asignado)
         usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
         if usuario is None:
             raise Exception("Usuario no encontrado")

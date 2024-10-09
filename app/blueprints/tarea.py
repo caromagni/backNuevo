@@ -351,7 +351,7 @@ def get_tareas(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
@@ -423,7 +423,7 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
