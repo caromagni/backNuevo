@@ -83,6 +83,27 @@ class NomencladorOut(Schema):
     desclarga = String()
     nroficin_corto = String()
 
+################Actuaciones####################
+class TipoActuacionOut(Schema):
+    id = String()
+    nombre = String()
+
+class ActuacionOut(Schema):
+    id = String()
+    nombre = String()
+    id_tipo_actuacion = String()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()  
+    tipo_actuacion=String()
+    #tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
+
+###############Expedientes####################
+class ExpedienteOut(Schema):    
+    id = String()
+    id_ext = String()
+    caratula = String()
+    estado = String()
+
 ###############Groups####################
 class HerarquiaGroupGroupInput(Schema):
     eliminado = Boolean()
@@ -376,9 +397,11 @@ class TareaOut(Schema):
     prioridad = Integer()
     estado = Integer()
     id_actuacion = String()
+    actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     titulo = String()
     cuerpo = String()
     id_expediente = String()
+    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
     caratula_expediente = String()
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
@@ -616,30 +639,7 @@ class TipoTareaCountOut(Schema):
 
 class SubtipoTareaCountOut(Schema):
     count = Integer()
-    data = Nested(SubtipoTareaOut, many=True)       
-   
-
-################Actuaciones####################
-class TipoActuacionOut(Schema):
-    id = String()
-    nombre = String()
-
-class ActuacionOut(Schema):
-    id = String()
-    nombre = String()
-    id_tipo_actuacion = String()
-    id_user_actualizacion = String()
-    fecha_actualizacion = String()  
-    tipo_actuacion=String()
-    #tipo_actuacion = Nested(TipoActuacionOut, only=("id", "nombre"))
-
-###############Expedientes####################
-class ExpedienteOut(Schema):    
-    id = String()
-    id_ext = String()
-    caratula = String()
-    estado = String()
-    
+    data = Nested(SubtipoTareaOut, many=True)         
 
 
 class TareaCountOut(Schema):
@@ -677,10 +677,10 @@ class TareaIdOut(Schema):
     plazo = Integer()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
-    grupos = List(Nested(GroupOut, only=("id", "nombre")))
+    grupos = List(Nested(GroupTareaOut))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
     expediente = Nested(ExpedienteOut, only=("id", "caratula"))
-    usuarios = List(Nested(UsuarioOut, only=("id", "nombre", "apellido")))
+    usuarios = List(Nested(UsuarioTareaOut))
 
 
 ###############Marshmallow####################

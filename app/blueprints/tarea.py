@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
 from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn
-from ..models.tarea_model import get_all_tarea, get_all_tarea1, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
+from ..models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
 from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol
@@ -351,7 +351,7 @@ def get_tareas(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
@@ -423,7 +423,7 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
