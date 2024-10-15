@@ -49,6 +49,34 @@ class Auditoria_Tarea(Base):
     usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)
 
+class Auditoria_TareaxGrupo(Base):
+    __tablename__ = 'auditoria_tareaxgrupo'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)
+    
+
+class Auditoria_TareaAsignadaUsuario(Base):
+    __tablename__ = 'auditoria_tarea_asignada_usuario'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    nombre_tabla = Column(String, nullable=False)
+    id_registro = Column(UUID, nullable=False)
+    operacion = Column(String, nullable=False)
+    datos_anteriores = Column(JSONB)
+    datos_nuevos = Column(JSONB)
+    fecha_actualizacion = Column(DateTime, nullable=False)
+    usuario_actualizacion = Column(String, nullable=False)
+    ip_usuario = Column(String, nullable=False)    
 
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'
@@ -121,6 +149,7 @@ class Grupo(Base):
 
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
+    id_user_asignado_default = Column(UUID)
     fecha_actualizacion = Column(DateTime)
     nombre = Column(String)
     descripcion = Column(String)
@@ -131,6 +160,7 @@ class Grupo(Base):
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
+
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
@@ -200,7 +230,7 @@ class TipoNota(Base):
     __table_args__ = {'schema': 'tareas'}
 
     eliminado = Column(Boolean)
-    fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_actualizacion = Column(DateTime)
     fecha_eliminacion = Column(DateTime)
     habilitado = Column(Boolean)
     id = Column(UUID, primary_key=True)
@@ -314,7 +344,7 @@ class Tarea(Base):
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     fecha_creacion = Column(DateTime)
     fecha_inicio = Column(DateTime)
@@ -328,6 +358,7 @@ class Tarea(Base):
     grupo = relationship('Grupo')
     expediente = relationship('ExpedienteExt')
     actuacion = relationship('ActuacionExt')
+    user_actualizacion = relationship('Usuario')
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
@@ -396,11 +427,14 @@ class Nota(Base):
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
     id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
-    id_user_creacion = Column(UUID)
+    id_user_creacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    id_user_actualizacion = Column(UUID)
     nota = Column(String)
     tarea = relationship('Tarea')
     tipo_nota = relationship('TipoNota')
     titulo = Column(String)
+    user_creacion = relationship('Usuario')
+    #usuario_actualizacion = relationship('Usuario')
 
 
 
@@ -412,8 +446,10 @@ class TareaAsignadaUsuario(Base):
     id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    fecha_asignacion = Column(DateTime) 
     id_user_actualizacion= Column(UUID, nullable=False)
     notas = Column(String)
+    eliminado = Column(Boolean, default=False)
 
     tarea = relationship('Tarea')
     usuario = relationship('Usuario')
@@ -428,6 +464,8 @@ class TareaXGrupo(Base):
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     id_user_actualizacion = Column(UUID)
     fecha_actualizacion = Column(DateTime)
+    fecha_asignacion = Column(DateTime)
+    eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')

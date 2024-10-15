@@ -7,10 +7,17 @@ from ..models.alch_model import Grupo,Usuario
 from ..models.usuario_model import get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario
 from ..schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioAllOut
 from ..common.error_handling import ValidationError, DataError, DataNotFound
+from ..common.auth import verificar_header
 from datetime import datetime
 import requests
 
 usuario_b = APIBlueprint('usuario_blueprint', __name__)
+#################Before requests ##################
+@usuario_b.before_request
+def before_request():
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -95,8 +102,8 @@ def get_usuario_id(id: str):
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
-                    "ErrorDesc":"Grupo no encontrado",
-                    "ErrorMsg":"No se encontró el grupo"
+                    "ErrorDesc":"Usuario no encontrado",
+                    "ErrorMsg":"No se encontró el usuario"
                 } 
             return result
         current_app.session.remove()

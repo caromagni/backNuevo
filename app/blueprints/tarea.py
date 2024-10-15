@@ -11,15 +11,18 @@ from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
 from ..common.usher import get_roles
+from ..common.auth import verificar_header
 import uuid
 import json
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
-###############
+
+#################Before requests ##################
 @tarea_b.before_request
 def before_request():
-    print("Antes de la petición")
-    print(request.headers)
+    if not verificar_header():
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")
 
 ######################Control de acceso######################
 def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
@@ -56,12 +59,8 @@ def control_rol_usuario(token='', nombre_usuario='', rol='', url_api=''):
                             urlCU='patch/usuario'
                         case 'eliminar-tipo-tarea':
                             urlCU='delete/tipo_tarea'
-                        case 'consulta_usuario_tarea':
-                            urlCU='get/tarea_usr'
-                        case 'alta_usuario_tarea':
-                            urlCU='post/tarea_usr'
                         case 'consulta_usuarios_tarea':
-                            urlCU='get/tarea_usr'
+                            urlCU='get/usuario_tarea'
                         case 'consulta_tarea_id':
                             urlCU='get/tarea'
                         case 'consulta_tareas_usuario':
@@ -352,7 +351,7 @@ def get_tareas(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
@@ -424,7 +423,7 @@ def get_tareas_detalle(query_data: dict):
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
-            id_usuario_asignado=request.args.get('id_grupo')      
+            id_grupo=request.args.get('id_grupo')      
         if(request.args.get('titulo') is not None):
             titulo=request.args.get('titulo')
         if(request.args.get('id_tipo_tarea') is not None):
@@ -474,7 +473,7 @@ def get_tarea(id_tarea:str):
         raise ValidationError(err) 
 
 @tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea_usr/<string:tarea_id>')
+@tarea_b.get('/ususario_tarea/<string:tarea_id>')
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    
@@ -487,9 +486,9 @@ def get_usuarios_asignados(tarea_id:str):
     except Exception as err:
         raise ValidationError(err)
 
-@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.post('/tarea_usr')
-@tarea_b.input(TareaUsuarioIn)
+#@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.post('/tarea_usr')
+#@tarea_b.input(TareaUsuarioIn)
 #@tarea_b.output(TareaOut)
 def post_usuario_tarea(json_data: dict):
     try:
