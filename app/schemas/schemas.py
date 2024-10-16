@@ -397,6 +397,7 @@ class TareaIn(Schema):
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
+    username = String()
 
 class TareaPatchIn(Schema):
     prioridad = Integer(validate=[

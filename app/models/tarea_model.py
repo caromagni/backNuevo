@@ -24,15 +24,17 @@ def calcular_fecha_vencimiento(fecha, plazo):
     return fecha_vencimiento
 
 
-def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_usuario_asignado=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
     session: scoped_session = current_app.session
     ##############Validaciones################
+    id_grupo=None
+    id_usuario_asignado=None
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
-        id_grupo = verifica_grupo_id(id_user_actualizacion)
+        id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
 
 
     if id_expediente is not None:
@@ -83,7 +85,6 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
                 for row in query_inhabilidad:
                     plazo=plazo+1
 
-        #fecha_fin = fecha_inicio + timedelta(days=plazo)
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
         print("fecha_fin:",fecha_fin)
 
@@ -148,25 +149,20 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
             session.add(tareaxgrupo) 
 
     else:
+        #Asigna el grupo del usuario que crea la tarea por defecto
         if id_grupo is not None:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo).first()
-            if existe_grupo is None:
-                raise Exception("Grupo no encontrado")
-            if existe_grupo.eliminado==True:
-                raise Exception("Grupo eliminado: " + existe_grupo.nombre)
-            if existe_grupo.suspendido==True:
-                raise Exception("Grupo suspendido: " + existe_grupo.nombre)
-            
-            nuevoID_tareaxgrupo=uuid.uuid4()
-            tareaxgrupo= TareaXGrupo(
-                id=nuevoID_tareaxgrupo,
-                id_grupo=id_grupo,
-                id_tarea=nuevoID_tarea,
-                id_user_actualizacion=id_user_actualizacion,
-                fecha_asignacion=datetime.now(),
-                fecha_actualizacion=datetime.now()
-            )
-            session.add(tareaxgrupo)        
+            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
+            if existe_grupo is not None:
+                nuevoID_tareaxgrupo=uuid.uuid4()
+                tareaxgrupo= TareaXGrupo(
+                    id=nuevoID_tareaxgrupo,
+                    id_grupo=id_grupo,
+                    id_tarea=nuevoID_tarea,
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_asignacion=datetime.now(),
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(tareaxgrupo)        
 
     if usuario is not None:
         for user in usuario:
@@ -190,7 +186,21 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
                     fecha_actualizacion=datetime.now()
                 )
                 session.add(asigna_usuario)
-    
+    else:
+        #Asigna el usuario que crea la tarea por defecto
+        if id_usuario_asignado is not None:
+            existe_usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
+            if existe_usuario is not None:
+                nuevoID=uuid.uuid4()
+                asigna_usuario = TareaAsignadaUsuario(
+                    id=nuevoID,
+                    id_tarea=nuevoID_tarea,
+                    id_usuario=id_usuario_asignado,
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_asignacion=datetime.now(),
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(asigna_usuario)
        
     session.commit()
     return nueva_tarea
@@ -198,6 +208,8 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
 def update_tarea(id='', **kwargs):
     ################################
     controla_tipo=False
+    id_grupo=None
+    id_usuario_asignado=None
     session: scoped_session = current_app.session
     tarea = session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
    
@@ -267,12 +279,22 @@ def update_tarea(id='', **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper()  
-    if 'id_user_actualizacion' in kwargs:
-        usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
-        tarea.id_user_actualizacion = kwargs['id_user_actualizacion']  
-        
+    if 'username' in kwargs:
+        id_user_actualizacion = verifica_username(kwargs['username'])
+
+        if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+            id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
+        else:
+            if 'id_user_actualizacion' in kwargs:
+                verifica_usr_id(kwargs['id_user_actualizacion'])
+                id_user_actualizacion = kwargs['id_user_actualizacion']
+                """  usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
+                if usuario is None:
+                    raise Exception("Usuario de actualizacion no encontrado") """
+                
+    tarea.id_user_actualizacion = id_user_actualizacion  
+                
     tarea.fecha_actualizacion = datetime.now()
     usuarios=[]
     grupos=[]
@@ -323,7 +345,30 @@ def update_tarea(id='', **kwargs):
                 "asignado": 'True',
                 "fecha_asisgnacion": datetime.now()
             }
-            grupos.append(grupo)   
+            grupos.append(grupo)
+    else:
+         #Asigna el grupo del usuario que crea la tarea por defecto
+        if id_grupo is not None:
+            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
+            if existe_grupo is not None:
+                nuevoID_tareaxgrupo=uuid.uuid4()
+                tareaxgrupo= TareaXGrupo(
+                    id=nuevoID_tareaxgrupo,
+                    id_grupo=id_grupo,
+                    id_tarea=id,
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_asignacion=datetime.now(),
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(tareaxgrupo) 
+                grupo = {
+                "id": existe_grupo.id,
+                "nombre": existe_grupo.nombre,
+                "asignado": 'True',
+                "fecha_asisgnacion": datetime.now()
+                }
+                grupos.append(grupo)          
+
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
@@ -355,6 +400,7 @@ def update_tarea(id='', **kwargs):
                 )
                 session.add(nuevo_asigna_usuario)
             else:
+                #si el usuario ya tuvo la tarea reasigno el usuario
                 if asigna_usuario.eliminado==True:
                     asigna_usuario.eliminado=False
                     asigna_usuario.fecha_actualizacion=datetime.now()
@@ -369,6 +415,30 @@ def update_tarea(id='', **kwargs):
                 "fecha_asignacion": datetime.now()
             }
             usuarios.append(usuario)
+    else:
+        #Asigna el usuario que crea la tarea por defecto
+        if id_usuario_asignado is not None:
+            existe_usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
+            if existe_usuario is not None:
+                nuevoID=uuid.uuid4()
+                asigna_usuario = TareaAsignadaUsuario(
+                    id=nuevoID,
+                    id_tarea=id,
+                    id_usuario=id_usuario_asignado,
+                    id_user_actualizacion= id_user_actualizacion,
+                    fecha_asignacion=datetime.now(),
+                    fecha_actualizacion=datetime.now()
+                )
+                session.add(asigna_usuario) 
+                
+                usuario = {
+                "id": existe_usuario.id,
+                "nombre": existe_usuario.nombre,
+                "apellido": existe_usuario.apellido,
+                "asignado": 'True',
+                "fecha_asignacion": datetime.now()
+                }
+                usuarios.append(usuario) 
 
     ###################Formatear el resultado####################
     result = {
