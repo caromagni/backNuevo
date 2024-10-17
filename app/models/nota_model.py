@@ -60,7 +60,7 @@ def insert_nota(titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_
         id_tarea=id_tarea,
         id_tipo_nota=id_tipo_nota,
         id_user_creacion=id_user_creacion,
-        id_user_actualizacion=id_user_actualizacion,
+        id_user_actualizacion=id_user_creacion,
         id=nuevoID_nota,
         nota=nota,
         titulo=titulo,

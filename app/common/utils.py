@@ -38,5 +38,4 @@ def verifica_grupo_id(id):
         else:
             id_user_asignacion = id       
 
-
     return id_grupo, id_user_asignacion        

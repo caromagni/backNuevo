@@ -136,7 +136,6 @@ def get_grupo_id(id: str):
         raise ValidationError(err)
         
 
-
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
