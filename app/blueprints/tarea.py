@@ -1,8 +1,8 @@
 from datetime import date, timedelta
 from ..schemas.schemas import TipoTareaIn, TareaGetIn, TipoTareaOut, TareaIn, TareaOut, TareaCountOut, TareaUsuarioIn, TareaUsuarioOut, TareaIdOut, MsgErrorOut, PageIn, TipoTareaCountOut, TareaCountAllOut, TareaAllOut, TareaPatchIn
-from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn
+from ..schemas.schemas import SubtipoTareaIn, SubtipoTareaOut, SubtipoTareaCountOut, SubtipoTareaGetIn, SubtipoTareaPatchIn, TipoTareaPatchIn, TareaxGrupoIdOut
 from ..models.tarea_model import get_all_tarea, get_all_tarea_detalle, get_all_tipo_tarea, get_tarea_by_id, insert_tipo_tarea, usuarios_tarea, insert_tarea, delete_tarea, insert_usuario_tarea, delete_tipo_tarea, update_tarea
-from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea
+from ..models.tarea_model import update_tipo_tarea, update_subtipo_tarea, get_all_subtipo_tarea, insert_subtipo_tarea, delete_subtipo_tarea, get_tarea_grupo_by_id
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol
 #from flask_jwt_extended import jwt_required
@@ -471,6 +471,32 @@ def get_tarea(id_tarea:str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err) 
+    
+@tarea_b.doc(description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.get('/tarea_grupo/<string:id_grupo>')
+#@tarea_b.output(TareaxGrupoIdOut(many=True))
+@tarea_b.output(TareaCountAllOut)
+def get_tarea_grupo(id_grupo:str):
+    try:
+        page=1
+        per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        cant=0
+
+        res, cant = get_tarea_grupo_by_id(id_grupo, page, per_page) 
+        
+        data = {
+                "count": cant,
+                "data": TareaAllOut().dump(res, many=True)
+            }
+        
+        current_app.session.remove()
+        return data
+        #return res
+    
+    except DataNotFound as err:
+        raise DataError(800, err)
+    except Exception as err:
+        raise ValidationError(err)     
 
 @tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/ususario_tarea/<string:tarea_id>')

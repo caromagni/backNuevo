@@ -20,6 +20,7 @@ def get_grupo_by_id(id):
     hijos=[]
     padres=[]
     usuarios=[]
+    tareas=[]
 
     if res is not None:
         #Traigo el padre
@@ -36,6 +37,18 @@ def get_grupo_by_id(id):
                                     Usuario.id,
                                     Usuario.nombre,
                                     Usuario.apellido).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
+        
+        
+        res_tarea = session.query(Tarea.id, 
+                                    Tarea.titulo,
+                                    Tarea.estado,
+                                    Tarea.fecha_creacion,
+                                    Tarea.fecha_inicio,
+                                    Tarea.fecha_fin,
+                                    Tarea.id_tipo_tarea,
+                                    Tarea.tipo_tarea,
+                                    Tarea.id_subtipo_tarea
+                                ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id).filter(TareaXGrupo.id_grupo==res.id).all()
         
         if res_hijos is not None:
             print("tiene hijos")
@@ -67,6 +80,23 @@ def get_grupo_by_id(id):
                 }
                 usuarios.append(usuario)
 
+        if res_tarea is not None:
+            print("tiene tareas: ", len(res_tarea))
+            for row in res_tarea:
+                tarea = {
+                    "id": row.id,
+                    "titulo": row.titulo,
+                    "estado": row.estado,
+                    #"subtipo_tarea": row.subtipo_tarea,
+                    "id_tipo_tarea": row.id_tipo_tarea,
+                    "id_subtipo_tarea": row.id_subtipo_tarea,
+                    #"tipo_tarea": row.tipo_tarea,
+                    "fecha_creacion": row.fecha_creacion,
+                    "fecha_inicio": row.fecha_inicio,
+                    "fecha_fin": row.fecha_fin
+                    }
+                tareas.append(tarea)        
+
         ###################Formatear el resultado####################
         results = {
             "id": res.id,
@@ -76,6 +106,7 @@ def get_grupo_by_id(id):
             "padre": padres,
             "hijos": hijos,
             "usuarios": usuarios,
+            "tareas": tareas,
             "nomenclador": res.nomenclador,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,

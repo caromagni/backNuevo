@@ -339,7 +339,7 @@ class Tarea(Base):
     cuerpo = Column(String)
     id_expediente = Column(ForeignKey('tareas.expediente_ext.id'))
     caratula_expediente = Column(String)
-    id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
+    id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'))
     id_subtipo_tarea = Column(ForeignKey('tareas.subtipo_tarea.id'))
     eliminable = Column(Boolean)
     fecha_eliminacion = Column(DateTime)
