@@ -28,7 +28,7 @@ def before_request():
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-
+        
         res = update_grupo(id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
@@ -98,7 +98,6 @@ def get_grupo_detalle(query_data: dict):
         nombre=""
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
-        print("query_data:",query_data)
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
@@ -112,8 +111,6 @@ def get_grupo_detalle(query_data: dict):
 
         res, cant=get_all_grupos_detalle(page,per_page, nombre, fecha_desde, fecha_hasta)
         
-        print("res:",res)
-       
         data = {
                 "count": cant,
                 "data": GroupAllOut().dump(res, many=True)
@@ -139,7 +136,6 @@ def get_grupo_id(id: str):
         raise ValidationError(err)
         
 
-
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
@@ -161,7 +157,6 @@ def get_usrsbygrupo(id_grupo: str):
 #@groups_b.output(GroupOut)
 def post_grupo(json_data: dict):
     try:
-        
         res = insert_grupo(**json_data)
         if res is None:
             result={
