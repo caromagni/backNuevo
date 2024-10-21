@@ -15,14 +15,14 @@ import json
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
-###############
-@label_b.before_request
-#################Before requests ##################
-def before_request():
-    if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")  
-####################################################
+# ###############
+# @label_b.before_request
+# #################Before requests ##################
+# def before_request():
+#     if not verificar_header():
+#         #raise UnauthorizedError("Token o api-key no validos")   
+#         print("Token o api key no validos")  
+# ####################################################
 
 ################################ NOTAS ################################
 @label_b.doc(description='Consulta de label', summary='Consulta de labels por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -40,8 +40,10 @@ def get_labels(query_data: dict):
         id_user_creacion = None
         id_tarea = None
         id_grupo_padre = None
-        fecha_desde = "01/01/1900"
-        fecha_hasta = datetime.now().strftime("%d/%m/%Y")
+        #fecha_desde = "01/01/1900"
+        #fecha_hasta = datetime.now().strftime("%d/%m/%Y")
+        fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
+        fecha_hasta=datetime.now()
 
         if request.args.get('page') is not None:
             page = int(request.args.get('page'))
@@ -63,7 +65,6 @@ def get_labels(query_data: dict):
             label_color = request.args.get('label_color')  
 
         res, cant = get_all_label(page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
-
         data = {
             "count": cant,
             "data": LabelAllOut().dump(res, many=True)

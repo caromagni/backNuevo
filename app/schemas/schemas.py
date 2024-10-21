@@ -897,7 +897,7 @@ class LabelIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    color = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a #xxxxxx")) 
+    color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
     id_grupo = String(required=True)
     eliminado = Boolean()
     id_user_creacion = String(required=True)
