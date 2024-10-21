@@ -1024,13 +1024,13 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
     total = query.count()
 
     result = query.order_by(Tarea.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
-    #print("result:", result)
+    
     results = []
-    notas=[]
     if result is not None:
         reasignada_usr=False
         reasignada_grupo=False
         for reg in result:
+            notas=[]
             if id_usuario_asignado is not None:
                 tarea_asignada_usr = session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == reg.id, TareaAsignadaUsuario.id_usuario == id_usuario_asignado).first()
                 if tarea_asignada_usr is not None:
@@ -1048,10 +1048,13 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 tarea_asignada_grupo = session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == reg.id, TareaXGrupo.eliminado==True).first()
                 if tarea_asignada_grupo is not None:
                     reasignada_grupo = True
-
+            print("#"*50)
+            print("Id tarea:", reg.id)
             res_notas = session.query(Nota).filter(Nota.id_tarea== reg.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
-
+            
             if res_notas is not None:
+                print("Total de notas: ", len(res_notas))
+                print("#"*50)
                 for row in res_notas:
                     nota = {
                         "id": row.id,
