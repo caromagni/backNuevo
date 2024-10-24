@@ -39,8 +39,7 @@ variables:
   PULL_REGISTRY_NAME:       "pull-registry-group-gestion-expte"  ## PULL REGISTRY NAME
   STAGE_PREFIX:             "dev-"
   PYTHON_SETTINGS_PREFIX:   "uwsgi-"
-
-
+ 
 sast:
   stage: test
 include:
