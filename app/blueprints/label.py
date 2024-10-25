@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut, LabelXTareaAllOut, LabelXTareaCountAllOut, LabelXTareaCountOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn
+from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut, LabelXTareaAllOut, LabelXTareaCountAllOut, LabelXTareaCountOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, LabelXTareaIdCountAllOut
 from ..models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label, get_label_by_tarea, insert_label_tarea
 from app.common.error_handling import DataError, DataNotFound, ValidationError
 from ..models.alch_model import Usuario, Rol, Label
@@ -150,7 +150,7 @@ def del_label(id: str):
 ################################ LABELS X TAREAS ################################
 @label_b.doc(description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_tarea/<string:id_tarea>')
-@label_b.output(LabelXTareaIdOut)
+@label_b.output(LabelXTareaIdCountAllOut)
 def get_label_tarea(id_tarea:str):
     try:
         res, cant = get_label_by_tarea(id_tarea)
@@ -164,10 +164,11 @@ def get_label_tarea(id_tarea:str):
         }
         print("result:",data) 
         current_app.session.remove()
-        return jsonify({
-        'status': 'success',
-        'data': data
-    })      
+        return data
+        #return jsonify({
+        #'status': 'success',
+        #'data': data
+    #})      
     
     except DataNotFound as err:
         raise DataError(800, err)

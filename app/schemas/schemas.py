@@ -1078,7 +1078,10 @@ class LabelXTareaIdOut(Schema):
     id_user_actualizacion = String(required=True)
     fecha_actualizacion = String(validate=validate_fecha)
 
-    
+class LabelXTareaIdCountAllOut(Schema):
+    count = Integer()
+    data = Nested(LabelXTareaIdOut, many=True)
+
 class LabelXTareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
