@@ -1,4 +1,4 @@
-FROM python:3.7.9
+FROM python:3.11
 ENV TZ=America/Argentina/Mendoza
 
 WORKDIR /app
@@ -13,4 +13,4 @@ RUN pip install -r requirements.txt
 
 COPY code/ .
 CMD ["uwsgi","--wsgi-file","main.py","--ini","uwsgi.ini"]
-    
+     
