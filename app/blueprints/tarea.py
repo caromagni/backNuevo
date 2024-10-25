@@ -313,7 +313,8 @@ def del_subtipo_tarea(id: str):
         raise ValidationError(err)
         
 ################################TAREAS################################
-@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.get('/tarea')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountOut)
@@ -385,10 +386,10 @@ def get_tareas(query_data: dict):
 
 
 
-@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea_detalle')
-@tarea_b.input(TareaGetIn, location='query')
-@tarea_b.output(TareaCountAllOut)
+#@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.get('/tarea_detalle')
+#@tarea_b.input(TareaGetIn, location='query')
+#@tarea_b.output(TareaCountAllOut)
 def get_tareas_detalle(query_data: dict):
     try:
         ##########Variables de control de acceso####################
@@ -413,6 +414,7 @@ def get_tareas_detalle(query_data: dict):
         id_tipo_tarea=None
         id_usuario_asignado=None
         id_grupo=None
+        id_tarea=None
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
         fecha_hasta=datetime.now()
 
@@ -420,6 +422,8 @@ def get_tareas_detalle(query_data: dict):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
+        if(request.args.get('id_tarea') is not None):
+            id_tarea=request.args.get('id_tarea')    
         if(request.args.get('id_usuario_asignado') is not None):
             id_usuario_asignado=request.args.get('id_usuario_asignado')   
         if(request.args.get('id_grupo') is not None):
@@ -442,7 +446,7 @@ def get_tareas_detalle(query_data: dict):
             fecha_desde=request.args.get('fecha_desde')
         if(request.args.get('fecha_hasta') is not None):
             fecha_hasta=request.args.get('fecha_hasta') 
-        res,cant = get_all_tarea_detalle(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
+        res,cant = get_all_tarea_detalle(page,per_page, titulo, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, id_grupo, id_tarea, fecha_desde, fecha_hasta, prioridad, estado, eliminado)    
 
         data = {
                 "count": cant,
@@ -456,7 +460,7 @@ def get_tareas_detalle(query_data: dict):
         raise ValidationError(err) 
 
 @tarea_b.doc(description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/tarea/<string:id_tarea>')
+@tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(TareaIdOut(many=True))
 def get_tarea(id_tarea:str):
     try:
@@ -543,7 +547,7 @@ def post_usuario_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
 
-@tarea_b.doc(description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/tarea/<string:tarea_id>')
 @tarea_b.input(TareaPatchIn)
 #@usuario_b.output(UsuarioOut)
@@ -566,14 +570,14 @@ def patch_tarea(tarea_id: str, json_data: dict):
     except Exception as err:
         raise ValidationError(err)
 
-
-@tarea_b.doc(description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.post('/tarea')
 @tarea_b.input(TareaIn)
 @tarea_b.output(TareaOut)
 def post_tarea(json_data: dict):
     try:
         print("#"*50)
+        print("Inserta tarea")
         print(json_data)
         print("#"*50)
         res = insert_tarea(**json_data)
@@ -592,7 +596,7 @@ def post_tarea(json_data: dict):
         raise ValidationError(err)    
 
 #################DELETE########################
-@tarea_b.doc(description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.delete('/tarea/<string:id>')
 def del_tarea(id: str):
     try:
