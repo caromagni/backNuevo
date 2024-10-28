@@ -45,5 +45,5 @@
 . export_creds.sh
 
 #start app
-uwsgi --wsgi-file main.py --ini ../uwsgi.ini
+uwsgi --wsgi-file main.py --ini ../uwsgi.dev-localhost.ini
 
