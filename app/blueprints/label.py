@@ -1,15 +1,15 @@
 from datetime import date, timedelta
-from ..schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, PageIn, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut, LabelXTareaAllOut, LabelXTareaCountAllOut, LabelXTareaCountOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, LabelXTareaIdCountAllOut
-from ..models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label, get_label_by_tarea, insert_label_tarea
-from app.common.error_handling import DataError, DataNotFound, ValidationError
-from ..models.alch_model import Usuario, Rol, Label
+from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label, get_label_by_tarea
+from common.error_handling import DataError, DataNotFound, ValidationError
+from models.alch_model import Usuario, Rol, Label
 #from flask_jwt_extended import jwt_required
 from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from sqlalchemy.orm import scoped_session
-from ..common.usher import get_roles
-from ..common.auth import verificar_header
+from common.usher import get_roles
+from common.auth import verificar_header
 import uuid
 import json
 from flask import jsonify
