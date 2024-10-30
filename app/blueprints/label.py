@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
-from models.label_model import get_all_label, get_label_by_id, insert_label, delete_label, update_label, get_label_by_tarea
+from models.label_model import get_all_label, get_label_by_id, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
 #from flask_jwt_extended import jwt_required
