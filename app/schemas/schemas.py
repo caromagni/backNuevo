@@ -1094,6 +1094,7 @@ class LabelXTareaAllOut(Schema):
 
 class LabelXTareaIdOut(Schema):
     activa= Boolean()
+    id= String(required=True)
     id_tarea = String(required=True)
     id_label = String(required=True)
     id_user_actualizacion = String(required=True)
