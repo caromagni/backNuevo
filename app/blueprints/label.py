@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
-from models.label_model import get_all_label, get_label_by_id, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
+from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
 #from flask_jwt_extended import jwt_required
@@ -193,6 +193,31 @@ def post_label_tarea(json_data: dict):
                     "code": 800,
                     "error": "Error en insert label",
                     "error_description": "No se pudo insertar la label"
+                }
+            res = MsgErrorOut().dump(result)
+        
+        return LabelXTareaOut().dump(res)
+    
+    except Exception as err:
+        raise ValidationError(err)    
+    
+@label_b.doc(description='Asignacion de Label a tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.put('/label_tarea_del/<string:id_label_tarea>')
+# @label_b.input(LabelXTareaIn)
+@label_b.output(LabelXTareaOut)
+def delete_label_tarea(id_label_tarea, **json_data: dict):
+    try:
+        print("##"*50)
+        print(json_data)
+        print("#"*50)
+        res = delete_label_tarea_model(id_label_tarea, **json_data)
+        print("res:",res)   
+        if res is None:
+            result = {
+                    "valido":"fail",
+                    "code": 800,
+                    "error": "Error en delete label",
+                    "error_description": "No se pudo eliminar la etiqueta"
                 }
             res = MsgErrorOut().dump(result)
         

@@ -595,7 +595,6 @@ class UsuarioTareaOut(Schema):
         return data
 
 
-
 class UsuarioAllOut(Schema):
     id = String()
     fecha_actualizacion = String()
@@ -1006,6 +1005,7 @@ class LabelOut(Schema):
     fecha_actualizacion = String()
     id_user_creacion = String()
     id_grupo_padre = String()
+    
 
 class LabelAllOut(Schema):
     id = String()
