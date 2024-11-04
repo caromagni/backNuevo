@@ -45,5 +45,6 @@
 . export_creds.sh
 
 #start app
+# flask --app main.py run --host 0.0.0.0 --port 5000 --reload
 uwsgi --wsgi-file main.py --ini ../uwsgi.dev-localhost.ini
 
