@@ -53,7 +53,7 @@ def insert_label(nombre='', color= '', eliminado=False, fecha_eliminacion=None, 
 
     ids_labels = [nuevoID_label]
 
-    insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, activa=True, fecha_actualizacion=datetime.now(), id_user_actualizacion=id_user_creacion)
+    insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, nueva=True, fecha_actualizacion=datetime.now(), id_user_actualizacion=id_user_creacion)
 
        
     session.commit()
@@ -176,21 +176,18 @@ def delete_label(id_label):
 def get_active_labels(id_grupo):
     session: scoped_session = current_app.session
     id_grupo_base = find_parent_id_recursive(session, id_grupo)
+    print('*********************************************id_grupo_base:', id_grupo_base)
     res = session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
 
     if res is not None:
-        labels = session.query(LabelXTarea).filter(LabelXTarea.id_label.in_([label.id for label in res]), LabelXTarea.activa == True).all()
-
-        if labels is not None:
-            return labels
-        else:
-            return 'No hay labels activas'
+        total = len(res)
+        return res, total
     else:
         return 'No hay labels para este grupo'
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea (ids_labels, id_tarea, activa=True, fecha_actualizacion=datetime.now(), id_user_actualizacion=None):
+def insert_label_tarea (ids_labels, id_tarea, nueva=False, fecha_actualizacion=datetime.now(), id_user_actualizacion=None):
     session: scoped_session = current_app.session
 
     labelsActivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
@@ -203,46 +200,48 @@ def insert_label_tarea (ids_labels, id_tarea, activa=True, fecha_actualizacion=d
     set_labelsInactivas = {str(label.id_label) for label in labelsInactivas}
     set_ids_labels = set(ids_labels)
 
-    # Mantener las etiquetas activas si ya están activas y vienen en ids_labels
-    for label in labelsActivas:
-        if str(label.id_label) in set_ids_labels:
-            print('La etiqueta ya existe activa')
-        else:
-            print('La etiqueta no existe activa')
-            label.activa = False
-            label.fecha_actualizacion = fecha_actualizacion
-            label.id_user_actualizacion = id_user_actualizacion
-            session.add(label)
-            taskLabels.append(label)
+    if not nueva:
+        # Mantener las etiquetas activas si ya están activas y vienen en ids_labels
+        for label in labelsActivas:
+            if str(label.id_label) in set_ids_labels:
+                print('La etiqueta ya existe activa')
+            else:
+                print('La etiqueta no existe activa')
+                label.activa = False
+                label.fecha_actualizacion = fecha_actualizacion
+                label.id_user_actualizacion = id_user_actualizacion
+                session.add(label)
+                taskLabels.append(label)
 
-    # Activar las etiquetas inactivas si vienen en ids_labels
-    for label in labelsInactivas:
-        if str(label.id_label) in set_ids_labels:
-            print('La etiqueta ya existe inactiva')
-            label.activa = True
-            label.fecha_actualizacion = fecha_actualizacion
-            label.id_user_actualizacion = id_user_actualizacion
-            session.add(label)
-            taskLabels.append(label)
+        # Activar las etiquetas inactivas si vienen en ids_labels
+        for label in labelsInactivas:
+            if str(label.id_label) in set_ids_labels:
+                print('La etiqueta ya existe inactiva')
+                label.activa = True
+                label.fecha_actualizacion = fecha_actualizacion
+                label.id_user_actualizacion = id_user_actualizacion
+                session.add(label)
+                taskLabels.append(label)
 
     # Crear nuevas etiquetas si no existen en las etiquetas activas o inactivas
-    nuevos_labels = set_ids_labels - set_labelsActivas - set_labelsInactivas
-    for id_label in nuevos_labels:
-        print(f'Creando nuevo registro para label: {id_label}')
-        nuevoID_label_tarea=uuid.uuid4()
+    if nueva:
+        nuevos_labels = set_ids_labels - set_labelsActivas - set_labelsInactivas
+        for id_label in nuevos_labels:
+            print(f'Creando nuevo registro para label: {id_label}')
+            nuevoID_label_tarea=uuid.uuid4()
 
-        nueva_label = LabelXTarea(
-            id=nuevoID_label_tarea,
-            id_label=id_label,
-            id_tarea=id_tarea,
-            activa=True,
-            fecha_actualizacion=fecha_actualizacion,
-            id_user_actualizacion=id_user_actualizacion
-        )
-        session.add(nueva_label)
-        taskLabels.append(nueva_label)
+            nueva_label = LabelXTarea(
+                id=nuevoID_label_tarea,
+                id_label=id_label,
+                id_tarea=id_tarea,
+                activa=True,
+                fecha_actualizacion=fecha_actualizacion,
+                id_user_actualizacion=id_user_actualizacion
+            )
+            session.add(nueva_label)
+            taskLabels.append(nueva_label)
 
-    session.commit()
+        session.commit()
 
     ###################Formatear el resultado####################
     response = {
