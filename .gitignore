@@ -139,3 +139,4 @@ dmypy.json
 export_creds.sh
 start.sh
 instala_sops.sh
+*.gpg
