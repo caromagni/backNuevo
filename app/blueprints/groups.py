@@ -28,7 +28,6 @@ def before_request():
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
-        
         res = update_grupo(id_grupo, **json_data)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
