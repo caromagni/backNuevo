@@ -385,17 +385,18 @@ def get_label_by_tarea(id_tarea):
 
 def delete_label_tarea_model(id, **kwargs):
     print('entra a delete de labels por tarea')
-    print('id_label_tarea:')
+    print('id_label:', id)
     print('kwargs:', kwargs)
+    id_tarea = kwargs['id_tarea']
     session: scoped_session = current_app.session
-    active_label = session.query(LabelXTarea).filter(LabelXTarea.id == uuid.UUID(id) ).first()
+    active_label = session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
     print('consulta labels por id de tarea')
     print('active_label:', active_label)
 
     if active_label is not None:
         active_label.activa = False
         active_label.fecha_actualizacion = datetime.now()
-        # active_label[0].id_user_actualizacion = kwargs['id_user']
+        active_label.id_user_actualizacion = kwargs['id_user_actualizacion']
         session.commit()
         return active_label       
     else:

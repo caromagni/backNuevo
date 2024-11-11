@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaGetIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
 from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, get_active_labels, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
@@ -204,15 +204,16 @@ def post_label_tarea(json_data: dict):
         raise ValidationError(err)    
     
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.delete('/label_tarea_del/<string:id_label_tarea>')
-# @label_b.input(LabelXTareaIn)
+@label_b.put('/label_tarea_del/<string:id_label>')
+@label_b.input(LabelXTareaPatchIn)
 @label_b.output(LabelXTareaIdOut)
-def delete_label_tarea(id_label_tarea, **json_data: dict):
+def delete_label_tarea(id_label: str, json_data: dict):
     try:
         print("##"*50)
+        print(id_label)
         print(json_data)
         print("#"*50)
-        res = delete_label_tarea_model(id_label_tarea, **json_data)
+        res = delete_label_tarea_model(id_label, **json_data)
         print("res:",res)   
         if res is None:
             result = {
