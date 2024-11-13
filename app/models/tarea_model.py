@@ -906,6 +906,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
     
     # Base query with date filtering
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
+    print(str(query))
     
     # Apply filters based on provided parameters
     if id_tarea is not None:
@@ -951,6 +952,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
         # Fetch assigned users for the task
         res_usuarios = session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
                                      ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
+        print(str(res_usuarios))
         
         for row in res_usuarios:
             usuario = {
@@ -967,6 +969,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
         # Fetch assigned groups for the task
         res_grupos = session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
                                    ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.eliminado).all()
+        print(str(res_grupos))
 
         for row in res_grupos:
             grupo = {
