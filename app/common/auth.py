@@ -8,16 +8,20 @@ def verify_token():
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
     jwt_alg=current_app.config['JWT_ALGORITHM']
     jwt_aud=current_app.config['JWT_DECODE_AUDIENCE']
+    print("Variable jwt_pk:",jwt_pk)
+    print("Variable jwt_alg:",jwt_alg)
+    print("Variable jwt_aud:",jwt_aud)
 
     if not token_encabezado:
         return None
+   
     
     if token_encabezado:
         try:
             # Decodificar y verificar el token
             token = token_encabezado.split(' ')[1]
             print("token:",token)
-            payload = jwt.decode(jwt=token, key=jwt_pk, algorithms=jwt_alg, audience=jwt_aud)
+            payload = jwt.decode(jwt=token, key=jwt_pk, leeway=50, algorithms=jwt_alg, audience=jwt_aud)
             
             return payload
             

@@ -100,6 +100,22 @@ class Nomenclador(Base):
     turnos_pass = Column(String(100))
     turnos_des = Column(String(25))
 
+class Usuario(Base):
+    __tablename__ = 'usuario'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    nombre = Column(String)
+    apellido = Column(String)
+    id_persona_ext = Column(UUID)
+    eliminado  = Column(Boolean, default=False)
+    suspendido = Column(Boolean, default=False)
+    username = Column(String)
+    dni = Column(String)
+    email = Column(String)
+
 class TipoActuacionExt(Base):
     __tablename__ = 'tipo_actuacion_ext'
     __table_args__ = {'schema': 'tareas'}
@@ -149,12 +165,12 @@ class ExpedienteExt(Base):
 class Grupo(Base):
     __tablename__ = 'grupo'
     __table_args__ = {'schema': 'tareas'}
-
     id = Column(UUID, primary_key=True)
     id_user_actualizacion = Column(UUID, nullable=False)
     id_user_asignado_default = Column(UUID)
+    id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
-    nombre = Column(String)
+    nombre = Column(String, nullable=False)
     descripcion = Column(String)
     codigo_nomenclador = Column(ForeignKey('tareas.nomenclador.nomenclador'), nullable=False)
     eliminado  = Column(Boolean, default=False)
@@ -163,6 +179,7 @@ class Grupo(Base):
     fecha_hasta = Column(DateTime)
     base = Column(Boolean, default=False)
     nomenclador = relationship('Nomenclador')
+    user_asignado_default= relationship('Usuario')
 
 
 class HerarquiaGrupoGrupo(Base):
@@ -268,21 +285,7 @@ class SubtipoTarea(Base):
 
     tipo_tarea = relationship('TipoTarea')
 
-class Usuario(Base):
-    __tablename__ = 'usuario'
-    __table_args__ = {'schema': 'tareas'}
 
-    id = Column(UUID, primary_key=True)
-    fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
-    nombre = Column(String)
-    apellido = Column(String)
-    id_persona_ext = Column(UUID)
-    eliminado  = Column(Boolean, default=False)
-    suspendido = Column(Boolean, default=False)
-    username = Column(String)
-    dni = Column(String)
-    email = Column(String)
 
 
 class AutoAccionAsignacion(Base):
@@ -410,14 +413,27 @@ class FechaIntermedia(Base):
     tarea = relationship('Tarea')
 
 
-t_label_x_tarea = Table(
-    'label_x_tarea', metadata,
-    Column('label_id', ForeignKey('tareas.label.id'), nullable=False),
-    Column('tarea_id', ForeignKey('tareas.tarea.id'), nullable=False),
-    Column('fecha_actualizacion', DateTime),
-    Column('id_user_actualizacion', UUID),
-    schema='tareas'
-)
+# t_label_x_tarea = Table(
+#     'label_x_tarea', metadata,
+#     Column('label_id', ForeignKey('tareas.label.id'), nullable=False),
+#     Column('tarea_id', ForeignKey('tareas.tarea.id'), nullable=False),
+#     Column('fecha_actualizacion', DateTime),
+#     Column('id_user_actualizacion', UUID),
+#     schema='tareas'
+# )
+class LabelXTarea(Base):
+    __tablename__ = 'label_x_tarea'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_tarea = Column(ForeignKey('tareas.tarea.id'))
+    id_label = Column(ForeignKey('tareas.label.id'))
+    id_user_actualizacion = Column(UUID)
+    fecha_actualizacion = Column(DateTime)
+    activa = Column(Boolean, default=False)
+
+    label = relationship('Label')
+    tarea = relationship('Tarea')
 
 class Nota(Base):
     __tablename__ = 'nota'
