@@ -1,4 +1,6 @@
 import uuid
+from sqlalchemy import func, and_
+from sqlalchemy.orm import aliased
 from sqlalchemy.orm import scoped_session
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
@@ -55,7 +57,8 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
             id_expediente = nuevoID_expte
             #raise Exception("Expediente no encontrado")
         else:
-            id_expediente = expediente.id    
+            id_expediente = expediente.id
+
     if id_actuacion is not None:
         actuacion = session.query(ActuacionExt).filter(ActuacionExt.id == id_actuacion or ActuacionExt.id_ext==id_actuacion).first()
         
@@ -74,6 +77,7 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
             id_actuacion = actuacion.id
             print("Actuacion encontrada")    
             #raise Exception("Actuacion no encontrada")    
+            
     if id_tipo_tarea is not None:
         tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
@@ -108,7 +112,8 @@ def insert_tarea(id_grupo=None, prioridad=0, estado=0, id_actuacion=None, titulo
         #Tarea.fecha_creacion.between(fecha_desde, fecha_hasta
         #Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio  
         query_inhabilidad = session.query(Inhabilidad).all()
-        if len(query_inhabilidad)>0:                                    
+        if len(query_inhabilidad)>0:  
+            fecha_inicio = fecha_inicio + " 23:59:59"                                 
             query_inhabilidad = session.query(Inhabilidad).filter(Inhabilidad.fecha_desde <= fecha_inicio, Inhabilidad.fecha_hasta >= fecha_inicio).all()
             if query_inhabilidad is not None:
                 for row in query_inhabilidad:
@@ -887,21 +892,12 @@ def get_tarea_grupo_by_id(id_grupo, page=1, per_page=10):
     
     return results, total         
 
-    return res, total
-    return res_tarea 
 
-from sqlalchemy.orm import joinedload
-from sqlalchemy import func
 
-from sqlalchemy import func, and_
-from sqlalchemy.orm import aliased
 
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
-    print("estado:", estado)
-    print("tipo de dato:", type(estado))
-    print("prioridad:", prioridad)
-    print("tipo de dato:", type(prioridad))
 
+    #fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     
     # Base query with date filtering
@@ -1021,6 +1017,7 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
 
 
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
+    #fecha_hasta = fecha_hasta + " 23:59:59"
     session: scoped_session = current_app.session
     
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
@@ -1086,6 +1083,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                     reasignada_grupo = True
             print("#"*50)
             print("Id tarea:", reg.id)
+            
             res_notas = session.query(Nota).filter(Nota.id_tarea== reg.id, Nota.eliminado==False).order_by(desc(Nota.fecha_creacion)).all()     
             
             if res_notas is not None:
@@ -1103,7 +1101,7 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                         "user_creacion": row.user_creacion,
                         "id_user_actualizacion": row.id_user_actualizacion
                     }
-                    notas.append(nota) 
+                    notas.append(nota)  
 
             result = {
                 "caratula_expediente": reg.caratula_expediente,
