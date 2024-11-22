@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from flask import current_app
 
-from models.alch_model import Tarea, TipoTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Tarea, TipoTarea, Label, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
 from common.utils import *
 
 def es_habil(fecha):
@@ -881,12 +881,14 @@ def get_tarea_grupo_by_id(id_grupo, page=1, per_page=10):
 
 
 
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None):
+def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, id_tarea=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None):
 
     session: scoped_session = current_app.session
   
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-
+    
+    if fecha_fin_desde is not None and fecha_fin_hasta is not None:
+        query = query.filter(Tarea.fecha_fin.between(fecha_fin_desde, fecha_fin_hasta))
     # Apply filters based on provided parameters
     if id_tarea is not None:
         query = query.filter(Tarea.id == id_tarea)
@@ -908,12 +910,21 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', id_expediente=None, id
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
+    if label:
+        print("label:", label)
+        query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
+                ).join(Label, Label.id == LabelXTarea.id_label
+                ).filter(Label.nombre.ilike(f"%{label}%"))
+    if labels:
+        print("labels:", labels)
+        query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
+                ).filter(LabelXTarea.id_label.in_(labels))    
 
     # Get total count of tasks matching the filter
     total = query.count()
     
     # Pagination with eager loading for associated users and groups
-    res_tareas = query.order_by(Tarea.fecha_creacion).offset((page - 1) * per_page).limit(per_page).all()
+    res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
 
     # Process each task in paginated results
     results = []

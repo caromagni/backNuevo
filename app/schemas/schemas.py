@@ -507,15 +507,21 @@ class TareaOut(Schema):
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
-  
+class LabelIdIn(Schema):
+    id = String()  
 class TareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
     id_tarea = String()
+    id_usuario_asignado= String()
     titulo = String(default="")
+    #label = String(default="")
+    labels = String(metadata={"id_label": "ids separados por comas"})
     id_tipo_tarea = String()
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
+    fecha_fin_desde = String(validate=validate_fecha)
+    fecha_fin_hasta = String(validate=validate_fecha)
     id_expediente = String()
     id_actuacion = String()
     prioridad = Integer()
