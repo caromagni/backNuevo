@@ -34,7 +34,6 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuaci
     #print("##############Validaciones################")
     id_grupo=None
     id_usuario_asignado=None
-    print("Username tareas:",username)
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
@@ -96,7 +95,6 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuaci
         fecha_inicio = datetime.now().date()
 
     if plazo>0:
-        print("Calcula plazos")
         query_inhabilidad = session.query(Inhabilidad).all()
         if len(query_inhabilidad)>0:  
             #fecha_inicio = fecha_inicio + " 23:59:59"     
@@ -231,7 +229,7 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=0, id_actuaci
     session.commit()
     return nueva_tarea
 
-def update_tarea(id='', **kwargs):
+def update_tarea(id='', username=None, **kwargs):
     ################################
     controla_tipo=False
     id_grupo=None
@@ -239,6 +237,21 @@ def update_tarea(id='', **kwargs):
     session: scoped_session = current_app.session
     tarea = session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+        if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+        else:
+            if 'id_user_actualizacion' in kwargs:
+                verifica_usr_id(kwargs['id_user_actualizacion'])
+                id_user_actualizacion = kwargs['id_user_actualizacion']
+                """  usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
+                if usuario is None:
+                    raise Exception("Usuario de actualizacion no encontrado") """
+            else:
+                raise Exception("Debe ingresar username o id_user_actualizacion")
+            
     if tarea is None:
         return None
     
@@ -305,19 +318,7 @@ def update_tarea(id='', **kwargs):
         tarea.estado = kwargs['estado']    
     if 'titulo' in kwargs:
         tarea.titulo = kwargs['titulo'].upper()  
-    if 'username' in kwargs:
-        id_user_actualizacion = verifica_username(kwargs['username'])
-
-        if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
-            id_grupo, id_usuario_asignado = verifica_grupo_id(id_user_actualizacion)
-        else:
-            if 'id_user_actualizacion' in kwargs:
-                verifica_usr_id(kwargs['id_user_actualizacion'])
-                id_user_actualizacion = kwargs['id_user_actualizacion']
-                """  usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-                if usuario is None:
-                    raise Exception("Usuario de actualizacion no encontrado") """
+    
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
                 
@@ -372,7 +373,7 @@ def update_tarea(id='', **kwargs):
                 "fecha_asisgnacion": datetime.now()
             }
             grupos.append(grupo)
-    else:
+    """ else:
          #Asigna el grupo del usuario que crea la tarea por defecto
         if id_grupo is not None:
             existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
@@ -393,7 +394,7 @@ def update_tarea(id='', **kwargs):
                 "asignado": 'True',
                 "fecha_asisgnacion": datetime.now()
                 }
-                grupos.append(grupo)          
+                grupos.append(grupo)   """        
 
 
     if 'usuario' in kwargs:
@@ -441,7 +442,7 @@ def update_tarea(id='', **kwargs):
                 "fecha_asignacion": datetime.now()
             }
             usuarios.append(usuario)
-    else:
+    """ else:
         #Asigna el usuario que crea la tarea por defecto
         if id_usuario_asignado is not None:
             existe_usuario = session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
@@ -464,7 +465,7 @@ def update_tarea(id='', **kwargs):
                 "asignado": 'True',
                 "fecha_asignacion": datetime.now()
                 }
-                usuarios.append(usuario) 
+                usuarios.append(usuario)  """
 
     ###################Formatear el resultado####################
     result = {
