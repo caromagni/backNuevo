@@ -526,11 +526,10 @@ def get_tareas_grupo():
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0
         username = g.get('username')
-        print("Tarea grupoo - username", username)
-        #control_rol_usuario('',username, '',"get/tarea_grupo")
-        #get_tarea_grupo
-        res, cant = get_tarea_grupo_by_id(username, page, per_page) 
-        #get_tarea_grupo_by_id
+        print("Tarea grupo - username", username)
+        #res, cant = get_tarea_grupo_by_id(username, page, per_page) 
+        res, cant = get_tarea_grupo(username, page, per_page)
+        
         data = {
                 "count": cant,
                 "data": TareaAllOut().dump(res, many=True)
@@ -538,7 +537,6 @@ def get_tareas_grupo():
         
         current_app.session.remove()
         return data
-        #return res
     
     except DataNotFound as err:
         raise DataError(800, err)
