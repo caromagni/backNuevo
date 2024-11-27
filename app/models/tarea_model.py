@@ -928,7 +928,9 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
                 "user_actualizacion": tarea.user_actualizacion,
                 "grupos": [],
                 "usuarios": [],
-                "notas": []
+                "notas": [],
+                "reasignada_usuario": False,
+                "reasignada_grupo": False
             }
         
         # Añadir información de grupos

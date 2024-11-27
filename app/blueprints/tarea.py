@@ -527,9 +527,9 @@ def get_tareas_grupo():
         cant=0
         username = g.get('username')
         print("Tarea grupo - username", username)
-        res, cant = get_tarea_grupo_by_id(username, page, per_page) 
-        #res, cant = get_tarea_grupo(username, page, per_page)
-        #get_tarea_grupo_by_id
+        #res, cant = get_tarea_grupo_by_id(username, page, per_page) 
+        res, cant = get_tarea_grupo(username, page, per_page)
+        
         data = {
                 "count": cant,
                 "data": TareaAllOut().dump(res, many=True)
