@@ -1075,19 +1075,16 @@ class LabelCountOut(Schema):
 ############## Labels x Tarea####################  
 
 class LabelXTareaIn(Schema):  
-    activa= Boolean()
-    id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
+    id_tarea = String(required=True)
     id_user_actualizacion = String(required=True)
-    fecha_actualizacion = String(validate=validate_fecha)
-
+    # fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaPatchIn(Schema):
-    activa= Boolean()
     id_tarea = String(required=True)
     id_label = String(required=True)
     id_user_actualizacion = String(required=True)
-    fecha_actualizacion = String(validate=validate_fecha)
+    # fecha_actualizacion = String(validate=validate_fecha)
 
     
 class LabelXTareaOut(Schema):
