@@ -594,8 +594,8 @@ def post_usuario_tarea(json_data: dict):
 #@usuario_b.output(UsuarioOut)
 def patch_tarea(tarea_id: str, json_data: dict):
     try:
-        
-        res = update_tarea(tarea_id, **json_data)
+        username = g.get('username')
+        res = update_tarea(tarea_id, username, **json_data)
         if res is None:
             #print("No hay datos que modificar")  
             result={
@@ -621,6 +621,7 @@ def post_tarea(json_data: dict):
         print("Inserta tarea")
         print(json_data)
         username = g.get('username')
+        #username="cristiandiaz@jus.mendoza.gov.ar"
         print("Usuario tarea.py:", username)
         print("#"*50)
         res = insert_tarea(username, **json_data)
