@@ -141,8 +141,10 @@ class HerarquiaOut(Schema):
 class HerarquiaAllOut(Schema):
     id_padre = String()
     parent_name = String()
+    parent_description = String()
     id_hijo = String()
     child_name = String()
+    child_description = String()
     child_eliminado = Boolean()
     path = String()
     level = Integer()
@@ -158,7 +160,7 @@ class GroupIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
@@ -176,7 +178,7 @@ class GroupPatchIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     id_user_asignado_default= String()
     id_padre = String()  
     codigo_nomenclador = String(validate=[
@@ -292,7 +294,7 @@ class TipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     base = Boolean(default=False)
 
 class TipoTareaPatchIn(Schema):
@@ -304,7 +306,7 @@ class TipoTareaPatchIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     base = Boolean(default=False)
 
 class TipoTareaOut(Schema):
@@ -323,7 +325,7 @@ class SubtipoTareaIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
 
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
@@ -332,7 +334,7 @@ class SubtipoTareaPatchIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -451,7 +453,7 @@ class TareaPatchIn(Schema):
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
@@ -589,7 +591,7 @@ class UsuarioInPatch(Schema):
         validate_char
     ])
     suspendido = Boolean()
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
@@ -690,7 +692,7 @@ class TareaCountAllOut(Schema):
 class TareaUsuarioIn(Schema):
     id_tarea = String(required=True)
     id_usuario = String(required=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     notas = String(validate=[
         validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
         validate_char
@@ -882,7 +884,7 @@ class TipoNotaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     habilitado = Boolean()
     eliminado = Boolean()
 
@@ -1085,7 +1087,7 @@ class LabelXTareaIn(Schema):
     activa= Boolean()
     id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
 
@@ -1093,7 +1095,7 @@ class LabelXTareaPatchIn(Schema):
     activa= Boolean()
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
     
@@ -1112,7 +1114,7 @@ class LabelXTareaAllOut(Schema):
     activa= Boolean()
     id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
 
@@ -1121,7 +1123,7 @@ class LabelXTareaIdOut(Schema):
     id= String(required=True)
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaIdCountAllOut(Schema):

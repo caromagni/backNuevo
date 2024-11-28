@@ -13,17 +13,24 @@ from common.auth import verificar_header
 import uuid
 import json
 from flask import jsonify
+from flask import g
 
 
 label_b = APIBlueprint('label_blueprint', __name__)
 
 # ###############
-# @label_b.before_request
-# #################Before requests ##################
-# def before_request():
-#     if not verificar_header():
-#         #raise UnauthorizedError("Token o api-key no validos")   
-#         print("Token o api key no validos")  
+@label_b.before_request
+def before_request():
+    username = verificar_header()
+    if username is None:
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")
+    if username is 'api-key':
+        print("API KEY")
+        g.username = None
+    else:
+        g.username = username
+        print("Username before:",g.username)  
 # ####################################################
 
 ################################ ETIQUETAS ################################
@@ -33,8 +40,6 @@ label_b = APIBlueprint('label_blueprint', __name__)
 @label_b.output(LabelCountOut)
 def get_labels(query_data: dict):
     try:
-
-        print("query_data:",query_data)
         page = 1
         per_page = int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant = 0
@@ -101,7 +106,7 @@ def get_label(id:str):
         raise ValidationError(err) 
 
 
-@label_b.doc(description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(LabelIn)
 @label_b.output(LabelOut)
@@ -110,7 +115,8 @@ def post_label(json_data: dict):
         print("#"*50)
         print(json_data)
         print("#"*50)
-        res = insert_label(**json_data)
+        username = g.username
+        res = insert_label(username, **json_data)
         if res is None:
             result = {
                     "valido":"fail",
@@ -126,11 +132,12 @@ def post_label(json_data: dict):
         raise ValidationError(err)    
 
 #################DELETE########################
-@label_b.doc(description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.delete('/label/<string:id>')
 def del_label(id: str):
     try:
-        res = delete_label(id)
+        username = g.username
+        res = delete_label(username, id)
         print("res:",res)
         if res is None:
            raise DataNotFound("Label no encontrada")
@@ -178,7 +185,7 @@ def get_label_tarea(id_tarea:str):
         raise ValidationError(err) 
          
 
-@label_b.doc(description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label_tarea')
 @label_b.input(LabelXTareaIn)
 @label_b.output(LabelXTareaOut)
@@ -187,7 +194,8 @@ def post_label_tarea(json_data: dict):
         print("#"*50)
         print(json_data)
         print("#"*50)
-        res = insert_label_tarea(**json_data)
+        username = g.username
+        res = insert_label_tarea(username, **json_data)
         print("res:",res)   
         if res is None:
             result = {
@@ -203,7 +211,7 @@ def post_label_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)    
     
-@label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea_del/<string:id_label>')
 @label_b.input(LabelXTareaPatchIn)
 @label_b.output(LabelXTareaIdOut)
@@ -213,7 +221,8 @@ def delete_label_tarea(id_label: str, json_data: dict):
         print(id_label)
         print(json_data)
         print("#"*50)
-        res = delete_label_tarea_model(id_label, **json_data)
+        username = g.username
+        res = delete_label_tarea_model(username, id_label, **json_data)
         print("res:",res)   
         if res is None:
             result = {
