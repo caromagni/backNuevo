@@ -235,8 +235,9 @@ def update_tarea(id='', username=None, **kwargs):
     id_grupo=None
     id_usuario_asignado=None
     session: scoped_session = current_app.session
+    print("update_tarea")
     tarea = session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
-   
+
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
@@ -246,12 +247,12 @@ def update_tarea(id='', username=None, **kwargs):
             if 'id_user_actualizacion' in kwargs:
                 verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
-                """  usuario = session.query(Usuario).filter(Usuario.id == kwargs['id_user_actualizacion'], Usuario.eliminado==False).first()
-                if usuario is None:
-                    raise Exception("Usuario de actualizacion no encontrado") """
+              
             else:
                 raise Exception("Debe ingresar username o id_user_actualizacion")
-            
+
+    print("id_user_actualizacion:", id_user_actualizacion)        
+    
     if tarea is None:
         return None
     
@@ -321,29 +322,33 @@ def update_tarea(id='', username=None, **kwargs):
     
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
-                
     tarea.fecha_actualizacion = datetime.now()
     usuarios=[]
     grupos=[]
     if 'grupo' in kwargs:
-        #elimino los grupos existentes para ese usuario
-        grupos_usuarios=session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id)
+        print("Grupos:", kwargs['grupo'])
+        #elimino los grupos existentes para esa tarea 
+        grupo_tarea=session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id)
 
-        for grupo in grupos_usuarios:
+        for grupo in grupo_tarea:
+            print("Encuentra grupo y lo borra:", grupo.id_grupo)
             grupo.eliminado=True
             grupo.fecha_actualizacion=datetime.now()
-            grupo.id_user_actualizacion=kwargs['id_user_actualizacion'] 
+            grupo.id_user_actualizacion=id_user_actualizacion
 
-        #controlo que el grupo exista y lo asocio al usuario
+        #controlo que el grupo exista y lo asocio a la tarea
         for group in kwargs['grupo']:
             existe_grupo = session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
+                print("Grupo no encontrado")
                 raise Exception("Error en el ingreso de grupos. Grupo no existente")
             
             if existe_grupo.eliminado==True:
+                print("Grupo eliminado")
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             if existe_grupo.suspendido==True:
+                print("Grupo suspendido")
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             nuevoID=uuid.uuid4()
@@ -353,18 +358,19 @@ def update_tarea(id='', username=None, **kwargs):
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
                     id_tarea=id,
-                    id_user_actualizacion= kwargs['id_user_actualizacion'],
+                    id_user_actualizacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now()
                 )
                 
                 session.add(nuevo_tarea_grupo)
             else:
+                print("Reactiva grupo")
                 if tareaxgrupo.eliminado==True:
                     tareaxgrupo.eliminado=False
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.fecha_actualizacion=datetime.now()
-                    tareaxgrupo.id_user_actualizacion=kwargs['id_user_actualizacion']    
+                    tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
 
             grupo = {
                 "id": existe_grupo.id,
@@ -373,29 +379,8 @@ def update_tarea(id='', username=None, **kwargs):
                 "fecha_asisgnacion": datetime.now()
             }
             grupos.append(grupo)
-    """ else:
-         #Asigna el grupo del usuario que crea la tarea por defecto
-        if id_grupo is not None:
-            existe_grupo = session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False, Grupo.suspendido==False).first()
-            if existe_grupo is not None:
-                nuevoID_tareaxgrupo=uuid.uuid4()
-                tareaxgrupo= TareaXGrupo(
-                    id=nuevoID_tareaxgrupo,
-                    id_grupo=id_grupo,
-                    id_tarea=id,
-                    id_user_actualizacion=id_user_actualizacion,
-                    fecha_asignacion=datetime.now(),
-                    fecha_actualizacion=datetime.now()
-                )
-                session.add(tareaxgrupo) 
-                grupo = {
-                "id": existe_grupo.id,
-                "nombre": existe_grupo.nombre,
-                "asignado": 'True',
-                "fecha_asisgnacion": datetime.now()
-                }
-                grupos.append(grupo)   """        
 
+    print("Grupos asignados a la tarea:", grupos)
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
@@ -421,7 +406,7 @@ def update_tarea(id='', username=None, **kwargs):
                     id=nuevoID,
                     id_tarea=id,
                     id_usuario=user['id_usuario'],
-                    id_user_actualizacion= kwargs['id_user_actualizacion'],
+                    id_user_actualizacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now()
                 )
@@ -432,7 +417,7 @@ def update_tarea(id='', username=None, **kwargs):
                     asigna_usuario.eliminado=False
                     asigna_usuario.fecha_actualizacion=datetime.now()
                     asigna_usuario.fecha_actualizacion=datetime.now()
-                    asigna_usuario.id_user_actualizacion=kwargs['id_user_actualizacion']
+                    asigna_usuario.id_user_actualizacion=id_user_actualizacion
 
             usuario = {
                 "id": existe_usuario.id,
@@ -505,13 +490,15 @@ def get_all_tipo_tarea(page=1, per_page=10):
     res = session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total
 
-def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, user_name=None):
+def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
-    if user_name is not None:
-        id_user_actualizacion = verifica_username(user_name)
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
 
     if id_user_actualizacion is not None:
         verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
            
     nuevoID=uuid.uuid4()
 
@@ -529,9 +516,18 @@ def insert_tipo_tarea(id='', codigo_humano='', nombre='', id_user_actualizacion=
     return nuevo_tipo_tarea
 
 
-def update_tipo_tarea(tipo_tarea_id='', **kwargs):
+def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
 
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
     tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id).first()
     
     if tipo_tarea is None:
@@ -546,25 +542,34 @@ def update_tipo_tarea(tipo_tarea_id='', **kwargs):
     else:
         tipo_tarea.base = False
 
-    if 'id_user_actualizacion' in kwargs:
-        tipo_tarea.id_user_actualizacion = kwargs['id_user_actualizacion']
-
+    tipo_tarea.id_user_actualizacion = id_user_actualizacion
     tipo_tarea.fecha_actualizacion = datetime.now()
     session.commit()
     return tipo_tarea
 
 
-def delete_tipo_tarea(id):
+def delete_tipo_tarea(username=None, id=None):
+
     session: scoped_session = current_app.session
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id, TipoTarea.eliminado==False).first()
     if tipo_tarea is not None:
         tipo_tarea.eliminado=True
         tipo_tarea.fecha_actualizacion=datetime.now()
+        tipo_tarea.id_user_actualizacion=id_user_actualizacion
         session.commit()
         return tipo_tarea
     else:
-        #print("Tipo de tarea no encontrado")
         return None
+    
 #########################SUBTIPO TAREA############################################
 def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
@@ -581,12 +586,18 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(id_tipo='', nombre='', id_user_actualizacion='', base=False):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
     if id_user_actualizacion is not None:
-        usuario = session.query(Usuario).filter(Usuario.id == id_user_actualizacion, Usuario.eliminado==False).first()
-        if usuario is None:
-            raise Exception("Usuario de actualizacion no encontrado")
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
+    
     if id_tipo is not None:
         tipo_tarea = session.query(TipoTarea).filter(TipoTarea.id == id_tipo, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
@@ -607,9 +618,18 @@ def insert_subtipo_tarea(id_tipo='', nombre='', id_user_actualizacion='', base=F
     session.commit()
     return nuevo_subtipo_tarea
 
-def update_subtipo_tarea(subtipo_id='', **kwargs):
+def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
 
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
     subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == subtipo_id).first()
     
     if subtipo_tarea is None:
@@ -617,22 +637,32 @@ def update_subtipo_tarea(subtipo_id='', **kwargs):
     
     if 'nombre' in kwargs:
         subtipo_tarea.nombre = kwargs['nombre']
-    if 'id_user_actualizacion' in kwargs:
-        subtipo_tarea.id_user_actualizacion = kwargs['id_user_actualizacion']
+        
     if 'base' in kwargs:
         subtipo_tarea.base = kwargs['base']
     else:
-        subtipo_tarea.base = False    
+        subtipo_tarea.base = False   
 
+    subtipo_tarea.id_user_actualizacion = id_user_actualizacion    
     subtipo_tarea.fecha_actualizacion = datetime.now()
     session.commit()
     return subtipo_tarea
 
-def delete_subtipo_tarea(id):
+def delete_subtipo_tarea(username=None, id=None):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     subtipo_tarea = session.query(SubtipoTarea).filter(SubtipoTarea.id == id, SubtipoTarea.eliminado==False).first()
     if subtipo_tarea is not None:
         subtipo_tarea.eliminado=True
+        subtipo_tarea.id_user_actualizacion=id_user_actualizacion
         subtipo_tarea.fecha_actualizacion=datetime.now()
         session.commit()
         return subtipo_tarea
@@ -1403,25 +1433,31 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
 
 def usuarios_tarea(tarea_id=""):
     session: scoped_session = current_app.session
-    #print("Usuarios por tarea:", tarea_id)    
+    print("Usuarios por tarea:", tarea_id)    
     usuarios = session.query(Usuario.nombre.label('nombre'),
                         Usuario.apellido.label('apellido'),
                         Usuario.id.label('id'),
                         Usuario.id_persona_ext.label('id_persona_ext'),
                         Usuario.id_user_actualizacion.label('id_user_actualizacion'),
-                        Usuario.fecha_actualizacion.label('fecha_actualizacion'),
-                        Tarea.id_grupo.label('id_grupo'),\
-                        Grupo.nombre.label('grupo'))\
+                        Usuario.fecha_actualizacion.label('fecha_actualizacion'))\
                         .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
                         .join(Tarea, TareaAsignadaUsuario.id_tarea == Tarea.id)\
-                        .join(Grupo, Tarea.id_grupo == Grupo.id)\
-                        .filter(TareaAsignadaUsuario.id_tarea == tarea_id)\
+                        .filter(Tarea.id == tarea_id, TareaAsignadaUsuario.eliminado==False)\
                         .all()
-    
+    print("Usuarios por tarea:", usuarios)
     return usuarios
 
-def delete_tarea(id_tarea):
+def delete_tarea(username=None, id_tarea=None):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
     tarea = session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
     if tarea is not None:
         if tarea.eliminable==False:
@@ -1430,6 +1466,7 @@ def delete_tarea(id_tarea):
               
         tarea.eliminado=True
         tarea.fecha_eliminacion=datetime.now()
+        tarea.id_user_actualizacion=id_user_actualizacion
         tarea.fecha_actualizacion=datetime.now()
         session.commit()
         return tarea

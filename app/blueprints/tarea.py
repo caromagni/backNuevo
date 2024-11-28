@@ -17,7 +17,7 @@ import json
 from flask import g
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
-global username 
+
 
 #################Before requests ##################
 @tarea_b.before_request
@@ -153,13 +153,13 @@ def get_tipoTareas(query_data: dict):
         raise ValidationError(err)    
  
 
-@tarea_b.doc(description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/tipo_tarea')
 @tarea_b.input(TipoTareaIn)
 def post_tipo_tarea(json_data: dict):
     try:
-    
-        res = insert_tipo_tarea(**json_data)
+        username = g.username
+        res = insert_tipo_tarea(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -177,13 +177,13 @@ def post_tipo_tarea(json_data: dict):
         raise ValidationError(err)  
     
 
-@tarea_b.doc(description='Modificación de un Tipos de Tarea', summary='Modificación de un Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Modificación de un Tipos de Tarea', summary='Modificación de un Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.patch('/tipo_tarea/<string:tipo_tarea_id>')
 @tarea_b.input(TipoTareaPatchIn)
 def update_tipotarea(tipo_tarea_id:str,json_data: dict):
     try:
-    
-        res = update_tipo_tarea(tipo_tarea_id,**json_data)
+        username=g.username
+        res = update_tipo_tarea(username, tipo_tarea_id,**json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -200,12 +200,13 @@ def update_tipotarea(tipo_tarea_id:str,json_data: dict):
     except Exception as err:
         raise ValidationError(err)  
     
-@tarea_b.doc(description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/tipo_tarea/<string:id>')
 #@tarea_b.output(MsgErrorOut)
 def del_tipo_tarea(id: str):
     try:
-        res = delete_tipo_tarea(id)
+        username=g.username
+        res = delete_tipo_tarea(username, id)
         if res is None:
             raise DataNotFound("Tipo de tarea no encontrado")
         else:
@@ -261,13 +262,13 @@ def get_subtipoTarea(query_data: dict):
         raise ValidationError(err)    
  
 
-@tarea_b.doc(description='Alta de un nuevo Subtipos de Tarea', summary='Alta de Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Subtipos de Tarea', summary='Alta de Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/subtipo_tarea')
 @tarea_b.input(SubtipoTareaIn)
 def post_subtipo_tarea(json_data: dict):
     try:
-    
-        res = insert_subtipo_tarea(**json_data)
+        username=g.username
+        res = insert_subtipo_tarea(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -284,13 +285,13 @@ def post_subtipo_tarea(json_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 
-@tarea_b.doc(description='Modificación de un Subtipos de Tarea', summary='Modificación de un Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Modificación de un Subtipos de Tarea', summary='Modificación de un Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.patch('/subtipo_tarea/<string:subtipo_id>')
 @tarea_b.input(SubtipoTareaPatchIn)
 def update_subtipotarea(subtipo_id:str,json_data: dict):
     try:
-    
-        res = update_subtipo_tarea(subtipo_id,**json_data)
+        username = g.username
+        res = update_subtipo_tarea(username, subtipo_id,**json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -306,12 +307,13 @@ def update_subtipotarea(subtipo_id:str,json_data: dict):
     except Exception as err:
         raise ValidationError(err) 
 
-@tarea_b.doc(description='Baja de Subtipo de Tarea', summary='Baja de subtipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Subtipo de Tarea', summary='Baja de subtipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/subtipo_tarea/<string:id>')
 #@tarea_b.output(MsgErrorOut)
 def del_subtipo_tarea(id: str):
     try:
-        res = delete_subtipo_tarea(id)
+        username=g.username
+        res = delete_subtipo_tarea(username, id)
         if res is None:
             raise DataNotFound("Subtipo de tarea no encontrado")
         else:
@@ -544,11 +546,11 @@ def get_tareas_grupo():
         raise ValidationError(err)     
 
 @tarea_b.doc(description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.get('/ususario_tarea/<string:tarea_id>')
+@tarea_b.get('/usuario_tarea/<string:tarea_id>')
 @tarea_b.output(TareaUsuarioOut(many=True))
 def get_usuarios_asignados(tarea_id:str):
     try:    
-        #print("Usuarios asignados a tarea:", tarea_id)
+        print("Usuarios asignados a tarea:", tarea_id)
         res = usuarios_tarea(tarea_id)
 
         current_app.session.remove()
@@ -557,14 +559,14 @@ def get_usuarios_asignados(tarea_id:str):
     except Exception as err:
         raise ValidationError(err)
 
-#@tarea_b.doc(description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 #@tarea_b.post('/tarea_usr')
 #@tarea_b.input(TareaUsuarioIn)
 #@tarea_b.output(TareaOut)
 def post_usuario_tarea(json_data: dict):
     try:
-    
-        res, msg = insert_usuario_tarea(**json_data)
+        username = g.get('username')
+        res, msg = insert_usuario_tarea(username, **json_data)
         if res is None:
             #print("Tarea ya asignada")
             result={
@@ -595,9 +597,9 @@ def post_usuario_tarea(json_data: dict):
 def patch_tarea(tarea_id: str, json_data: dict):
     try:
         username = g.get('username')
+
         res = update_tarea(tarea_id, username, **json_data)
         if res is None:
-            #print("No hay datos que modificar")  
             result={
                     "valido":"fail",
                     "ErrorCode": 800,
@@ -644,7 +646,8 @@ def post_tarea(json_data: dict):
 @tarea_b.delete('/tarea/<string:id>')
 def del_tarea(id: str):
     try:
-        res = delete_tarea(id)
+        username=g.get('username')
+        res = delete_tarea(username, id)
         #print("res:",res)
         if res is None:
            raise DataNotFound("Tarea no encontrada")
