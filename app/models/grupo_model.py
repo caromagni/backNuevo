@@ -637,8 +637,8 @@ def get_grupos_all(eliminado=None):
     SELECT 
         g.id AS id_padre,
         g.id AS id_hijo,
-        g.descripcion AS parent_name,
-        g.descripcion AS child_name,
+        g.nombre AS parent_name,
+        g.nombre AS child_name,
         g.eliminado AS child_eliminado,         
         g.id::text AS path,
         0 AS level,  -- Set level to 0 for parentless groups
@@ -657,8 +657,8 @@ def get_grupos_all(eliminado=None):
     SELECT 
         hgg.id_padre,
         hgg.id_hijo,
-        gp_padre.descripcion AS parent_name,
-        gp_hijo.descripcion AS child_name,
+        gp_padre.nombre AS parent_name,
+        gp_hijo.nombre AS child_name,
         gp_hijo.eliminado AS child_eliminado,         
         gt.path || ' -> ' || hgg.id_hijo::text AS path,
         gt.level + 1 AS level,
@@ -696,8 +696,8 @@ ORDER BY gt.path;
         'SELECT '
         'g.id AS id_padre, '
         'g.id AS id_hijo, '
-        'g.descripcion AS parent_name, '
-        'g.descripcion AS child_name, '
+        'g.nombre AS parent_name, '
+        'g.nombre AS child_name, '
         'g.eliminado AS child_eliminado, '
         'g.id::text AS path, '
         '0 AS level, '  # Nivel 0 para grupos sin padre
@@ -710,8 +710,8 @@ ORDER BY gt.path;
         'SELECT '
         'hgg.id_padre, '
         'hgg.id_hijo, '
-        'gp_padre.descripcion AS parent_name, '
-        'gp_hijo.descripcion AS child_name, '
+        'gp_padre.nombre AS parent_name, '
+        'gp_hijo.nombre AS child_name, '
         'gp_hijo.eliminado AS child_eliminado, '
         'gt.path || \' -> \' || hgg.id_hijo::text AS path, '
         'gt.level + 1 AS level, '
