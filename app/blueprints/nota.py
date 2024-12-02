@@ -12,6 +12,7 @@ from common.usher import get_roles
 from common.auth import verificar_header
 import uuid
 import json
+from flask import g
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
@@ -20,6 +21,19 @@ nota_b = APIBlueprint('nota_blueprint', __name__)
 #     if not verificar_header():
 #         #raise UnauthorizedError("Token o api-key no validos")   
 #         print("Token o api key no validos") 
+
+@nota_b.before_request
+def before_request():
+    username = verificar_header()
+    if username is None:
+        #raise UnauthorizedError("Token o api-key no validos")   
+        print("Token o api key no validos")
+    if username is 'api-key':
+        print("API KEY")
+        g.username = None
+    else:
+        g.username = username
+        print("Username before:",g.username)  
 
 
 ####################TIPO DE NOTA######################
@@ -53,13 +67,14 @@ def get_tipoNotas(query_data: dict):
         raise ValidationError(err)    
  
 
-@nota_b.doc(description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.post('/tipo_nota')
 @nota_b.input(TipoNotaIn)
 def post_tipo_nota(json_data: dict):
     try:
         print('insertando nuevo tipo de notas')
-        res = insert_tipo_nota(**json_data)
+        username = g.username
+        res = insert_tipo_nota(username, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -76,12 +91,13 @@ def post_tipo_nota(json_data: dict):
     except Exception as err:
         raise ValidationError(err)  
 
-@nota_b.doc(description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/tipo_nota/<string:id>')
 #@nota_b.output(MsgErrorOut)
 def del_tipo_nota(id: str):
     try:
-        res = delete_tipo_nota(id)
+        username = g.username
+        res = delete_tipo_nota(username, id)
         if res is None:
             raise DataNotFound("Tipo de nota no encontrado")
         else:
@@ -146,8 +162,12 @@ def get_notas(query_data: dict):
         current_app.session.remove()
         return data
     
+    except ValidationError as err:
+        print(f"Validation error: {err}")
+        return {"error": str(err)}, 400
     except Exception as err:
-        raise ValidationError(err) 
+        print(f"Unexpected error: {err}")
+        raise ValidationError(err)
 
 
 @nota_b.doc(description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -170,7 +190,7 @@ def get_nota(id:str):
         raise ValidationError(err) 
 
 
-@nota_b.doc(description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.post('/nota')
 @nota_b.input(NotaIn)
 @nota_b.output(NotaOut)
@@ -179,7 +199,8 @@ def post_nota(json_data: dict):
         print("#"*50)
         print(json_data)
         print("#"*50)
-        res = insert_nota(**json_data)
+        username = g.username
+        res = insert_nota(username, **json_data)
         if res is None:
             result = {
                     "valido":"fail",
@@ -197,9 +218,11 @@ def post_nota(json_data: dict):
 #################DELETE########################
 @nota_b.doc(description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
+@nota_b.output(NotaIdOut)
 def del_nota(id: str):
     try:
-        res = delete_nota(id)
+        username = g.username
+        res = delete_nota(username,id)
         print("res:",res)
         if res is None:
            raise DataNotFound("Nota no encontrada")
@@ -216,3 +239,5 @@ def del_nota(id: str):
         raise DataError(800, err)
     except Exception as err:
         raise ValidationError(err)
+    except Exception as e:
+        session.rollback()

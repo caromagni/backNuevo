@@ -638,7 +638,9 @@ def get_grupos_all(eliminado=None):
         g.id AS id_padre,
         g.id AS id_hijo,
         g.nombre AS parent_name,
+        g.descripcion AS parent_description,            
         g.nombre AS child_name,
+        g.descripcion AS child_description,
         g.eliminado AS child_eliminado,         
         g.id::text AS path,
         0 AS level,  -- Set level to 0 for parentless groups
@@ -658,7 +660,9 @@ def get_grupos_all(eliminado=None):
         hgg.id_padre,
         hgg.id_hijo,
         gp_padre.nombre AS parent_name,
+        gp_padre.descripcion AS parent_description,
         gp_hijo.nombre AS child_name,
+        gp_hijo.descripcion AS child_description,
         gp_hijo.eliminado AS child_eliminado,         
         gt.path || ' -> ' || hgg.id_hijo::text AS path,
         gt.level + 1 AS level,
@@ -678,8 +682,10 @@ def get_grupos_all(eliminado=None):
 SELECT 
     gt.id_padre,
     gt.parent_name,
+    gt.parent_description,              
     gt.id_hijo,
     gt.child_name,
+    gt.child_description,
     gt.child_eliminado,             
     gt.path,
     gt.level,
@@ -697,7 +703,9 @@ ORDER BY gt.path;
         'g.id AS id_padre, '
         'g.id AS id_hijo, '
         'g.nombre AS parent_name, '
+        'g.descripcion AS parent_description, '
         'g.nombre AS child_name, '
+        'g.descripcion AS child_description, '
         'g.eliminado AS child_eliminado, '
         'g.id::text AS path, '
         '0 AS level, '  # Nivel 0 para grupos sin padre
@@ -711,7 +719,9 @@ ORDER BY gt.path;
         'hgg.id_padre, '
         'hgg.id_hijo, '
         'gp_padre.nombre AS parent_name, '
+        'gp_padre.descripcion AS parent_description, '
         'gp_hijo.nombre AS child_name, '
+        'gp_hijo.descripcion AS child_description, '
         'gp_hijo.eliminado AS child_eliminado, '
         'gt.path || \' -> \' || hgg.id_hijo::text AS path, '
         'gt.level + 1 AS level, '
@@ -725,8 +735,10 @@ ORDER BY gt.path;
         'SELECT '
         'gt.id_padre, '
         'gt.parent_name, '
+        'gt.parent_description, '
         'gt.id_hijo, '
         'gt.child_name, '
+        'gt.child_description, '
         'gt.child_eliminado, '
         'gt.path, '
         'gt.level, '
