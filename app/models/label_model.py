@@ -175,14 +175,22 @@ def delete_label(username=None, id_label=None):
     
     label = session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
     print('label id a borrar:', label)
-    if label is not None:              
-        label.eliminado=True
-        label.fecha_eliminacion=datetime.now()
-        label.id_user_actualizacion=id_user_actualizacion
-        # label.fecha_actualizacion=datetime.now()
-        session.commit()
-        return label
-    
+    if label is not None:
+        if(label.id_user_creacion != id_user_actualizacion):
+            return "Usuario no autorizado para eliminar la etiqueta" 
+        else: 
+            labelTarea = session.query(LabelXTarea).filter(LabelXTarea.id_label != id_label, LabelXTarea.activa == True).all()       
+            if labelTarea is not None:
+                result = { "status": "error", "message": "La etiqueta está asociada a una tarea activa"}
+                return result
+            else:
+                label.eliminado=True
+                label.fecha_eliminacion=datetime.now()
+                label.id_user_actualizacion=id_user_actualizacion
+                label.fecha_actualizacion=datetime.now()
+                session.commit()
+                return label
+        
     else:
         print("Label no encontrada")
         return None
@@ -440,18 +448,19 @@ def get_label_by_tarea(id_tarea):
         print("La tarea no tiene labels")
         return None
 
-def delete_label_tarea_model(**kwargs):
+def delete_label_tarea_model(username, **kwargs):
     print('entra a delete de labels por tarea')
     print('kwargs:', kwargs)
     id = kwargs['id_label']
     id_tarea = kwargs['id_tarea']
     session: scoped_session = current_app.session
-
+    
     if username is not None:
         id_user_actualizacion = verifica_username(username)
     else:
-        raise ValidationError("Usuario no ingresado")
-    
+        raise ValidationError("Usuario no ingresado")    
+
+   
     active_label = session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
     print('consulta labels por id de tarea')
     print('active_label:', active_label)
