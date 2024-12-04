@@ -238,23 +238,38 @@ def insert_label_tarea (username=None, **kwargs):
     print('set_labelsTarea:', set_labelsTarea)
 
     nuevos_labels = set_ids_labels - set_labelsTarea
+    viejos_labels = set_ids_labels - nuevos_labels  
+
+    print  ('nuevos_labels:', nuevos_labels)
+    print  ('viejos_labels:', len (viejos_labels))
 
     fecha_actualizacion = datetime.now()
 
-    if len(nuevos_labels)==0:
+    if len(viejos_labels)!= 0:
+        print('entra a actualizar labels')
         for label in labelsTarea:
-            if str(label.id_label) in set_ids_labels:
-                label.activa = True
-                label.fecha_actualizacion = fecha_actualizacion
-                label.id_user_actualizacion = id_user_actualizacion
-                session.commit()
-            else:
-                if(label.activa):
-                    label.activa = False
+            for label_viejo in viejos_labels:
+                print('entra al bucle de labels viejos'+label_viejo)
+                print('entra al bucle de labels de la tarea'+str(label.id_label))
+                if str(label.id_label) == label_viejo:
+                    label.activa = True
                     label.fecha_actualizacion = fecha_actualizacion
                     label.id_user_actualizacion = id_user_actualizacion
                     session.commit()
+                else:
+                    if str(label.id_label) not in viejos_labels:
+                        label.activa = False
+                        label.fecha_actualizacion = fecha_actualizacion
+                        label.id_user_actualizacion = id_user_actualizacion
+                        session.commit()
     else:
+        for label in labelsTarea:
+            label.activa = False
+            label.fecha_actualizacion = fecha_actualizacion
+            label.id_user_actualizacion = id_user_actualizacion
+            session.commit()
+
+    if(len(nuevos_labels) != 0):
         for id_label in nuevos_labels:
             print('Creando nuevo registro para label: ', {id_label})
             nuevoID_label_tarea=uuid.uuid4()
