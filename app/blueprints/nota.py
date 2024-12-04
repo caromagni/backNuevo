@@ -218,7 +218,7 @@ def post_nota(json_data: dict):
 #################DELETE########################
 @nota_b.doc(description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/nota/<string:id>')
-@nota_b.output(NotaIdOut)
+# @nota_b.output(NotaIdOut)
 def del_nota(id: str):
     try:
         username = g.username
@@ -227,13 +227,18 @@ def del_nota(id: str):
         if res is None:
            raise DataNotFound("Nota no encontrada")
         else:
-            print("Nota eliminada:", res)
-            result={
-                    "Msg":"Registro eliminado",
-                    "Id nota": id
-                } 
-        
-        return result
+            if (type(res) != str):
+                result={
+                        "Msg": "Registro eliminado",
+                        "Id nota": id
+                    }
+            else:
+                result={
+                        "Msg":"Registro no eliminado, usuario no autorizado",
+                        "Id nota": id
+                    }
+            return result 
+
     
     except DataNotFound as err:
         raise DataError(800, err)

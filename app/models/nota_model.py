@@ -67,8 +67,11 @@ def delete_tipo_nota(username=None, id=None):
 
 ##########################  NOTAS #############################################
 
-def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_creacion=None, id_user_actualizacion=None, fecha_creacion=None, id_tarea=None):
+def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_creacion = verifica_username(username)
     try:
         nuevoID_nota=uuid.uuid4()
 
@@ -78,8 +81,8 @@ def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=
         fecha_creacion=datetime.now(),
         id_tarea=id_tarea,
         id_tipo_nota=id_tipo_nota,
-        id_user_creacion=id_user_actualizacion,
-        id_user_actualizacion=id_user_actualizacion,
+        id_user_creacion=id_user_creacion,
+        id_user_actualizacion=None,
         id=nuevoID_nota,
         nota=nota,
         titulo=titulo,
@@ -210,15 +213,17 @@ def delete_nota(username=None, id_nota=None):
         raise ValidationError("Usuario no ingresado")  
     
     nota = session.query(Nota).filter(Nota.id == id_nota, Nota.eliminado==False).first()
-    if nota is not None:              
-        nota.eliminado=True
-        nota.fecha_eliminacion=datetime.now()
-        nota.fecha_actualizacion=datetime.now()
-        nota.id_user_actualizacion=id_user_actualizacion
-        session.commit()
-        return nota
-    
+    if nota is not None:     
+        if(nota.id_user_creacion != id_user_actualizacion):
+            return "Usuario no autorizado para eliminar la nota" 
+        else:        
+            nota.eliminado=True
+            nota.fecha_eliminacion=datetime.now()
+            nota.fecha_actualizacion=datetime.now()
+            nota.id_user_actualizacion=id_user_actualizacion
+            session.commit()
+            return nota    
     else:
-        print("Nota no encontrada")
+        print("Nota no encontrada??"+id_nota)
         return None
    
