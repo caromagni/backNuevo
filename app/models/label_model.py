@@ -175,14 +175,22 @@ def delete_label(username=None, id_label=None):
     
     label = session.query(Label).filter(Label.id == id_label, Label.eliminado==False).first()
     print('label id a borrar:', label)
-    if label is not None:              
-        label.eliminado=True
-        label.fecha_eliminacion=datetime.now()
-        label.id_user_actualizacion=id_user_actualizacion
-        # label.fecha_actualizacion=datetime.now()
-        session.commit()
-        return label
-    
+    if label is not None:
+        if(label.id_user_creacion != id_user_actualizacion):
+            return "Usuario no autorizado para eliminar la etiqueta" 
+        else: 
+            labelTarea = session.query(LabelXTarea).filter(LabelXTarea.id_label != id_label, LabelXTarea.activa == True).all()       
+            if labelTarea is not None:
+                result = { "status": "error", "message": "La etiqueta está asociada a una tarea activa"}
+                return result
+            else:
+                label.eliminado=True
+                label.fecha_eliminacion=datetime.now()
+                label.id_user_actualizacion=id_user_actualizacion
+                label.fecha_actualizacion=datetime.now()
+                session.commit()
+                return label
+        
     else:
         print("Label no encontrada")
         return None
@@ -201,8 +209,16 @@ def get_active_labels(id_grupo):
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea (ids_labels, id_tarea, id_user_actualizacion=None):
+def insert_label_tarea (username=None, **kwargs):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+    else:
+        raise ValidationError("Usuario no ingresado") 
+    
+    id_tarea = kwargs['id_tarea']
+    ids_labels = kwargs['ids_labels']
 
     labelsTarea = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
     # labelsActivas = session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
@@ -222,23 +238,38 @@ def insert_label_tarea (ids_labels, id_tarea, id_user_actualizacion=None):
     print('set_labelsTarea:', set_labelsTarea)
 
     nuevos_labels = set_ids_labels - set_labelsTarea
+    viejos_labels = set_ids_labels - nuevos_labels  
+
+    print  ('nuevos_labels:', nuevos_labels)
+    print  ('viejos_labels:', len (viejos_labels))
 
     fecha_actualizacion = datetime.now()
 
-    if len(nuevos_labels)==0:
+    if len(viejos_labels)!= 0:
+        print('entra a actualizar labels')
         for label in labelsTarea:
-            if str(label.id_label) in set_ids_labels:
-                label.activa = True
-                label.fecha_actualizacion = fecha_actualizacion
-                label.id_user_actualizacion = id_user_actualizacion
-                session.commit()
-            else:
-                if(label.activa):
-                    label.activa = False
+            for label_viejo in viejos_labels:
+                print('entra al bucle de labels viejos'+label_viejo)
+                print('entra al bucle de labels de la tarea'+str(label.id_label))
+                if str(label.id_label) == label_viejo:
+                    label.activa = True
                     label.fecha_actualizacion = fecha_actualizacion
                     label.id_user_actualizacion = id_user_actualizacion
                     session.commit()
+                else:
+                    if str(label.id_label) not in viejos_labels:
+                        label.activa = False
+                        label.fecha_actualizacion = fecha_actualizacion
+                        label.id_user_actualizacion = id_user_actualizacion
+                        session.commit()
     else:
+        for label in labelsTarea:
+            label.activa = False
+            label.fecha_actualizacion = fecha_actualizacion
+            label.id_user_actualizacion = id_user_actualizacion
+            session.commit()
+
+    if(len(nuevos_labels) != 0):
         for id_label in nuevos_labels:
             print('Creando nuevo registro para label: ', {id_label})
             nuevoID_label_tarea=uuid.uuid4()
@@ -248,8 +279,8 @@ def insert_label_tarea (ids_labels, id_tarea, id_user_actualizacion=None):
                 id_label=id_label,
                 id_tarea=id_tarea,
                 activa=True,
-                fecha_creacion=fecha_actualizacion,
-                id_user_creacion=id_user_actualizacion,
+                # fecha_creacion=fecha_actualizacion,
+                # id_user_creacion=id_user_actualizacion,
                 fecha_actualizacion=fecha_actualizacion,
                 id_user_actualizacion=id_user_actualizacion
             )
@@ -440,18 +471,19 @@ def get_label_by_tarea(id_tarea):
         print("La tarea no tiene labels")
         return None
 
-def delete_label_tarea_model(**kwargs):
+def delete_label_tarea_model(username, **kwargs):
     print('entra a delete de labels por tarea')
     print('kwargs:', kwargs)
     id = kwargs['id_label']
     id_tarea = kwargs['id_tarea']
     session: scoped_session = current_app.session
-
+    
     if username is not None:
         id_user_actualizacion = verifica_username(username)
     else:
-        raise ValidationError("Usuario no ingresado")
-    
+        raise ValidationError("Usuario no ingresado")    
+
+   
     active_label = session.query(LabelXTarea).filter(LabelXTarea.id_label == uuid.UUID(id), LabelXTarea.id_tarea == uuid.UUID(id_tarea) ).first()
     print('consulta labels por id de tarea')
     print('active_label:', active_label)

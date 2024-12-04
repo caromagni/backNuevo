@@ -901,7 +901,7 @@ class LoadExpedienteSchema(Schema):
 class TipoNotaIn(Schema):
    
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
         validate_char
     ])
     id_user_actualizacion = String()
@@ -922,21 +922,19 @@ class TipoNotaCountOut(Schema):
     
 class NotaIn(Schema):    
     titulo = String(required=True, validate=[
-        validate.Length(min=3, max=15, error="El campo debe ser mayor a 3 y menor a 15 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
     id_tipo_nota = String(required=True)
     eliminado = Boolean()
     # id_user_creacion = String(required=True)
-    id_user_creacion = String(required=True)
     id_tarea = String()
-    id_user_actualizacion = String()    
 
 
 class NotaPatchIn(Schema):
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
@@ -1019,7 +1017,7 @@ class NotaCountOut(Schema):
     
 class LabelIn(Schema):    
     nombre = String(required=True, validate=[
-        validate.Length(min=3, max=25, error="El campo debe ser mayor a 63 y menor a 25 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
@@ -1034,7 +1032,7 @@ class LabelIn(Schema):
 
 class LabelPatchIn(Schema):
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nombre = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
@@ -1107,13 +1105,13 @@ class LabelCountOut(Schema):
 class LabelXTareaIn(Schema):  
     ids_labels = List(String(),required=True, many=True)
     id_tarea = String(required=True)
-    id_user_actualizacion = String(required=True)
+    # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaPatchIn(Schema):
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
+    # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
 
     
