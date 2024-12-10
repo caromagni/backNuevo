@@ -1336,14 +1336,16 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
 
 
 
-def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     #fecha_hasta = fecha_hasta + " 23:59:59"
     
     session: scoped_session = current_app.session
     
     query = session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
+   
     if titulo is not '':
         query = query.filter(Tarea.titulo.ilike(f'%{titulo}%'))
+   
     if id_expediente is not None:
         query = query.filter(Tarea.id_expediente == id_expediente)
     
@@ -1352,6 +1354,9 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
 
     if id_tipo_tarea is not None:
         query = query.filter(Tarea.id_tipo_tarea== id_tipo_tarea)
+
+    if id_tarea is not None:
+        query = query.filter(Tarea.id == id_tarea)    
 
     if id_usuario_asignado is not None:
         #print ("id_usuario_asignado:", id_usuario_asignado)
