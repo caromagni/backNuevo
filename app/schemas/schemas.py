@@ -230,6 +230,7 @@ class GroupOut(Schema):
     eliminado = Boolean()
     suspendido = Boolean()
     path_name = String()
+    path = String()
     level = Integer()
     base = Boolean()
 
@@ -508,7 +509,7 @@ class TareaOut(Schema):
     titulo = String()
     cuerpo = String()
     id_expediente = String()
-    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
+    expediente = Nested(ExpedienteOut, only=("id", "caratula", "nro_expte"))
     caratula_expediente = String()
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
@@ -528,6 +529,7 @@ class TareaOut(Schema):
     reasignada_usr = Boolean(default=False)
     reasignada_grupo = Boolean(default=False)
     notas = List(Nested(NotaTareaOut))
+    tiene_notas = Boolean()
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
@@ -810,7 +812,7 @@ class TareaIdOut(Schema):
     subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
     grupos = List(Nested(GroupTareaOut))
     actuacion = Nested(ActuacionOut, only=("id", "nombre"))
-    expediente = Nested(ExpedienteOut, only=("id", "caratula"))
+    expediente = Nested(ExpedienteOut, only=("id", "caratula","nro_expte"))
     usuarios = List(Nested(UsuarioGroupTareaOut))
     notas = List(Nested(NotaTareaOut))
     id_user_actualizacion = String()

@@ -217,6 +217,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
                 data = {
                     "id": reg.id_hijo,
                     "nombre": grupo.nombre,
+                    "path": reg.path,
                     "path_name": reg.path_name,
                     "fecha_actualizacion": grupo.fecha_actualizacion,
                     "level": reg.level,
@@ -246,7 +247,108 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
 
     return result_paginated, total
 
+def get_all_base(id):
+    cursor=None
+    session: scoped_session = current_app.session
+    # Subconsulta recursiva
+    subquery = text("""
+        WITH RECURSIVE GroupTree AS (
+            -- Anchor member: Start with all parentless nodes
+            SELECT 
+                g.id AS id_padre,
+                g.id AS id_hijo,
+                g.descripcion AS parent_name,
+                g.descripcion AS child_name,
+                g.id::text AS path,
+                COALESCE(g.nombre, g.id::text) AS path_name,
+                0 AS level,
+                true AS is_parentless,
+                g.id AS group_id,
+                g.base AS is_base
+            FROM 
+                tareas.grupo g
+            LEFT JOIN 
+                tareas.herarquia_grupo_grupo hgg1 ON g.id = hgg1.id_hijo
+            WHERE 
+                hgg1.id_hijo IS NULL
 
+            UNION ALL
+
+            -- Recursive member: Join with the hierarchical table to find child groups
+            SELECT 
+                hgg.id_padre,
+                hgg.id_hijo,
+                gp_padre.descripcion AS parent_name,
+                gp_hijo.descripcion AS child_name,
+                gt.path || ' -> ' || hgg.id_hijo::text AS path,
+                gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
+                gt.level + 1 AS level,
+                false AS is_parentless,
+                gp_hijo.id AS group_id,
+                gp_padre.base AS is_base
+            FROM 
+                tareas.herarquia_grupo_grupo hgg
+            INNER JOIN 
+                GroupTree gt ON gt.id_hijo = hgg.id_padre
+            INNER JOIN 
+                tareas.grupo gp_padre ON hgg.id_padre = gp_padre.id
+            INNER JOIN 
+                tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
+        )
+
+        -- Select from the CTE to get the full hierarchy
+        SELECT 
+            gt.id_padre,
+            gt.parent_name,
+            gt.id_hijo,
+            gt.child_name,
+            gt.path,
+            gt.path_name,
+            gt.level,
+            gt.is_parentless,
+            gt.group_id,
+            gt.is_base
+        FROM 
+            GroupTree gt
+        ORDER BY 
+            gt.path;
+        """)
+
+    # Ejecutar la subconsulta
+    cursor = session.execute(subquery)
+    if cursor:
+        print("Cursor:", cursor)
+    else:
+        print("Cursor vacío")    
+    #result = cursor.fetchall()
+    res=[]
+    for reg in cursor:
+        print(reg.path_name,"-", reg.is_base, "-", reg.is_parentless)
+        
+# Identificar el grupo base del grupo dado
+    grupo_dado = session.query(Grupo).filter(Grupo.id == id).first()
+    grupo_base = next((r for r in cursor if r.id_hijo == grupo_dado.id and r.is_parentless), None)
+    i=0
+    if grupo_base:
+        # Filtrar los grupos con el mismo grupo base
+        grupos_mismo_base = [r for r in cursor if r.id_padre == grupo_base.id_padre]
+        print(grupos_mismo_base)
+        for grupo in grupos_mismo_base:
+            print(grupo.path_name)
+            data = {"id": reg.id_hijo,
+                    "nombre": grupo.nombre,
+                    "path": reg.path,
+                    "path_name": reg.path_name
+                }
+            i=i+1
+            res.append(data)
+    else:
+        print("No se encontró un grupo base para el ID proporcionado.")                                                                     
+        
+     
+
+   
+    return res, i
    
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False): 
     #fecha_hasta = fecha_hasta + " 23:59:59"

@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from common.api_key import *
 from flask import request, current_app
-from models.grupo_model import get_all_grupos, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
+from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut
@@ -149,7 +149,19 @@ def get_grupo_id(id: str):
         return res
     except Exception as err:
         raise ValidationError(err)
+
+@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.get('/grupos_grupobase/<string:id>')
+@groups_b.output(GroupIdOut())
+def get_all_grupobase(id: str):
+    try:
+        print("id:",id)
+        res = get_all_base(id)
         
+        current_app.session.remove()
+        return res
+    except Exception as err:
+        raise ValidationError(err)        
 
 @groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
