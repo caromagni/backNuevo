@@ -46,10 +46,15 @@ include:
 - template: Security/SAST.gitlab-ci.yml
   
 
+# build-image:
+#   stage: build-image
+#   image: docker:stable-dind 
+#   services:
+#   - name: docker:dind  
+#     command: ["--mtu=1300"]
+
 build-image:
   stage: build-image
-  
-  #para runers locales
   image: docker:stable 
   services:
   - name: docker:18-dind  
@@ -59,6 +64,12 @@ build-image:
   #image: docker:stable-dind 
   #services:
   #- name: docker:dind  
+  #  command: ["--mtu=1300"]
+
+
+  #image: docker:stable 
+  #services:
+  #- name: docker:18-dind  
   #  command: ["--mtu=1300"]
 
   rules:
