@@ -59,6 +59,12 @@ build-image:
   services:
   - name: docker:18-dind  
     command: ["--mtu=1300"]
+  
+  #para runers de gitlab
+  #image: docker:stable-dind 
+  #services:
+  #- name: docker:dind  
+  #  command: ["--mtu=1300"]
 
 
   #image: docker:stable 

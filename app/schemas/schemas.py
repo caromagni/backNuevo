@@ -385,10 +385,14 @@ class GroupsBaseOut(Schema):
     id = String()
     id_padre = String()
     id_hijo = String()
+    parent_name = String()
+    child_name = String()
     path = String()
     path_name = String()
     is_parentless = Boolean()
-
+    eliminado = Boolean()
+    is_base = Boolean()
+    
 class GroupIdOut(Schema):
     id = String()
     nombre = String()
