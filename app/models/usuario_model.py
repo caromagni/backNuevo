@@ -1,6 +1,7 @@
 import uuid
 from sqlalchemy.orm import scoped_session
 from datetime import datetime
+from common.utils import *
 
 from flask import current_app
 
@@ -135,25 +136,29 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
         query = query.filter(Usuario.suspendido == suspendido)
 
     total= len(query.all())
+    print("total usuarios:", total)
 
     # Ordenamiento y paginación
     query = query.order_by(Usuario.apellido).offset((page - 1) * per_page).limit(per_page)
 
     # Ejecutar la consulta paginada
     paginated_results = query.all()
-
+    
     if paginated_results is not None:
         results = []
+        tareas=[]
+        grupos=[]
         for res in paginated_results:
-            tareas=[]
-            grupos=[]
             #Traigo los grupos del usuario
+            
             res_grupos = session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
-                                    ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id).all()
+                                    ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False
+                                    ).order_by(Grupo.nombre).all()
             
             #Traigo las tareas asignadas al usuario
             res_tareas = session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
-                                    ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
+                                    ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id, TareaAsignadaUsuario.eliminado==False
+                                    ).order_by(Tarea.titulo).all()
             
 
             if res_tareas is not None:
@@ -179,8 +184,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
 
                     }
                     grupos.append(grupo)
-                print("grupos:", grupos)    
-
+               
 
             ###################Formatear el resultado####################
             result = {
@@ -198,7 +202,6 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "grupos": grupos,
                 "tareas": tareas
             }
-            print("result:", result)
             results.append(result)
 
    
@@ -227,8 +230,17 @@ def get_grupos_by_usuario(id):
     return res
 
 
-def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
+def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
     session: scoped_session = current_app.session
+
+    if user_actualizacion is not None:
+        id_user_actualizacion = verifica_username(user_actualizacion)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+
     nuevoID_usuario=uuid.uuid4()
     print("nuevo_usuario:",nuevoID_usuario)
     nuevo_usuario = Usuario(
@@ -236,7 +248,7 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
         nombre=nombre,
         apellido=apellido,
         dni = dni,
-        username = username.upper(),
+        username = username,
         email = email.lower(),
         id_persona_ext=id_persona_ext,
         id_user_actualizacion=id_user_actualizacion,
@@ -267,8 +279,17 @@ def insert_usuario(id='', nombre='', apellido='', id_persona_ext=None, id_grupo=
     return nuevo_usuario
 
 
-def update_usuario(id='', **kwargs):
+def update_usuario(id='',username=None, **kwargs):
     session: scoped_session = current_app.session
+    print("Update usuario")
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
    
     if usuario is None:
@@ -289,8 +310,8 @@ def update_usuario(id='', **kwargs):
         usuario.email = kwargs['email'].lower()           
     if 'id_persona_ext' in kwargs:
         usuario.id_persona_ext = kwargs['id_persona_ext']
-    if 'id_user_actualizacion' in kwargs:
-        usuario.id_user_actualizacion = kwargs['id_user_actualizacion']
+    #if 'id_user_actualizacion' in kwargs:
+        usuario.id_user_actualizacion = id_user_actualizacion
     if 'suspendido' in kwargs:
         usuario.suspendido = kwargs['suspendido']
     usuario.fecha_actualizacion = datetime.now()
@@ -300,7 +321,8 @@ def update_usuario(id='', **kwargs):
         grupos_usuarios=session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id)
         for grupo in grupos_usuarios:
             grupo.eliminado=True
-            grupo.fecha_actualizacion=datetime.now()
+            grupo.fecha_actualizacion=datetime.now() 
+            
 
         #controlo que el grupo exista y lo asocio al usuario
         for group in kwargs['grupo']:
@@ -311,51 +333,52 @@ def update_usuario(id='', **kwargs):
             if existe_grupo.eliminado==True:
                 raise Exception("Error en el ingreso de grupos. Grupo eliminado: " + existe_grupo.nombre)
 
-            #asocio el grupo al usuario
-            nuevoID=uuid.uuid4()
-            usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id, UsuarioGrupo.id_grupo==group['id_grupo'], UsuarioGrupo.eliminado==False).first()
-            if usuario_grupo is None:
-                nuevo_usuario_grupo = UsuarioGrupo(
-                    id=nuevoID,
-                    id_grupo=group['id_grupo'],
-                    id_usuario=id,
-                    id_user_actualizacion= kwargs['id_user_actualizacion'],
-                    fecha_actualizacion=datetime.now()
-                )
-                session.add(nuevo_usuario_grupo)
+            grupos_usuarios=session.query(UsuarioGrupo).filter(UsuarioGrupo.id_grupo == group['id_grupo'], UsuarioGrupo.id_usuario==id).first()
+            
+            if grupos_usuarios is not None:
+                    grupos_usuarios.eliminado=False
+                    grupos_usuarios.fecha_actualizacion=datetime.now()
+                    grupos_usuarios.id_user_actualizacion=id_user_actualizacion
+            else:
+                    #asocio el grupo al usuario
+                    nuevoID=uuid.uuid4()
+                    nuevo_usuario_grupo = UsuarioGrupo(
+                            id=nuevoID,
+                            id_grupo=group['id_grupo'],
+                            id_usuario=id,
+                            id_user_actualizacion= id_user_actualizacion,
+                            fecha_actualizacion=datetime.now()
+                        )
+                    session.add(nuevo_usuario_grupo)
 
             #si el usuario es el asignado por defecto para tareas, lo actualizo en el grupo
             if 'asignado_default' in group:
                 if group['asignado_default'] == True:
-                    existe_grupo.id_user_asignado_default = id
-                    existe_grupo.fecha_actualizacion = datetime.now() 
-                    existe_grupo.id_user_actualizacion = kwargs['id_user_actualizacion']
-
-
-    if 'id_grupo' in kwargs:      
-        nuevoID=uuid.uuid4()
-        usuario_grupo = session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario == id, UsuarioGrupo.id_grupo==kwargs['id_grupo']).first()
-        if usuario_grupo is None:
-            nuevo_usuario_grupo = UsuarioGrupo(
-                id=nuevoID,
-                id_grupo=kwargs['id_grupo'],
-                id_usuario=id,
-                id_user_actualizacion= kwargs['id_user_actualizacion'],
-                fecha_actualizacion=datetime.now()
-            )
-            session.add(nuevo_usuario_grupo)
+                    grupos_usuarios.id_user_asignado_default = id
+                    grupos_usuarios.fecha_actualizacion = datetime.now() 
+                    grupos_usuarios.id_user_actualizacion = id_user_actualizacion
 
     session.commit()
     return usuario
 
-def delete_usuario(id):
+def delete_usuario(username=None, id=None):
     session: scoped_session = current_app.session
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
     usuario = session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
     if usuario is None:
         return None
     
     usuario.eliminado = True
     usuario.fecha_actualizacion = datetime.now()
+    usuario.id_user_actualizacion = id_user_actualizacion
     session.commit()
     return usuario
 

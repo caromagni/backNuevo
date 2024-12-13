@@ -2,7 +2,8 @@ import uuid
 from sqlalchemy.orm import scoped_session, joinedload
 from datetime import datetime, timedelta
 from common.functions import controla_fecha
-
+from common.utils import *
+from common.error_handling import ValidationError
 from flask import current_app
 
 from .alch_model import Nota, TipoNota, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
@@ -17,8 +18,14 @@ def get_all_tipo_nota(page=1, per_page=10):
     res = session.query(TipoNota).order_by(TipoNota.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total
 
-def insert_tipo_nota(id='', nombre='', id_user_actualizacion='', habilitado=True, eliminado=False):
+def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', habilitado=True, eliminado=False):
     session: scoped_session = current_app.session
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+    else:
+        raise ValidationError("Usuario no ingresado") 
+    
     nuevoID=uuid.uuid4()
     nuevo_tipo_nota = TipoNota(
         eliminado=False,
@@ -34,14 +41,25 @@ def insert_tipo_nota(id='', nombre='', id_user_actualizacion='', habilitado=True
     session.commit()
     return nuevo_tipo_nota
 
-def delete_tipo_nota(id):
+def delete_tipo_nota(username=None, id=None):
     session: scoped_session = current_app.session
+    if id is None:
+        raise ValidationError("ID de nota no ingresado")
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+    else:
+        raise ValidationError("Usuario no ingresado")
+    
     tipo_nota = session.query(TipoNota).filter(TipoNota.id == id, TipoNota.eliminado==False).first()
     if tipo_nota is not None:
         tipo_nota.eliminado=True
         tipo_nota.fecha_actualizacion=datetime.now()
+        tipo_nota.id_user_actualizacion=id_user_actualizacion
+        tipo_nota.fecha_eliminacion=datetime.now()
         session.commit()
         return tipo_nota
+    
     else:
         print("Tipo de nota no encontrado")
         return None
@@ -49,28 +67,40 @@ def delete_tipo_nota(id):
 
 ##########################  NOTAS #############################################
 
-def insert_nota(titulo='', nota='', id_tipo_nota=None, eliminado=False, id_user_creacion=None, id_user_actualizacion=None, fecha_creacion=None, id_tarea=None):
+def insert_nota(username=None, titulo='', nota='', id_tipo_nota=None, eliminado=False, fecha_creacion=None, id_tarea=None):
     session: scoped_session = current_app.session
 
-    nuevoID_nota=uuid.uuid4()
+    if username is not None:
+        id_user_creacion = verifica_username(username)
+    try:
+        nuevoID_nota=uuid.uuid4()
 
-    nueva_nota = Nota(
+        nueva_nota = Nota(
         eliminado=eliminado,
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now(),
         id_tarea=id_tarea,
         id_tipo_nota=id_tipo_nota,
         id_user_creacion=id_user_creacion,
-        id_user_actualizacion=id_user_creacion,
+        id_user_actualizacion=None,
         id=nuevoID_nota,
         nota=nota,
         titulo=titulo,
     )
 
-    session.add(nueva_nota)
+        session.add(nueva_nota)
        
-    session.commit()
-    return nueva_nota
+        session.commit()
+        return nueva_nota
+    except Exception as e:
+        session.rollback()
+        print(f"Error inserting nota: {e}")
+        raise
+    # session: scoped_session = current_app.session
+
+    
+
+    
 
 def update_nota(id='', **kwargs):
     session: scoped_session = current_app.session
@@ -133,7 +163,7 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
     # elif isinstance(fecha_hasta, str):
     #     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
 
-    query = session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
+    query = session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
     # filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
     print('consulta por parámetros de notas')
     print("id tarea:",id_tarea)
@@ -174,16 +204,26 @@ def get_nota_by_id(id):
         print("Nota no encontrada")
         return None
 
-def delete_nota(id_nota):
+def delete_nota(username=None, id_nota=None):
     session: scoped_session = current_app.session
-    nota = session.query(Nota).filter(Nota.id == id_nota, Nota.eliminado==False).first()
-    if nota is not None:              
-        nota.eliminado=True
-        nota.fecha_eliminacion=datetime.now()
-        nota.fecha_actualizacion=datetime.now()
-        session.commit()
-        return nota
     
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
     else:
-        print("Nota no encontrada")
+        raise ValidationError("Usuario no ingresado")  
+    
+    nota = session.query(Nota).filter(Nota.id == id_nota, Nota.eliminado==False).first()
+    if nota is not None:     
+        if(nota.id_user_creacion != id_user_actualizacion):
+            return "Usuario no autorizado para eliminar la nota" 
+        else:        
+            nota.eliminado=True
+            nota.fecha_eliminacion=datetime.now()
+            nota.fecha_actualizacion=datetime.now()
+            nota.id_user_actualizacion=id_user_actualizacion
+            session.commit()
+            return nota    
+    else:
+        print("Nota no encontrada??"+id_nota)
         return None
+   

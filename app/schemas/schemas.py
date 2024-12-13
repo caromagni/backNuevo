@@ -102,13 +102,14 @@ class ExpedienteOut(Schema):
     id = String()
     id_ext = String()
     caratula = String()
+    nro_expte = String()
     estado = String()
 ###############Listas####################
 class ListUsuario(Schema):
     id_usuario = String()
 
 class ListGrupo(Schema):
-    id_grupo = String()    
+    id_grupo = String(required=True)    
 
 class ListUsrGrupo(Schema):
     asignado_default = Boolean()  
@@ -140,8 +141,10 @@ class HerarquiaOut(Schema):
 class HerarquiaAllOut(Schema):
     id_padre = String()
     parent_name = String()
+    parent_description = String()
     id_hijo = String()
     child_name = String()
+    child_description = String()
     child_eliminado = Boolean()
     path = String()
     level = Integer()
@@ -157,7 +160,7 @@ class GroupIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     id_user_asignado_default= String()
     id_padre = String() 
     base = Boolean(default=False)
@@ -175,8 +178,8 @@ class GroupPatchIn(Schema):
         validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
-    id_user_asignado_default= String()
+    id_user_actualizacion = String()
+    id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
     codigo_nomenclador = String(validate=[
         validate.Length(min=6, max=6, error="El campo debe ser de 6 caracteres"),
@@ -195,12 +198,24 @@ class GroupGetIn(Schema):
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
 
+class UsuarioDefaultOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+
 class GroupOut(Schema):
     id = String()
     nombre = String()
     descripcion = String()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
+    user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
@@ -216,8 +231,6 @@ class GroupTareaOut(Schema):
     descripcion = String()
     asignada = Boolean()
     fecha_asignacion = String()
-
-
 
 
 class UsuarioGroupIdOut(Schema):
@@ -236,6 +249,7 @@ class UsuarioGOut(Schema):
     id = String()
     nombre = String()
     apellido = String()
+    activo = Boolean()
 
 class HerarquiaGroupOut(Schema):
     id = String()
@@ -281,7 +295,7 @@ class TipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     base = Boolean(default=False)
 
 class TipoTareaPatchIn(Schema):
@@ -293,7 +307,7 @@ class TipoTareaPatchIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     base = Boolean(default=False)
 
 class TipoTareaOut(Schema):
@@ -312,7 +326,7 @@ class SubtipoTareaIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
 
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
@@ -321,7 +335,7 @@ class SubtipoTareaPatchIn(Schema):
         validate_char
     ])
     base = Boolean(default=False)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -365,7 +379,7 @@ class GroupIdOut(Schema):
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
-    usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido")))
+    usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))
     tareas = List(Nested(TareaxGroupOut))     
 
 class UsuarioOut(Schema):
@@ -398,20 +412,25 @@ class TareaIn(Schema):
     cuerpo = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
     id_expediente = String()
     caratula_expediente = String()
+    nro_expte = String()
     nombre_actuacion= String()    
     id_tipo_tarea = String(required=True)
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String()
-    fecha_inicio = String(validate=validate_fecha)
+    #id_user_actualizacion = String()
+    fecha_inicio = String(required=True, validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
     grupo = List(Nested(ListGrupo))
-    estado = fields.Integer(validate=validate.OneOf(
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
+    """  estado = fields.Integer(validate=validate.OneOf(
+        [estado.value for estado in EstadoEnum], 
+        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
+    )) """
     username = String()
 
     """ caratula_expediente = String(validate=[
@@ -435,16 +454,20 @@ class TareaPatchIn(Schema):
     id_tipo_tarea = String()
     id_subtipo_tarea = String()
     eliminable = Boolean()
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_inicio = String(validate=validate_fecha)
     fecha_fin = String(validate=validate_fecha)
     plazo = Integer(default=0)
     usuario = List(Nested(ListUsuario))
     grupo = List(Nested(ListGrupo))
-    estado = fields.Integer(validate=validate.OneOf(
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"},validate=validate.OneOf(
         [estado.value for estado in EstadoEnum], 
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
+    """ estado = fields.Integer(validate=validate.OneOf(
+        [estado.value for estado in EstadoEnum], 
+        error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
+    )) """
 
 class TipoNotaTareaOut(Schema):
     id = String()
@@ -493,20 +516,27 @@ class TareaOut(Schema):
     
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
-  
+class LabelIdIn(Schema):
+    id = String()  
+
 class TareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
     id_tarea = String()
+    id_usuario_asignado= String()
     titulo = String(default="")
+    labels = String(metadata={"description": "ids separados por comas. Ej: 1,2,3"})
+    #labels = List(String(), metadata={"description": "Array de IDs de labels (strings)"})
     id_tipo_tarea = String()
     fecha_desde = String(validate=validate_fecha)
     fecha_hasta = String(validate=validate_fecha)
+    fecha_fin_desde = String(validate=validate_fecha)
+    fecha_fin_hasta = String(validate=validate_fecha)
     id_expediente = String()
     id_actuacion = String()
     prioridad = Integer()
     eliminado = Boolean()
-    estado = Integer()
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
     
 ####################Grupos - Tareas - Usuarios ####################
 class GroupAllOut(Schema):
@@ -543,12 +573,12 @@ class UsuarioIn(Schema):
         validate.Length(min=3, max=50, error="El campo debe ser mayor a 3 y menor a 30 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String()
+    #id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
+    username = String(validate=[validate.Length(min=4, max=200, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
     
 
@@ -562,7 +592,7 @@ class UsuarioInPatch(Schema):
         validate_char
     ])
     suspendido = Boolean()
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
@@ -629,7 +659,8 @@ class TareaAllOut(Schema):
     id = String()
     #id_grupo = String()
     prioridad = Integer()
-    estado = Integer()
+    #estado = Integer()
+    estado = Integer(metadata={"description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"})
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
@@ -662,7 +693,7 @@ class TareaCountAllOut(Schema):
 class TareaUsuarioIn(Schema):
     id_tarea = String(required=True)
     id_usuario = String(required=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     notas = String(validate=[
         validate.Length(min=4, error="El campo debe ser mayor a 4 caracteres"),
         validate_char
@@ -851,10 +882,10 @@ class LoadExpedienteSchema(Schema):
 class TipoNotaIn(Schema):
    
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
         validate_char
     ])
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     habilitado = Boolean()
     eliminado = Boolean()
 
@@ -872,7 +903,7 @@ class TipoNotaCountOut(Schema):
     
 class NotaIn(Schema):    
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
@@ -880,12 +911,11 @@ class NotaIn(Schema):
     eliminado = Boolean()
     # id_user_creacion = String(required=True)
     id_tarea = String()
-    id_user_actualizacion = String()    
 
 
 class NotaPatchIn(Schema):
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
@@ -968,7 +998,7 @@ class NotaCountOut(Schema):
     
 class LabelIn(Schema):    
     nombre = String(required=True, validate=[
-        validate.Length(min=3, max=25, error="El campo debe ser mayor a 63 y menor a 25 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     color = String(required=True, validate=validate.Length(min=7, max=7, error="El campo debe ser #xxxxxx")) 
@@ -983,7 +1013,7 @@ class LabelIn(Schema):
 
 class LabelPatchIn(Schema):
     titulo = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=3, max=25, error="El campo debe ser mayor a 3 y menor a 25 caracteres"),
         validate_char
     ])
     nombre = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres"))
@@ -1054,19 +1084,16 @@ class LabelCountOut(Schema):
 ############## Labels x Tarea####################  
 
 class LabelXTareaIn(Schema):  
-    activa= Boolean()
-    id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
-    id_user_actualizacion = String(required=True)
-    fecha_actualizacion = String(validate=validate_fecha)
-
+    id_tarea = String(required=True)
+    # id_user_actualizacion = String(required=True)
+    # fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaPatchIn(Schema):
-    activa= Boolean()
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
-    fecha_actualizacion = String(validate=validate_fecha)
+    # id_user_actualizacion = String(required=True)
+    # fecha_actualizacion = String(validate=validate_fecha)
 
     
 class LabelXTareaOut(Schema):
@@ -1084,7 +1111,7 @@ class LabelXTareaAllOut(Schema):
     activa= Boolean()
     id_tarea = String(required=True)
     ids_labels = List(String(),required=True, many=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
 
@@ -1093,7 +1120,7 @@ class LabelXTareaIdOut(Schema):
     id= String(required=True)
     id_tarea = String(required=True)
     id_label = String(required=True)
-    id_user_actualizacion = String(required=True)
+    id_user_actualizacion = String()
     fecha_actualizacion = String(validate=validate_fecha)
 
 class LabelXTareaIdCountAllOut(Schema):
