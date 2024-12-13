@@ -45,7 +45,7 @@ sast:
 include:
 - template: Security/SAST.gitlab-ci.yml
   
-
+#to use with gitlab runners 
 # build-image:
 #   stage: build-image
 #   image: docker:stable-dind 
