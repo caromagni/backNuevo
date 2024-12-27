@@ -844,7 +844,8 @@ class TareaHIstoriaUserIdOut(Schema):
     username = String()
     eliminado = Boolean()
     eliminado_anterior = Boolean()
-    eliminado_nueva = Boolean()
+    fecha_actualizacion_anterior = String()
+    #eliminado_nueva = Boolean()
     fecha_actualizacion = String()
 
 

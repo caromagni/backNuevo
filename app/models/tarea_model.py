@@ -747,11 +747,11 @@ def get_tarea_historia_usr_by_id(id):
         cast(
             Auditoria_TareaAsignadaUsuario.datos_anteriores[("fecha_actualizacion")].astext,
             TIMESTAMP
-        ).label("fecha_asignacion"),
+        ).label("fecha_actualizacion_anterior"),
         cast(
             Auditoria_TareaAsignadaUsuario.datos_nuevos[("fecha_actualizacion")].astext,
             TIMESTAMP
-        ).label("fecha_desasignacion"),
+        ).label("fecha_actualizacion"),
     )
     .outerjoin(
         TareaAsignadaUsuario,
@@ -766,7 +766,7 @@ def get_tarea_historia_usr_by_id(id):
         TareaAsignadaUsuario.id_usuario == Usuario.id
     )
     .filter(Tarea.id == id)  # Se utiliza la variable aquí
-    .order_by(Auditoria_TareaAsignadaUsuario.fecha_actualizacion.desc())
+    .order_by(Usuario.apellido, Auditoria_TareaAsignadaUsuario.fecha_actualizacion.desc())
     )
 
 # Ejecutar la consulta
