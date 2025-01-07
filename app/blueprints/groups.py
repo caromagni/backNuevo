@@ -4,7 +4,7 @@ from flask import request, current_app
 from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
-from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut
+from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn
 from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
@@ -151,12 +151,18 @@ def get_grupo_id(id: str):
         raise ValidationError(err)
 
 @groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
-@groups_b.get('/grupos_grupobase/<string:id>')
+@groups_b.get('/grupos_grupobase')
+@groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut(many=True))
-def get_all_grupobase(id: str):
+def get_all_grupobase(query_data: dict):
     try:
-        print("id:",id)
-        res = get_all_base(id)
+        id_grupo=None
+        usuarios =False
+        if(request.args.get('id_grupo') is not None):
+            id=request.args.get('id_grupo')
+        if(request.args.get('usuarios') is not None):
+            usuarios=request.args.get('usuarios')    
+        res = get_all_base(id, usuarios)
         
         current_app.session.remove()
         return res
