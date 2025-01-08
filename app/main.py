@@ -121,7 +121,7 @@ def create_app():
      ############### CODIGO PARA LANZAR THREADS ################
     """ thread = threading.Thread(target=chk_messagges())
     thread.daemon = True
-    thread.start() """
+    thread.start()  """
 
     return app
 
