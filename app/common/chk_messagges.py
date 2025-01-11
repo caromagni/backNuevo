@@ -12,7 +12,6 @@ def chk_messagges(app):
     #if uwsgi.worker_id() == 1:
     #if uwsgi.worker_id() == 1:
     while True:
-        print("handler.channel: ", handler.channel)
         if handler.channel:
             with app.app_context():
                 print("---- RUNNING CHECK MESSAGES ----")
