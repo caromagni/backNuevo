@@ -20,27 +20,48 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("campos: ", campos)
         if action in ["POST", "PUT"]:
             print("action: ", action)
-            usher_apikey = os.environ.get('USHER_API_KEY', 'default_apikey')
-            headers = {'x-api-key': usher_apikey, 'x-api-system': os.environ.get('SYSTEM_NAME', 'default_system')}
+            #usher_apikey = os.environ.get('USHER_API_KEY', 'default_apikey')
+            usher_apikey = os.environ.get('USHER_API_KEY')
+            #system_apikey = os.environ.get('SYSTEM_API_KEY', 'default_system')
+            system_apikey = os.environ.get('SYSTEM_NAME')
+            print("usher_apikey: ", usher_apikey)
+            print("system_apikey: ", system_apikey)
+            headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
 
             try:
-                response = requests.get(url, params=params, headers=headers)
-                resp = response.json()
-                print("response: ", resp)
-                attributes = response.get('data', {})            
-                print("attributes: ", attributes)           
+                entity_id = '206598a1-3fdd-45a3-81e5-45dbcc665a63'
+                response = requests.get(url, params=params, headers=headers).json()
+                attributes_list = response['data']
+                print("#"*50)
+                #print("attributes: ", attributes_list)  
+                #print("tipo de attributes: ", type(attributes_list))
+
+                attributes = next((attr for attr in attributes_list if attr.get('id') == entity_id), None)
+
+                if not attributes:
+                    print(f"No se encontró un registro en 'data' con id: {entity_id}")
+                    return
+
                 valid_attributes = {key: value for key, value in attributes.items() if key in campos}
+                """ alid_attributes = [{key: value for key, value in attributes.items() if key in campos}
+                                    for attributes in attributes_list] """
+                
                 print("valid_attributes: ", valid_attributes)
 
                 if entity == 'usuario':
+                    print("entity: ", entity)
                     query = session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
-                    if query:
-                        print("Usuario encontrado, actualizando...")
+                    if query is not None:
+                        print("Usuario encontrado, actualizando..." + entity_id)
                         for key, value in valid_attributes.items():
-                            setattr(query, key, value)
+                            if key != 'id':
+                                setattr(query, key, value)
                         session.commit()
                         print("Actualizaciones realizadas.")
+                    else:
+                        print("Usuario no encontrado.")
+
             except Exception as e:
                 print("Error en check_updates:", e)
 
