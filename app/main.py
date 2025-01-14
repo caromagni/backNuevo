@@ -122,7 +122,7 @@ def create_app():
     
     ############### CODIGO PARA LANZAR THREADS ################
     if uwsgi.worker_id() == 1:
-        thread = threading.Thread(target=chk_messagges, args=(app,))
+        thread = threading.Thread(target=chk_messagges, args=(app, Session))
         thread.daemon = True
         thread.start()
         print("Hilo de recepción de mensajes iniciado.")
