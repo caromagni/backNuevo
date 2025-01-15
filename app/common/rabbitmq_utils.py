@@ -33,7 +33,6 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
 
             try:
-                #entity_id = '206598a1-3fdd-45a3-81e5-45dbcc665a63'
                 response = requests.get(url, params=params, headers=headers).json()
                 attributes_list = response['data']
                 print("#"*50)

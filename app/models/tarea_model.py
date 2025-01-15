@@ -255,9 +255,6 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
 
 def update_tarea(id='', username=None, **kwargs):
     ################################
-    controla_tipo=False
-    id_grupo=None
-    id_usuario_asignado=None
     session: scoped_session = current_app.session
     print("update_tarea")
     tarea = session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
@@ -280,8 +277,8 @@ def update_tarea(id='', username=None, **kwargs):
     if tarea is None:
         return None
     
-    if 'caratula_expte' in kwargs:
-        tarea.caratula_expte = kwargs['caratula_expte'].upper()
+    if 'caratula_expediente' in kwargs:
+        tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
     if 'cuerpo' in kwargs:
         tarea.cuerpo = kwargs['cuerpo']
     if 'eliminable' in kwargs:
@@ -490,6 +487,7 @@ def update_tarea(id='', username=None, **kwargs):
         "subtipo_tarea": tarea.subtipo_tarea,
         "id_expediente": tarea.id_expediente,
         "expediente": tarea.expediente,
+        "caratula_expediente": tarea.caratula_expediente,
         "id_actuacion": tarea.id_actuacion,
         "actuacion": tarea.actuacion,
         "cuerpo": tarea.cuerpo,
@@ -504,6 +502,40 @@ def update_tarea(id='', username=None, **kwargs):
     }
 
     session.commit()
+    return result
+
+def update_lote_tareas_v2(username=None, **kwargs):
+    print("update_tarea_V2")
+
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+        if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+        else:
+            if 'id_user_actualizacion' in kwargs:
+                verifica_usr_id(kwargs['id_user_actualizacion'])
+                id_user_actualizacion = kwargs['id_user_actualizacion']
+              
+            else:
+                raise Exception("Debe ingresar username o id_user_actualizacion")
+            
+    if 'upd_tarea' in kwargs:
+        upd_tarea = kwargs['upd_tarea']
+        datos = []
+        datos_error = []
+        for tareas_update in upd_tarea:
+           resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
+           if resp is None:
+                datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
+               
+           datos.append(resp)
+
+    result = {
+        "tareas_error": datos_error,
+        "tareas_ok": datos
+    }
+
     return result
 
 def update_lote_tareas(username=None, **kwargs):
@@ -583,9 +615,9 @@ def update_lote_tareas(username=None, **kwargs):
                     tarea_error.append("Tarea eliminada:"+id_tarea)
                 else:
                     print("Tarea encontrada:", tarea.id)
-                    if 'caratula_expte' in kwargs:
-                        tarea.caratula_expte = kwargs['caratula_expte'].upper()
-                        print("Caratula:", tarea.caratula_expte)
+                    if 'caratula_expediente' in kwargs:
+                        tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
+                        print("Caratula:", tarea.caratula_expediente)
                     if 'cuerpo' in kwargs:
                         tarea.cuerpo = kwargs['cuerpo']
                         print("Cuerpo:", tarea.cuerpo)
