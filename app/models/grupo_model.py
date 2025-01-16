@@ -123,6 +123,8 @@ def get_grupo_by_id(id):
 
 
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now(), path_name=False, eliminado=False, suspendido=False):
+    start_time= datetime.now()
+    print("TIMETRACK_INITIAL:",start_time)
     print ("Fecha desde:", fecha_desde)
     print ("Fecha hasta:", fecha_hasta)
     print("Tipo fecha desde:", type(fecha_desde))
@@ -244,7 +246,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde='01/01/2000
         result_paginated= query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page)    
 
     #result = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
-
+    print("TIMETRACK_FINAL:", datetime.now())
+    #calculate the milliseconds that took from start to finish
+    print("TOTAL_PROCESSING_TIME:", datetime.now()-start_time)
     return result_paginated, total
 def encontrar_grupo_base(res_grupos, id):
     for r in res_grupos:

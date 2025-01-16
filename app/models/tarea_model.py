@@ -135,6 +135,10 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
        return None, msg
 
     nuevoID_tarea=uuid.uuid4()
+    print("DATE DEBUG")
+    print("datetime.now():", datetime.now())
+    print("fecha_inicio:", fecha_inicio)
+    print("fecha_fin:", fecha_fin)
     nueva_tarea = Tarea(
         id=nuevoID_tarea,
         prioridad=prioridad,
