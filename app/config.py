@@ -1,5 +1,5 @@
 
-import os
+import os 
 from common.keycloak import get_public_key
 
 os.environ.setdefault('postgres_user', 'NOT_SET')
