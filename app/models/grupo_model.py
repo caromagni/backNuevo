@@ -870,7 +870,7 @@ def get_grupos_recursivo():
             gt.path;""")
     res = session.execute(query).fetchall()
     return res
-
+ 
 
 
 def get_grupos_all(eliminado=None):
@@ -1081,3 +1081,5 @@ def undelete_grupo(id):
     grupo.eliminado = False
     session.commit()
     return grupo    
+
+
