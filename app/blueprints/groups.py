@@ -9,6 +9,7 @@ from datetime import datetime
 from common.auth import verificar_header
 from common.rabbitmq_utils import *
 from flask import g
+from alchemy_db import db
 
 
 auth = HTTPTokenAuth()
@@ -92,7 +93,7 @@ def get_grupo(query_data: dict):
                 "data": GroupOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
+        
         return data
     
     except Exception as err:
@@ -131,7 +132,6 @@ def get_grupo_detalle(query_data: dict):
                 "data": GroupAllOut().dump(res, many=True)
             }
         
-        current_app.session.remove()
         return data
     
     except Exception as err:
@@ -145,7 +145,7 @@ def get_grupo_id(id: str):
         print("id:",id)
         res = get_grupo_by_id(id)
         
-        current_app.session.remove()
+       
         return res
     except Exception as err:
         raise ValidationError(err)
@@ -164,8 +164,7 @@ def get_all_grupobase(query_data: dict):
             usuarios=request.args.get('usuarios')
         print("before grupos_grupobase query")        
         res = get_all_base(id, usuarios)
-        
-        current_app.session.remove()
+     
         return res
     except Exception as err:
         raise ValidationError(err)        
@@ -178,7 +177,7 @@ def get_usrsbygrupo(id_grupo: str):
     try:
         res = get_usuarios_by_grupo(id_grupo)
         
-        current_app.session.remove()
+       
         return res
     
     except Exception as err:
