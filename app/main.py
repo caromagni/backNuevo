@@ -102,7 +102,7 @@ def create_app():
         return send_from_directory('_build/html', 'index.html')
     
     app.register_blueprint(groups_b)
-    #app.register_blueprint(herarquia_b)
+    app.register_blueprint(herarquia_b)
     app.register_blueprint(usuario_b)
     app.register_blueprint(tarea_b)
     #app.register_blueprint(fix_b)
