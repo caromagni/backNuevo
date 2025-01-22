@@ -198,7 +198,7 @@ def delete_label(username=None, id_label=None):
 
 def get_active_labels(id_grupo):
     
-    id_grupo_base = find_parent_id_recursive(session, id_grupo)
+    id_grupo_base = find_parent_id_recursive(db, id_grupo)
     print('*********************************************id_grupo_base:', id_grupo_base)
     res = db.session.query(Label).filter(Label.id_grupo_padre == id_grupo_base, Label.eliminado == False).all()
 

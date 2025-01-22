@@ -4,6 +4,7 @@ from models.alch_model import HerarquiaGrupoGrupo
 from flask import current_app
 from alchemy_db import db
 def find_parent_id(db, id_hijo: str):
+    print("find parent id function")
     try:
         # Query the HerarquiaGrupoGrupo table to find the parent
         hierarchy = db.session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo == id_hijo).one()
@@ -19,6 +20,7 @@ def find_parent_id(db, id_hijo: str):
         raise
 
 def find_parent_id_recursive(db, id_hijo: str):
+    print("find parent id recursive function")
     parent_id = find_parent_id(db, id_hijo)
     
     if parent_id is None:
