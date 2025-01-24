@@ -370,7 +370,7 @@ def update_usuario(id='',username=None, **kwargs):
                             id_user_actualizacion= id_user_actualizacion,
                             fecha_actualizacion=datetime.now()
                         )
-                    session.add(nuevo_usuario_grupo)
+                    db.session.add(nuevo_usuario_grupo)
 
             #si el usuario es el asignado por defecto para tareas, lo actualizo en el grupo
             if 'asignado_default' in group:
@@ -379,7 +379,7 @@ def update_usuario(id='',username=None, **kwargs):
                     grupos_usuarios.fecha_actualizacion = datetime.now() 
                     grupos_usuarios.id_user_actualizacion = id_user_actualizacion
 
-    session.commit()
+    db.session.commit()
     return usuario
 
 def delete_usuario(username=None, id=None):
