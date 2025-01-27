@@ -57,7 +57,7 @@ build-image:
   stage: build-image
   image: docker:stable 
   services:
-  - name: docker:18-dind  
+  - name: docker:19.03.12-dind  
     command: ["--mtu=1300"]
   
   #para runers de gitlab
