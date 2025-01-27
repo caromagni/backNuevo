@@ -210,7 +210,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     
     return results, total 
         
-
+ 
 def get_grupos_by_usuario(id):
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
