@@ -668,7 +668,7 @@ def patch_lote_tareas(json_data: dict):
         
         return TareaPatchLoteOut().dump(res)    
         
-    
+     
     except Exception as err:
         raise ValidationError(err)
 
