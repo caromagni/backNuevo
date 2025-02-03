@@ -249,8 +249,9 @@ class UsuarioGroupIdOut(Schema):
     nombre = String()
     apellido = String()
     id_persona_ext = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
+    usr_eliminado = Boolean()
+    usr_suspendido = Boolean()
+    eliminado_grupo = Boolean()
     #nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
 
 
@@ -610,7 +611,20 @@ class TareaOut(Schema):
     reasignada_grupo = Boolean(default=False)
     notas = List(Nested(NotaTareaOut))
     tiene_notas = Boolean()
-    
+
+class TareaxGrupoOut(Schema):
+    id = String()
+    estado = Integer()
+    titulo = String()
+    id_tipo_tarea = String()
+    id_subtipo_tarea = String()
+    tarea_eliminado = Boolean()
+    eliminado_grupo = Boolean()
+    fecha_actualizacion = String()
+    tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
+    subtipo_tarea = Nested(SubtipoTareaOut, only=("id", "nombre"))
+    reasignada_usr = Boolean(default=False)
+    reasignada_grupo = Boolean(default=False)
 
     #grupo = Nested(GroupOut, only=("id", "nombre"))
 class LabelIdIn(Schema):
@@ -653,7 +667,7 @@ class GroupAllOut(Schema):
     codigo_nomenclador = String()
     nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
     usuarios = List(Nested(UsuarioGroupIdOut))
-    tareas = List(Nested(TareaOut))
+    tareas = List(Nested(TareaxGrupoOut))
 
 class GroupCountOut(Schema):
     count = Integer()
