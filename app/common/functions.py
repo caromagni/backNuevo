@@ -2,6 +2,7 @@ from datetime import datetime
 
 from common.error_handling import ValidationError
 
+#import requests
 from flask import request
 
 def get_user_ip():
@@ -11,7 +12,7 @@ def get_user_ip():
     else:
         # Si no hay proxy, se obtiene la IP directamente
         ip = request.remote_addr
-    
+    print("Funcion IP del usuario:", ip)
     return ip 
 
 def controla_fecha(fecha_in=''):
