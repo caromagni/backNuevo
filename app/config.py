@@ -24,8 +24,8 @@ class Config:
 
     SERVERS = [
         {
-            'name': 'localhost',
-            'url': 'http://localhost:5005'
+            'name': 'dev-tareas',
+            'url': 'https://dev-backend.tareas.pjm.gob.ar/'
         },
         {
             'name': 'localhost',
