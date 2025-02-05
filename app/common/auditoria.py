@@ -6,19 +6,10 @@ from sqlalchemy.inspection import inspect
 from datetime import datetime, date
 from models.alch_model import Auditoria, Auditoria_Grupo, Auditoria_Tarea, Auditoria_TareaxGrupo, Auditoria_TareaAsignadaUsuario, TareaXGrupo, TareaAsignadaUsuario, Tarea, TipoTarea, Usuario, UsuarioGrupo, Grupo, HerarquiaGrupoGrupo 
 import uuid
-from flask import request, has_request_context
+from common.functions import get_user_ip
+#from flask import request, has_request_context
 
-def get_user_ip():
-    if has_request_context():
-        if request.headers.get('X-Forwarded-For'):
-            ip = request.headers['X-Forwarded-For'].split(',')[0]
-        else:
-            ip = request.remote_addr
-        print("Funcion IP del usuario:", ip)
-        return ip
-    else:
-        # Si no hay contexto de solicitud, retorna una IP por defecto o None
-        return '172.17.0.1' # IP de localhost
+
 
 
 ### modelos para los cuales se generará la auditoría ###

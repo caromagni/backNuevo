@@ -4,7 +4,6 @@ import os
 from flask import current_app
 from alchemy_db import db
 from models.alch_model import Parametros, Usuario, TipoTarea, SubtipoTarea
-from common.functions import get_user_ip
 import requests
 import uuid
 from datetime import datetime
