@@ -282,14 +282,14 @@ def insert_tarea(username=None, id_grupo=None, prioridad=0, estado=1, id_actuaci
     db.session.commit()
     return nueva_tarea
 
-def update_tarea(id='', username=None, **kwargs):
+def update_tarea(id_tarea='', username=None, **kwargs):
     ################################
     controla_tipo=False
     id_grupo=None
     id_usuario_asignado=None
     
     print("update_tarea")
-    tarea = db.session.query(Tarea).filter(Tarea.id == id, Tarea.eliminado==False).first()
+    tarea = db.session.query(Tarea).filter(Tarea.id == id_tarea, Tarea.eliminado==False).first()
 
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -381,7 +381,7 @@ def update_tarea(id='', username=None, **kwargs):
     if 'grupo' in kwargs:
         print("Grupos:", kwargs['grupo'])
         #elimino los grupos existentes para esa tarea 
-        grupo_tarea=db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id)
+        grupo_tarea=db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id_tarea)
 
         for grupo in grupo_tarea:
             print("Encuentra grupo y lo borra:", grupo.id_grupo)
@@ -405,12 +405,12 @@ def update_tarea(id='', username=None, **kwargs):
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             nuevoID=uuid.uuid4()
-            tareaxgrupo = db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id, TareaXGrupo.id_grupo==group['id_grupo']).first()
+            tareaxgrupo = db.session.query(TareaXGrupo).filter(TareaXGrupo.id_tarea == id_tarea, TareaXGrupo.id_grupo==group['id_grupo']).first()
             if tareaxgrupo is None:
                 nuevo_tarea_grupo = TareaXGrupo(
                     id=nuevoID,
                     id_grupo=group['id_grupo'],
-                    id_tarea=id,
+                    id_tarea=id_tarea,
                     id_user_actualizacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now()
@@ -426,7 +426,7 @@ def update_tarea(id='', username=None, **kwargs):
                     tareaxgrupo.id_user_actualizacion=id_user_actualizacion   
 
             grupo = {
-                "id": existe_grupo.id,
+                "id_grupo": existe_grupo.id,
                 "nombre": existe_grupo.nombre,
                 "asignado": 'True',
                 "fecha_asisgnacion": datetime.now()
@@ -437,7 +437,7 @@ def update_tarea(id='', username=None, **kwargs):
 
     if 'usuario' in kwargs:
         #elimino los usuarios existentes para esa tarea
-        usuarios_tarea=db.session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id)
+        usuarios_tarea=db.session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id_tarea)
         if usuarios_tarea:
             for usuario in usuarios_tarea:
                 usuario.eliminado=True
@@ -453,11 +453,11 @@ def update_tarea(id='', username=None, **kwargs):
                 raise Exception("Error en el ingreso de usuarios. Usuario eliminado: " + existe_usuario.apellido + ' - id: ' + str(existe_usuario.id))
 
             nuevoID=uuid.uuid4()
-            asigna_usuario = db.session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id, TareaAsignadaUsuario.id_usuario==user['id_usuario']).first()
+            asigna_usuario = db.session.query(TareaAsignadaUsuario).filter(TareaAsignadaUsuario.id_tarea == id_tarea, TareaAsignadaUsuario.id_usuario==user['id_usuario']).first()
             if asigna_usuario is None:
                 nuevo_asigna_usuario = TareaAsignadaUsuario(
                     id=nuevoID,
-                    id_tarea=id,
+                    id_tarea=id_tarea,
                     id_usuario=user['id_usuario'],
                     id_user_actualizacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
@@ -473,7 +473,7 @@ def update_tarea(id='', username=None, **kwargs):
                     asigna_usuario.id_user_actualizacion=id_user_actualizacion
 
             usuario = {
-                "id": existe_usuario.id,
+                "id_usuario": existe_usuario.id,
                 "nombre": existe_usuario.nombre,
                 "apellido": existe_usuario.apellido,
                 "asignado": 'True',
@@ -504,7 +504,7 @@ def update_tarea(id='', username=None, **kwargs):
                 "fecha_asignacion": datetime.now()
                 }
                 usuarios.append(usuario)  """
-
+    print ("Arma el resultado")
     ###################Formatear el resultado####################
     result = {
         "id": tarea.id,
@@ -528,16 +528,18 @@ def update_tarea(id='', username=None, **kwargs):
         "fecha_actualizacion": tarea.fecha_actualizacion,
         "fecha_creacion": tarea.fecha_creacion,
         "id_grupo": tarea.id_grupo,
-        "grupos": grupos,
-        "usuarios": usuarios
+        "grupo": grupos,
+        "usuario": usuarios
     }
 
     db.session.commit()
     return result
 
 def update_lote_tareas_v2(username=None, **kwargs):
-    print("update_tarea_V2")
-    
+    print("update_tarea_V2 --")
+    print(kwargs)
+    print("#"*50)
+
     if username is not None:
         id_user_actualizacion = verifica_username(username)
         if id_user_actualizacion is not None:
@@ -557,7 +559,7 @@ def update_lote_tareas_v2(username=None, **kwargs):
         for tareas_update in upd_tarea:
            resp = update_tarea(tareas_update['id'], username, **tareas_update)
            if resp is None:
-                datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
+                datos_error.append("Tarea no procesada:"+tareas_update['id'])
                
            datos.append(resp)
 
@@ -1085,7 +1087,7 @@ def get_tarea_by_id(id):
                 if usuario_grupo is not None:
                     for usr_gr in usuario_grupo:
                         grupo_usr = {
-                           "id": usr_gr.id_grupo,
+                           "id_grupo": usr_gr.id_grupo,
                            "nombre": usr_gr.nombre
                         }
                         grupos_usr.append(grupo_usr)    
