@@ -235,6 +235,14 @@ class GetGroupOut(Schema):
     level = Integer()
     base = Boolean()
 
+class GroupxUsrOut(Schema):
+    id_grupo = String()
+    nombre = String()
+    nomenclador = Nested(NomencladorOut, only=("nomenclador", "desclarga")) 
+    eliminado = Boolean()
+    grupo_eliminado = Boolean()
+    grupo_suspendido = Boolean()
+
 class GroupOut(Schema):
     id_grupo = String()
     nombre = String()
@@ -760,7 +768,27 @@ class UsuarioTareaOut(Schema):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
 
+class DetalleUsuarioAllOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)
+    id_persona_ext = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    grupo = List(Nested(GroupxUsrOut))
+    tareas = List(Nested(TareaOut, only=("id", "titulo", "id_tipo_tarea", "tipo_tarea","eliminado")))
+    dni = String()
+    email = String()
+    username = String()
 
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+    
 class UsuarioAllOut(Schema):
     id = String()
     fecha_actualizacion = String()
@@ -781,6 +809,10 @@ class UsuarioAllOut(Schema):
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
+
+class DetalleUsuarioCountAllOut(Schema):
+    count = Integer()
+    data = Nested(DetalleUsuarioAllOut, many=True) 
 
 class UsuarioCountAllOut(Schema):
     count = Integer()
