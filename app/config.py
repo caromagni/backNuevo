@@ -29,10 +29,6 @@ class Config:
         },
         {
             'name': 'localhost',
-            'url': 'http://localhost:5005'
-        },
-        {
-            'name': 'localhost',
             'url': 'http://172.17.0.2:5005'
         },
         {
