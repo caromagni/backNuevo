@@ -1,7 +1,7 @@
 from apiflask import APIBlueprint, HTTPTokenAuth
 from common.api_key import *
 from flask import request, current_app
-from models.grupo_model import get_grupo_base, get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
+from models.grupo_model import get_all_grupos, get_all_base, get_all_grupos_detalle, update_grupo, insert_grupo, get_usuarios_by_grupo, get_grupo_by_id, delete_grupo, get_all_grupos_nivel, undelete_grupo
 from common.error_handling import ValidationError, DataError, DataNotFound, UnauthorizedError
 from typing import List
 from schemas.schemas import GroupIn, GroupPatchIn, GroupOut, GetGroupOut, GetGroupCountOut, GroupCountOut, GroupCountAllOut, GroupGetIn, UsuariosGroupOut, GroupIdOut, GroupAllOut, MsgErrorOut, GroupsBaseOut, GroupsBaseIn

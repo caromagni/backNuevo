@@ -435,14 +435,6 @@ class GroupsBaseOut(Schema):
     suspendido = Boolean()
     is_base = Boolean()
     usuarios = List(Nested(UsuariosGroupOut))
-
-class GroupBaseOut(Schema):
-    id_padre = String()
-    parent_name = String()
-    path_name = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
-    
     
 class GroupIdOut(Schema):
     id = String()
