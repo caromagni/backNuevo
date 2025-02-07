@@ -18,6 +18,7 @@ from blueprints.expediente import expediente_b
 from blueprints.nota import nota_b
 from blueprints.label import label_b
 from blueprints.fix_stuck_in_idle_connections import fix_b
+from blueprints.ai_assistant import ai_assistant
 from models.alch_model import Base
 from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
 from config import Config
@@ -111,6 +112,7 @@ def create_app():
     app.register_blueprint(expediente_b)
     app.register_blueprint(nota_b)
     app.register_blueprint(label_b)
+    app.register_blueprint(ai_assistant)
 
     
     
