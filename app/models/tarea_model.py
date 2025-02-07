@@ -1716,6 +1716,8 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "reasignada_grupo": reasignada_grupo
         }
         results.append(result)
+
+        print("Tarea:", result["id"], "-", result["titulo"])
     
     return results, total
 
