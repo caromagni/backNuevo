@@ -146,17 +146,18 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     
     if paginated_results is not None:
         results = []
-        tareas=[]
-        grupos=[]
+        
         for res in paginated_results:
             #Traigo los grupos del usuario
+            tareas=[]
+            grupos=[]
             
             res_grupos = db.session.query(UsuarioGrupo.id_usuario, Grupo.id, Grupo.nombre, Grupo.eliminado, Grupo.suspendido, Grupo.codigo_nomenclador
                                     ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False
                                     ).order_by(Grupo.nombre).all()
             
             #Traigo las tareas asignadas al usuario
-            res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
+            """ res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
                                     ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id, TareaAsignadaUsuario.eliminado==False
                                     ).order_by(Tarea.titulo).all()
             
@@ -170,7 +171,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                         "id_tipo_tarea": row.id_tipo_tarea,
                         "eliminado": row.eliminado
                     }
-                    tareas.append(tarea)
+                    tareas.append(tarea) """
 
             if res_grupos is not None:
                 #print("Tiene grupos-", len(res_grupos))
@@ -199,8 +200,8 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "dni": res.dni,
                 "username": res.username,
                 "email": res.email,
-                "grupo": grupos,
-                "tareas": tareas
+                "grupo": grupos
+                #"tareas": tareas
             }
             results.append(result)
 
@@ -233,7 +234,6 @@ def get_grupos_by_usuario(id):
                   ).join(UsuarioGrupo, Usuario.id == UsuarioGrupo.id_usuario
                   ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
                   ).filter(Usuario.id == id, UsuarioGrupo.eliminado==False).all()                                    
-
     return res
 
 
@@ -268,7 +268,7 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
-    session.add(nuevo_usuario)
+    db.session.add(nuevo_usuario)
     if grupo is not None:
         for group in grupo:
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
@@ -286,9 +286,9 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
                 id_user_actualizacion=id_user_actualizacion,
                 fecha_actualizacion=datetime.now()
             )
-            session.add(nuevo_usuario_grupo)
+            db.session.add(nuevo_usuario_grupo)
 
-    session.commit()
+    db.session.commit()
 
     return nuevo_usuario
 

@@ -41,7 +41,7 @@ def get_grupos_by_usr(id_usuario: str):
                     "valido":"fail",
                     "ErrorCode": 800,
                     "ErrorDesc":"Usuario sin grupos",
-                    "ErrorMsg":"No se encontraron datos de usuarios"
+                    "ErrorMsg":"No se encontraron datos de grupos para este usuario"
                 } 
             return result
         
@@ -111,6 +111,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
                 
                 "data": UsuarioOut().dump(res)
         }
+
         #return UsuarioOut().dump(res)    
         return data
         

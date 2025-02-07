@@ -35,7 +35,7 @@ def before_request():
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.patch('/grupo/<string:id_grupo>')
 @groups_b.input(GroupPatchIn) 
-@groups_b.output(GetGroupCountOut)
+@groups_b.output(GetGroupOut)
 
 def patch_grupo(id_grupo: str, json_data: dict):
     try:
