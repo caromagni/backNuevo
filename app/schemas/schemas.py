@@ -1207,6 +1207,7 @@ class LabelIn(Schema):
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)
     id_tarea = String()
+    ids_labels = List(String(),required=True, many=True)
 
 
 class LabelPatchIn(Schema):
