@@ -43,9 +43,11 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     nuevoID_label=uuid.uuid4()
     id_tarea = id_tarea
     tarea = get_tarea_by_id(id_tarea)
-    id_grupo = tarea[0]['grupos'][0]['id']
-    print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
-    id_grupo_padre=find_parent_id_recursive(session, id_grupo)
+    # id_grupo = tarea[0]['grupos'][0]['id']
+    id_grupo = id_grupo
+    # print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
+    print('db.session:', db.session)
+    id_grupo_padre=find_parent_id_recursive(db.session, id_grupo)
 
     print('id_grupo_padre:', id_grupo_padre)
 

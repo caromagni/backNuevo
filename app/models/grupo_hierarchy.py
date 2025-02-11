@@ -7,7 +7,7 @@ def find_parent_id(db, id_hijo: str):
     print("find parent id function")
     try:
         # Query the HerarquiaGrupoGrupo table to find the parent
-        hierarchy = db.session.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo == id_hijo).one()
+        hierarchy = db.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo == id_hijo).one()
         
         # If a parent is found, return its id
         return hierarchy.id_padre
@@ -21,6 +21,8 @@ def find_parent_id(db, id_hijo: str):
 
 def find_parent_id_recursive(db, id_hijo: str):
     print("find parent id recursive function")
+    print('db.session:', db)
+
     parent_id = find_parent_id(db, id_hijo)
     
     if parent_id is None:
