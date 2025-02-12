@@ -290,4 +290,4 @@ def getGrupoBase(id: str):
         current_app.session.remove()
         return res
     except Exception as err:
-        raise ValidationError(err)        
+        raise ValidationError(err)     

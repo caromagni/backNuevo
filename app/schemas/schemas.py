@@ -320,6 +320,24 @@ class GroupsUsuarioOut(Schema):
     fecha_hasta= String()
     fecha_actualizacion= String()
     id_user_actualizacion= String()
+    
+    
+class GroupsBaseUsrOut(Schema):
+    #id_usuario = String()
+    #nombre = String()
+    #apellido = String()
+    id_padre = String()
+    id_grupo = String()
+    nombre_grupo = String()
+    codigo_nomenclador = String()
+    descripcion = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+    fecha_creacion = String()
+    fecha_hasta= String()
+    fecha_actualizacion= String()
+    id_user_actualizacion= String()
+
 
 class UsuariosGroupOut(Schema):
     nombre_grupo = String()

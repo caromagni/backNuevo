@@ -5,7 +5,11 @@ from flask import current_app
 from alchemy_db import db
 def find_parent_id(db, id_hijo: str):
     print("find parent id function")
+    print('db.session:', db)
+    print('id_hijo:', id_hijo)
     try:
+            # query_usr = db.session.query(Usuario).filter(Usuario.email == nombre_usuario).first()
+
         # Query the HerarquiaGrupoGrupo table to find the parent
         hierarchy = db.query(HerarquiaGrupoGrupo).filter(HerarquiaGrupoGrupo.id_hijo == id_hijo).one()
         
