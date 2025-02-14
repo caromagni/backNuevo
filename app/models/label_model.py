@@ -117,9 +117,7 @@ def update_label(id='', **kwargs):
 
 # Consulta de etiquetas por parámetros
 def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
-   
-    
-    
+       
     if username is not None:
         id_user = verifica_username(username)
     else:
@@ -212,22 +210,31 @@ def delete_label(username=None, id_label=None):
 ############################## LABELS x GRUPO BASE ########################################
 ### Busca las etiquetas activas según el grupo base disponibles para todo el árbol de dicho grupo ####
 
-def get_active_labels(id_grupo_base):
+def get_active_labels(ids_grupos_base):
     print('entra a get de labels por grupo base aaaahhhhhhhhhhkfhaksfhkasdfhñasdfh')
+    print('ids_grupos_base:', ids_grupos_base)
     # id_grupo_base = find_parent_id_recursive(db, id_grupo)
     # print('*********************************************id_grupo_base:', id_grupo_base)
     print("##"*50)
-    # ids_list = ids_grupos_base.split(',')
-    # for id in ids_list:
-    print('id_grupos_base:', id)
-    print("#"*50)
-    labels_group = db.session.query(Label).filter(Label.id_grupo_padre == id, Label.eliminado == False).all()
-    if labels_group is not None:
-        print('labels:', labels_group)
-        total = len(labels_group)
-        return labels_group, total
-    else:
-        return 'No hay labels para este grupo'
+    ids_list = ids_grupos_base.split(',')
+    print('ids_list:', ids_list)
+    labels_group_array = []
+    total = 0
+    for id in ids_list:
+        print('id_grupos_base:', id)
+        print("#"*50)
+        labels_group = db.session.query(Label).filter(Label.id_grupo_padre == id, Label.eliminado == False).all()
+        print('labels group por id:', labels_group)
+        if labels_group is not None:
+            print('labels:', labels_group)
+            labels_group_array.append(labels_group)
+            total = total + len(labels_group)
+        
+            # total = len(labels_group)
+        #     print('saliendo del get_active_labels')   
+        # else:
+        #     return 'No hay labels para este grupo'
+    return labels_group_array, total
     
 
 ############################## LABELS x TAREA ########################################

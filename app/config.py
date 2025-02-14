@@ -34,7 +34,11 @@ class Config:
         {
             'name': 'localhost',
             'url': 'http://localhost:3000'
-        }    
+        },
+        {
+            'name': 'localhost',
+            'url': 'http://localhost:5005'
+        }      
     ]
     DESCRIPTION='APIs Sistema de Tareas'
     TITLE='APIs Tareas'
