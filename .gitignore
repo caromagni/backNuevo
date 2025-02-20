@@ -141,3 +141,4 @@ start.sh
 uwsgi.dev-localhost.ini
 #instala_sops.sh
 
+app/ai_temp_data/*
