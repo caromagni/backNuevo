@@ -4,16 +4,25 @@ from typing import List
 from schemas.schemas import GroupHOut, HerarquiaGroupGroupOut, HerarquiaGroupGroupInput, HerarquiaOut,HerarquiaAllOut
 from common.error_handling import ValidationError
 from common.auth import verificar_header
-from flask import current_app, request
+from flask import current_app, request, g
 
 herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
-    if not verificar_header():
-        #raise UnauthorizedError("Token o api-key no validos")   
-        print("Token o api key no validos")  
+    jsonHeader = verificar_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            print("Token o api key no validos")
+            user_origin=''
+    else:
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
 ####################################################
 
 @herarquia_b.doc(description='Listado de Grupos padres - Hijos', summary='Grupos padres - hijos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
