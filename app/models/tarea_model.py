@@ -59,16 +59,18 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     id_usuario_asignado=None
     #if type_header is not "api_key":
     if usr_header is not None:
+        print("usr_header:", usr_header)
         print("verifying token username")
         id_user_actualizacion = verifica_username(usr_header)
-    #else:
+    else:
         #raise Exception("Error en el ingreso de Usuario. Usuario no existente")
     
-    if username is not None:
-        print("verifying username: " + username)
-        id_user_actualizacion = verifica_username(username)
-    else:
-        raise Exception("Error en el ingreso de Usuario. Usuario no existente")    
+        if username is not None:
+            print("verifying username: " + username)
+            id_user_actualizacion = verifica_username(username)
+        else:
+            raise Exception("Error en el ingreso de Usuario. Usuario no existente")  
+          
 
     if id_expediente is not None:
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente or ExpedienteExt.id_ext== id_expediente).first()
