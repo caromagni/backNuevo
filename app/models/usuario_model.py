@@ -304,8 +304,9 @@ def update_usuario(id='',username=None, **kwargs):
     else:
         raise Exception("Usuario no ingresado")
     
-    usuario = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
-   
+    usuario = db.session.query(Usuario).filter(Usuario.id == id).first()
+    #Usuario.eliminado==False
+
     if usuario is None:
         return None
     
@@ -335,6 +336,8 @@ def update_usuario(id='',username=None, **kwargs):
         usuario.id_user_actualizacion = id_user_actualizacion
     if 'suspendido' in kwargs:
         usuario.suspendido = kwargs['suspendido']
+    if 'eliminado' in kwargs:
+        usuario.eliminado = kwargs['eliminado']    
     usuario.fecha_actualizacion = datetime.now()
 
     if 'grupo' in kwargs:

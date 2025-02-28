@@ -754,6 +754,7 @@ class UsuarioInPatch(Schema):
         validate_char
     ])
     suspendido = Boolean()
+    eliminado = Boolean()
     id_user_actualizacion = String()
     id_persona_ext = String()
     grupo = List(Nested(ListUsrGrupo))
