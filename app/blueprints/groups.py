@@ -156,7 +156,7 @@ def get_grupo_id(id: str):
         print(traceback.format_exc())
         raise ValidationError(err)
 
-@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut(many=True))
