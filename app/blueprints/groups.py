@@ -26,8 +26,8 @@ def before_request():
     if jsonHeader is None:
         #if not verificar_header():
             #raise UnauthorizedError("Token o api-key no validos")   
-            user_origin=''
-            type_origin=''
+            user_origin=None
+            type_origin=None
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
@@ -107,7 +107,7 @@ def get_grupo(query_data: dict):
         raise ValidationError(err)  
     
 #############DETALLE DE GRUPOS###################    
-@groups_b.doc(description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo_detalle')
 @groups_b.input(GroupGetIn, location='query')
 @groups_b.output(GroupCountAllOut)
@@ -145,7 +145,7 @@ def get_grupo_detalle(query_data: dict):
         print(traceback.format_exc())
         raise ValidationError(err)  
 
-@groups_b.doc(description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
 @groups_b.output(GroupIdOut())
 def get_grupo_id(id: str):
@@ -159,7 +159,7 @@ def get_grupo_id(id: str):
         print(traceback.format_exc())
         raise ValidationError(err)
 
-@groups_b.doc(description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase')
 @groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut(many=True))
@@ -180,7 +180,7 @@ def get_all_grupobase(query_data: dict):
         print(traceback.format_exc())
         raise ValidationError(err)        
 
-@groups_b.doc(description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo/<string:id_grupo>')
 #@groups_b.input(PageIn, location='query')
 @groups_b.output(UsuariosGroupOut(many=True))
@@ -223,16 +223,17 @@ def post_grupo(json_data: dict):
         raise ValidationError(err)  
      
 ##############DELETE####################
-@groups_b.doc(description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @groups_b.delete('/grupo/<string:id>')
 #@groups_b.output(GroupOut)
 def del_grupo(id: str):
     try:
+        username=g.username
         #eliminar el grupo con sus hijos
         todos=False
         #elimina solo el grupo
         # todos=False
-        res = delete_grupo(id, todos)
+        res = delete_grupo(username, id, todos)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
             
@@ -249,12 +250,13 @@ def del_grupo(id: str):
         raise ValidationError(err)
     
 ##################UNDELETE####################
-@groups_b.doc(description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
 @groups_b.patch('/grupo_undelete/<string:id>')
 def restaura_grupo(id: str):
     try:
+        username=g.username
         todos=False
-        res = undelete_grupo(id)
+        res = undelete_grupo(username, id)
         if res is None:
             raise DataNotFound("Grupo no encontrado")
 
@@ -270,7 +272,7 @@ def restaura_grupo(id: str):
         raise ValidationError(err)
     
   
-@groups_b.doc(description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.input(GroupsBaseIn, location='query')
 @groups_b.output(GroupsBaseOut)
 @groups_b.get('/grupo_base/<string:id>')
