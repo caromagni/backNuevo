@@ -1058,9 +1058,23 @@ def eliminar_grupo_recursivo(id):
 
     
 
-def delete_grupo(id,todos=False):
+def delete_grupo(username=None, id='', todos=False):
     #print("Borrando grupo con id:", id)
     #session = current_app.session
+    
+
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if username is None:
+        id_user_actualizacion='4411e1e8-800b-439b-8b2d-9f88bafd3c29'
+
+    if id_user_actualizacion is not None:
+        verifica_usr_id(id_user_actualizacion)
+    else:
+        logger.error("Id de usuario no ingresado")
+        #raise Exception("Usuario no ingresado")    
+    
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == False).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
@@ -1100,7 +1114,16 @@ def delete_grupo(id,todos=False):
 
     return grupo
 
-def undelete_grupo(id):
+def undelete_grupo(username=None, id=None):
+    
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+
+    if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+    else:
+            raise Exception("Usuario no ingresado")
+    
     grupo = db.session.query(Grupo).filter(Grupo.id == id, Grupo.eliminado == True).first()
     if grupo is None:
         raise Exception("Grupo no encontrado")
