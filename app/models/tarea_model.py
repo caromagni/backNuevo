@@ -189,7 +189,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
-        caratula_expediente=caratula_expediente,
+        #caratula_expediente=caratula_expediente,
         id_tipo_tarea=id_tipo_tarea,
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
@@ -330,8 +330,8 @@ def update_tarea(id_tarea='', username=None, **kwargs):
     if tarea is None:
         return None
     
-    if 'caratula_expediente' in kwargs:
-        tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
+    #if 'caratula_expediente' in kwargs:
+        #tarea.caratula_expediente = kwargs['caratula_expediente'].upper()
     if 'cuerpo' in kwargs:
         tarea.cuerpo = kwargs['cuerpo']
     if 'eliminable' in kwargs:
@@ -546,7 +546,7 @@ def update_tarea(id_tarea='', username=None, **kwargs):
         "subtipo_tarea": tarea.subtipo_tarea,
         "id_expediente": tarea.id_expediente,
         "expediente": tarea.expediente,
-        "caratula_expediente": tarea.caratula_expediente,
+       #"caratula_expediente": tarea.caratula_expediente,
         "id_actuacion": tarea.id_actuacion,
         "actuacion": tarea.actuacion,
         "cuerpo": tarea.cuerpo,
