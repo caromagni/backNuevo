@@ -899,6 +899,9 @@ class TareaUsuarioIn(Schema):
         validate_char
     ])
 
+class TareaAlertaIn(Schema):
+    dias_aviso = Integer(required=True)
+    
 class TareaUsrOut(Schema):
     id = String()
     titulo = String()

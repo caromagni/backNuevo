@@ -37,8 +37,9 @@ def nombre_prioridad(prioridad):
         return "Baja"
 
 def es_habil(fecha):
-    if fecha.weekday() >= 5:
-        return True    
+    """ if fecha.weekday() >= 5:
+        return True  """ 
+    return fecha.weekday() < 5  
     
 def calcular_fecha_vencimiento(fecha, plazo):
     logger.info("calcula fecha vencimiento:" + str(fecha) + "-" + str(plazo))
@@ -47,10 +48,60 @@ def calcular_fecha_vencimiento(fecha, plazo):
     dias_agregados = 0
     while dias_agregados < plazo:
         fecha_vencimiento = fecha_vencimiento + timedelta(days=1)
-        if not es_habil(fecha_vencimiento):
+        if es_habil(fecha_vencimiento):
             dias_agregados = dias_agregados + 1
 
     return fecha_vencimiento
+
+def calcular_dias_vencimiento(fecha_vencimiento):
+    """Calcula los días hábiles restantes hasta la fecha de vencimiento"""
+    fecha_actual = datetime.now().date()  # Tomar solo la fecha, sin hora
+    fecha_vencimiento = fecha_vencimiento.date()  # Asegurar que es solo fecha
+    
+    dias_vencimiento = 0
+    fecha_intermedia = fecha_actual
+    
+    while fecha_intermedia < fecha_vencimiento:
+        if es_habil(fecha_intermedia):
+            dias_vencimiento += 1
+        fecha_intermedia += timedelta(days=1)  # Pasar al siguiente día
+    
+    logger.info("dias_vencimiento:" + str(dias_vencimiento) + "-" + str(fecha_vencimiento))
+    return dias_vencimiento
+
+def tareas_a_vencer(username=None, dias_aviso=None):
+    total = 0
+    if username is not None:
+        id_user = verifica_username(username)
+
+        if id_user is not None:
+            verifica_usr_id(id_user)
+        else:
+            raise Exception("Debe ingresar username o id_user_actualizacion")
+            
+    if dias_aviso is None:
+        dias_aviso = 365  # Por defecto, 365 días de aviso
+
+    logger.info("tareas_a_vencer")
+    #Busco las tareas asignadas a todos los grupos del usuario username
+    tareas = (db.session.query(Tarea)
+              .join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea)
+              .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
+              .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
+              .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
+                      Tarea.eliminado == False,
+                      Tarea.estado != 3,
+                      UsuarioGrupo.id_usuario==id_user,
+                      UsuarioGrupo.eliminado==False)  # Estado activo
+              .all())
+    if tareas is not None:
+        total = len(tareas)
+        logger.info("Cantidad de tareas_a_vencer:" + str(total))    
+
+    logger.info("Cantidad de tareas_a_vencer:" + str(total))
+    tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    total = len(tareas_vencer)
+    return tareas_vencer, total
 
 
 def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=False, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
@@ -82,6 +133,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == id_expediente).first()
 
         if expediente is None:
+            #Cuando viene del portal o de expedientes, se ingresa el id_ext
             expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id_ext == id_expediente).first()
             if expediente is None:
                 nuevoID_expte=uuid.uuid4()
