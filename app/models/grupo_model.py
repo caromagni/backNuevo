@@ -300,7 +300,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-@cache.cached(timeout=500, make_cache_key=lambda: f"get_all_base_{id}_{usuarios}")
+@cache.cached(timeout=500)
 def get_all_base(id, usuarios=False):
     cursor=None
    
