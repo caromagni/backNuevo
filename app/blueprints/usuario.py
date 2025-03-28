@@ -20,24 +20,18 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    print ("metodo:",request.method)
-    print("encabezados:",request.headers)
-    if request.method == 'OPTIONS':
-        print('usuario.py')
-        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
-        return jsonify({"message": "CORS preflight handled"}), 200
+    
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+            user_origin=None
+            type_origin=None
     else:
-        jsonHeader = verify_header()
-        
-        if jsonHeader is None:
-                user_origin=None
-                type_origin=None
-        else:
-                user_origin = jsonHeader['user_name']
-                type_origin = jsonHeader['type']
-        
-        g.username = user_origin
-        g.type = type_origin
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 #################GET GRUPOS POR USUARIO####################    
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Grupos al que pertenece un Usuario', summary='Grupos por Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -331,12 +325,14 @@ def get_groups_base_by_usr(query_data: dict):
             suspendido=request.args.get('suspendido')                
 
         res, cant=get_all_usuarios_detalle(page, per_page, nombre, apellido, id_grupo, dni, username, eliminado, suspendido)
-        for r in res[0]['grupo']:
-            #print("r:",r)
-            id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
-            #print("id_padre:",id_padre)
-            r['id_padre']=id_padre
-            print("r con id padre:",r)
+        if res is not None or len(res)>0:
+        
+            for r in res[0]['grupo']:
+                #print("r:",r)
+                id_padre=find_parent_id_recursive(db.session, r['id_grupo'])
+                #print("id_padre:",id_padre)
+                r['id_padre']=id_padre
+                print("r con id padre:",r)
 
         return res
     

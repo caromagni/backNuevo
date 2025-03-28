@@ -8,9 +8,6 @@ import traceback
 
 def verify_jwt_in_header():
     # Verificar si el método es OPTIONS
-    if request.method == 'OPTIONS':
-        print("OPTIONS")
-        return None 
     
     token_encabezado = request.headers.get('Authorization')
     jwt_pk=current_app.config['JWT_PUBLIC_KEY'] 
@@ -22,8 +19,8 @@ def verify_jwt_in_header():
 
     if not token_encabezado:
         logger.error("No se proporciono token en el encabezado")
-        raise UnauthorizedError('No se proporciono token en el encabezado')
-        #return None
+        #raise UnauthorizedError('No se proporciono token en el encabezado')
+        return None
    
     
     if token_encabezado:
@@ -84,9 +81,6 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
 def verify_header():
     ############### verifico si viene api key######################
     try:
-        if request.method == 'OPTIONS':
-            print("Solicitud OPTIONS recibida, permitiendo sin autenticación Verify Header")
-            return jsonify({"message": "CORS preflight handled"}), 200
         
         token_payload = verify_jwt_in_header()
         x_api_key = request.headers.get('x-api-key')
@@ -118,4 +112,4 @@ def verify_header():
         logger.info("Error en la verificacion de header")
         logger.error(err)
         print(traceback.format_exc())
-        raise UnauthorizedError(err)
+        #raise UnauthorizedError(err)

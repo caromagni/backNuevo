@@ -27,23 +27,18 @@ tarea_b = APIBlueprint('tarea_blueprint', __name__)
 @tarea_b.before_request
 def before_request():
     print("ENTRANDO A BEFORE REQUEST")
-    print("tarea.py - before_request -", request.method)
-    print("encabezados:",request.headers)
-    if request.method == 'OPTIONS':
-        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
-        return jsonify({"message": "CORS preflight handled"}), 200
+       
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+            user_origin=''
+            type_origin=''
     else:
-        jsonHeader = verify_header()
-        
-        if jsonHeader is None:
-                user_origin=''
-                type_origin=''
-        else:
-                user_origin = jsonHeader['user_name']
-                type_origin = jsonHeader['type']
-        
-        g.username = user_origin
-        g.type = type_origin
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
      
 
 ######################Control de acceso######################
