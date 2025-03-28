@@ -11,13 +11,7 @@ herarquia_b = APIBlueprint('herarquia_blueprint', __name__)
 #################Before requests ##################
 @herarquia_b.before_request
 def before_request():
-    print("herarquia.py - before_request -", request.method)
-    print("encabezados:",request.headers)
-    if request.method == 'OPTIONS':
-        print('grupo.py')
-        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
-        return jsonify({"message": "CORS preflight handled"}), 200
-    
+   
     jsonHeader = verify_header()
     
     if jsonHeader is None:

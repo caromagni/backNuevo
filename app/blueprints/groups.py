@@ -21,26 +21,20 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #################Before requests ##################
 @groups_b.before_request
 def before_request():
-    print("grupo.py - before_request -", request.method)
-    print("encabezados:",request.headers)
-    if request.method == 'OPTIONS':
-        print('grupo.py')
-        print("Solicitud OPTIONS recibida, permitiendo sin autenticación")
-        return jsonify({"message": "CORS preflight handled"}), 200
+    
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+        #if not verificar_header():
+            #raise UnauthorizedError("Token o api-key no validos")   
+            user_origin=None
+            type_origin=None
     else:
-        jsonHeader = verify_header()
-        
-        if jsonHeader is None:
-            #if not verificar_header():
-                #raise UnauthorizedError("Token o api-key no validos")   
-                user_origin=None
-                type_origin=None
-        else:
-                user_origin = jsonHeader['user_name']
-                type_origin = jsonHeader['type']
-        
-        g.username = user_origin
-        g.type = type_origin
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 ####################################################
 
