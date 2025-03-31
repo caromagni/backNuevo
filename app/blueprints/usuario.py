@@ -20,7 +20,8 @@ usuario_b = APIBlueprint('usuario_blueprint', __name__)
 #################Before requests ##################
 @usuario_b.before_request
 def before_request():
-    
+    print("Before request user.py")
+
     jsonHeader = verify_header()
     
     if jsonHeader is None:

@@ -65,7 +65,7 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
             break
     
     if stored_hashed_api_key == 'NOT_FOUND':
-        print("API Key not found")
+        logger.error("API Key not found")
         return False
     
     #convert stored_api_key to bytes
@@ -112,4 +112,4 @@ def verify_header():
         logger.info("Error en la verificacion de header")
         logger.error(err)
         print(traceback.format_exc())
-        #raise UnauthorizedError(err)
+        raise UnauthorizedError(err)
