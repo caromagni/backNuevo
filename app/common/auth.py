@@ -117,4 +117,4 @@ def verify_header():
     except Exception as err:
         logger.info("Error en la verificacion de header")
         logger.error(err)
-        raise UnauthorizedError(err)
+        #raise UnauthorizedError(err)

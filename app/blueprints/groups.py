@@ -81,6 +81,20 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 #     response.headers["Access-Control-Allow-Credentials"] = "true"
     
 #     return response
+@groups_b.route("/grupo", methods=["OPTIONS"])
+def before_request():
+    print("************ingreso a before_request Usuarios************")
+    jsonHeader = verify_header()
+    
+    if jsonHeader is None:
+            user_origin=None
+            type_origin=None
+    else:
+            user_origin = jsonHeader['user_name']
+            type_origin = jsonHeader['type']
+    
+    g.username = user_origin
+    g.type = type_origin
 
 
 
