@@ -19,69 +19,10 @@ groups_b = APIBlueprint('groups_Blueprint', __name__)
 
 
 #################Before requests ##################
-# @groups_b.before_request
-# def before_request():
-#     # Skip authentication for OPTIONS requests
-#     print("REQUEST METHOD INCOMING IN GROUPS")
-#     print(request.method)
-#     print("#########################################################")
-#     if request.method == 'OPTIONS':
-#         print("return before request group")
-#         response = make_response()
-          
-#         response.headers["Access-Control-Allow-Origin"] = '*'
-    
-# #     # Explicitly match the requested headers
-#         response.headers["Access-Control-Allow-Methods"] = "*"
-    
-#         response.headers["Access-Control-Allow-Headers"] = "*"
-    
-#         response.headers["Content-Length"] = "0"
-#         return response
-
-#     print("GROUPS BEFORE REQUEST")
-#     jsonHeader = verify_header()
-    
-#     if jsonHeader is None:
-#         #if not verificar_header():
-#             #raise UnauthorizedError("Token o api-key no validos")   
-#             user_origin=None
-#             type_origin=None
-#     else:
-#             user_origin = jsonHeader['user_name']
-#             type_origin = jsonHeader['type']
-    
-#     g.username = user_origin
-#     g.type = type_origin
-
-####################################################
-
-#seems that the HTTP get RESPONSE headers might be emtpy??
 
 
-# @groups_b.route("/grupo", methods=["OPTIONS"])
-# def grupo_options_handler():
-#     response = make_response()
-#     print("MAKING RESPONSE")
-#     # Dynamic origin handling
-#     response.headers["Allow"] = "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
-#     request_origin = request.headers.get("Origin")
-#     allowed_origins = ["http://localhost:2500"]
-    
-#     if request_origin in allowed_origins:
-#         response.headers["Access-Control-Allow-Origin"] = request_origin
-    
-#     # Explicitly match the requested headers
-#     response.headers["Access-Control-Allow-Methods"] = "GET, HEAD, POST, OPTIONS, PUT, PATCH, DELETE"
-    
-#     response.headers["Access-Control-Allow-Headers"] = "access-control-allow-methods,access-control-allow-origin,authorization,content-type"
-    
-#     # Additional CORS headers
-#     response.headers["Access-Control-Max-Age"] = "86400"  # Cache preflight response for 24 hours
-#     response.headers["Access-Control-Allow-Credentials"] = "true"
-    
-#     return response
-@groups_b.route("/grupo", methods=["OPTIONS"])
+#@groups_b.route("/grupo", methods=["OPTIONS"])
+@groups_b.before_request
 def before_request():
     print("************ingreso a before_request Usuarios************")
     jsonHeader = verify_header()
