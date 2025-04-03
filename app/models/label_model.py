@@ -331,6 +331,8 @@ def get_label_by_tarea(id_tarea):
         for row in tasks_labels:
             active_label = db.session.query(
                 LabelXTarea.id,
+                LabelXTarea.id_label,
+                LabelXTarea.id_tarea,
                 Label.nombre,
                 Label.color
             ).join(
@@ -353,33 +355,33 @@ def get_label_by_tarea(id_tarea):
     print('Total active labels:', total)
     return active_labels, total
 
-def delete_label_tarea_model(username, **kwargs):
-    print('entra a delete de labels por tarea')
-    print('kwargs:', kwargs)
-    id = kwargs['id']
-    # id_tarea = kwargs['id_tarea']
-       
-    if username is not None:
-        id_user_actualizacion = verifica_username(username)
+def delete_label_tarea_model(username=None, id=None):
+    if not username:
+        raise Exception("Usuario no ingresado")
 
-    if id_user_actualizacion is not None:
-            verifica_usr_id(id_user_actualizacion)
-    else:
-            raise Exception("Usuario no ingresado")
+    # Verify the username and get the user ID
+    id_user_actualizacion = verifica_username(username)
+    if not id_user_actualizacion:
+        raise Exception("Usuario no ingresado")
 
-   
-    active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id == uuid.UUID(id)).first()
-    print('consulta labels por id de tarea')
-    print('active_label:', active_label)
+    # Query the active label by ID
+    try:
+        active_label = db.session.query(LabelXTarea).filter(LabelXTarea.id == uuid.UUID(id)).first()
+    except ValueError:
+        raise Exception("ID inválido proporcionado")
 
-    if active_label is not None:
+    print('Consulta labels por ID de tarea')
+    print('Active label:', active_label)
+
+    if active_label:
+        # Mark the label as inactive and update metadata
         active_label.activa = False
         active_label.fecha_actualizacion = datetime.now()
         active_label.id_user_actualizacion = id_user_actualizacion
         db.session.commit()
-        print('tarea eliminada')
-        return active_label       
+        print('Etiqueta desactivada correctamente')
+        return active_label
     else:
-        print("La tarea no tiene etiquetas activas")
+        print("No se encontraron etiquetas activas para la tarea")
         return None
 

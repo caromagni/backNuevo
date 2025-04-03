@@ -217,37 +217,39 @@ def put_label_tarea(json_data: dict):
         print(traceback.format_exc())
         raise ValidationError(err)    
     
+@label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.delete('/label_tarea_del/')
+@label_b.delete('/label_tarea_del/<string:id>')
 # @label_b.input(LabelXTareaPatchIn)
-@label_b.output(LabelXTareaIdOut)
-def delete_label_tarea(json_data: dict):
+# @label_b.output(LabelXTareaIdOut)
+def delete_label_tarea(id: str):
+
     try:
         username = g.username
         print("##"*50)
-        print(json_data)
+        print(id)
         print("#"*50)
-        res = delete_label_tarea_model(username, **json_data)
+        res = delete_label_tarea_model(username, id)
         print("res:",res)   
         if res is None:
-            result = {
-                    "valido":"fail",
-                    "code": 800,
-                    "error": "Error en delete label",
-                    "error_description": "No se pudo eliminar la etiqueta"
-                }
-            res = MsgErrorOut().dump(result)
+            raise DataNotFound("Tipo de tarea no encontrado")
+        else:
+            result={
+                    "Msg":"Registro eliminado",
+                    "Id label x tarea": id,
+                    } 
         
-        return LabelXTareaIdOut().dump(res)
+        return result
     
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)    
-    
+
+
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
 # @label_b.input(LabelXTareaGetIn)
-# @label_b.output(LabelCountAllOut)
+@label_b.output(LabelCountAllOut)
 def get_active_labels_grupo(ids_grupos_base:str):
     try:
         labels = []
