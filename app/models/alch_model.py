@@ -213,7 +213,7 @@ class Label(Base):
     fecha_eliminacion = Column(DateTime)
     fecha_actualizacion = Column(DateTime)
     id = Column(UUID, primary_key=True)
-    id_grupo_padre = Column(UUID)
+    id_grupo_base = Column(UUID)
     id_user_creacion = Column(UUID, nullable=False)
     id_user_actualizacion = Column(UUID)
     nombre = Column(String)

@@ -34,8 +34,9 @@ from models.alch_model import Label, Grupo, HerarquiaGrupoGrupo
 #         return buscar_grupo_padre_recursivo(padre.id)
 
 # Creación de nueva etiqueta (se crea asociada a una tarea y un grupo base específico)
-def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_user_creacion=None, id_grupo=None, id_tarea=None, ids_labels=[]):
+def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eliminacion=None, id_user_creacion=None, id_grupo=None, id_tarea=None):
     
+    ids_labels=[]
     
     if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -52,9 +53,9 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     id_grupo = id_grupo
     # print('grupo:', tarea[0]['grupos'][0]['id'], 'usuario ingresante:', id_user_creacion)
     print('db.session:', db.session)
-    id_grupo_padre=find_parent_id_recursive(db.session, id_grupo)
+    id_grupo_base=find_parent_id_recursive(db.session, id_grupo)
 
-    print('id_grupo_padre:', id_grupo_padre)
+    print('id_grupo_padre:', id_grupo_base)
 
     nueva_label = Label(
         eliminado=eliminado,
@@ -63,7 +64,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
         id_user_creacion=id_user_creacion,
         id=nuevoID_label,
         color=color,
-        id_grupo_padre=id_grupo_padre,
+        id_grupo_base=id_grupo_base,
         nombre=nombre,
     )
 
@@ -120,7 +121,7 @@ def update_label(id='', **kwargs):
     return result
 
 # Consulta de etiquetas por parámetros
-def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
+def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_base=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None, label_color=''):
        
     """ if username is not None:
         id_user_actualizacion = verifica_username(username)
@@ -135,8 +136,8 @@ def get_all_label(username=None, page=1, per_page=30, nombre='', id_grupo_padre=
     if nombre != '':
         query = query.filter(Label.nombre.ilike(f'%{nombre}%'))
 
-    if id_grupo_padre is not None:
-        query = query.filter(Label.id_grupo_padre== id_grupo_padre)
+    if id_grupo_base is not None:
+        query = query.filter(Label.id_grupo_base== id_grupo_base)
 
     if id_tarea is not None:
         query = query.filter(Label.id_tarea== id_tarea)
@@ -211,7 +212,7 @@ def get_active_labels(ids_grupos_base):
     for id in ids_list:
         print('id_grupos_base:', id)
         print("#"*50)
-        labels_group = db.session.query(Label).filter(Label.id_grupo_padre == id, Label.eliminado == False).all()
+        labels_group = db.session.query(Label).filter(Label.id_grupo_base == id, Label.eliminado == False).all()
         print('labels group por id:', labels_group)
         if labels_group is not None:
             print('labels:', labels_group)
@@ -346,6 +347,8 @@ def get_label_by_tarea(id_tarea):
             if active_label:
                 label = {
                     "id": active_label.id,
+                    "id_label": active_label.id_label,
+                    "id_tarea": active_label.id_tarea,
                     "nombre": active_label.nombre,
                     "color": active_label.color
                 }

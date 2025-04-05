@@ -1246,7 +1246,7 @@ class LabelIn(Schema):
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)
     id_tarea = String()
-    ids_labels = List(String(),required=True, many=True)
+    ids_labels = List(String(),required=False, many=True)
 
 
 class LabelPatchIn(Schema):
@@ -1271,7 +1271,7 @@ class LabelOut(Schema):
     fecha_creacion = String()
     fecha_actualizacion = String()
     id_user_creacion = String()
-    id_grupo_padre = String()
+    id_grupo_base = String()
     
 
 class LabelAllOut(Schema):
@@ -1283,7 +1283,7 @@ class LabelAllOut(Schema):
     fecha_creacion = String()
     fecha_actualizacion = String()
     id_user_creacion = String()
-    id_grupo_padre = String()
+    id_grupo_base = String()
 
 
 class LabelIdOut(Schema):
@@ -1295,7 +1295,7 @@ class LabelIdOut(Schema):
     fecha_creacion = String()
     fecha_actualizacion = String()
     id_user_creacion = String()
-    id_grupo_padre = String()
+    id_grupo_base = String()
 
     
 class LabelGetIn(Schema):

@@ -54,7 +54,7 @@ def get_labels(query_data: dict):
         label_color = ""
         id_user_creacion = None
         id_tarea = None
-        id_grupo_padre = None
+        id_grupo_base = None
         #fecha_desde = "01/01/1900"
         #fecha_hasta = datetime.now().strftime("%d/%m/%Y")
         fecha_desde=datetime.strptime("01/01/1900","%d/%m/%Y").replace(hour=0, minute=0, second=0)
@@ -79,7 +79,7 @@ def get_labels(query_data: dict):
         if request.args.get('label_color') is not None:
             label_color = request.args.get('label_color')  
 
-        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_padre, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
+        res, cant = get_all_label(username, page, per_page, nombre, id_grupo_base, id_tarea, id_user_creacion, fecha_desde, fecha_hasta, eliminado, label_color)    
         data = {
             "count": cant,
             "data": LabelAllOut().dump(res, many=True)
@@ -248,38 +248,37 @@ def delete_label_tarea(id: str):
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.get('/label_grupo/<string:ids_grupos_base>')
-# @label_b.input(LabelXTareaGetIn)
-@label_b.output(LabelCountAllOut)
-def get_active_labels_grupo(ids_grupos_base:str):
+# @label_b.output(LabelCountAllOut)
+def get_active_labels_grupo(ids_grupos_base: str):
     try:
-        labels = []
+        # Fetch active labels and count
         res, cant = get_active_labels(ids_grupos_base)
-        for label in res:           
-            # data = {
-            #     'data': LabelAllOut().dump(label, many=True)
-            # }
-            labels.append(LabelAllOut().dump(label, many=True))
-        print("array labels formateado:",labels)   
+        print("res:", res)
         if res is None:
             result = {
-                    "valido":"fail",
-                    "code": 800,
-                    "error": "Error en delete label",
-                    "error_description": "No se pudo eliminar la etiqueta"
-                }
-            res = MsgErrorOut().dump(result)
-        
-            return LabelAllOut().dump(res)
-    
-        # data = {
-        #         "count": str(cant),            
-        #         "data": LabelAllOut().dump(res, many=True)
+                "valido": "fail",
+                "code": 800,
+                "error": "Error en obtener etiquetas",
+                "error_description": "No se encontraron etiquetas activas"
+            }
+            return MsgErrorOut().dump(result)
 
-        #     }
-        # print("result:",data) 
-        print('saliendo del label_b.get /label_grupo/<string:ids_grupos_base>')
-        return labels
-    
+        # Serialize each label and append to the list
+        labels = []
+        for label in res:
+            if label != []: 
+                labels.append(LabelAllOut().dump(label, many=True))
+
+        
+
+        # Prepare the response data
+        data = {
+            "count": str(cant),
+            "data": labels
+        }
+        print("result:", data)
+        return data
+
     except Exception as err:
         print(traceback.format_exc())
         raise ValidationError(err)
