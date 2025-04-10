@@ -24,7 +24,7 @@ def get_usuario_by_id(id):
                                   ).join(Grupo, Grupo.id==UsuarioGrupo.id_grupo).filter(UsuarioGrupo.id_usuario== res.id, UsuarioGrupo.eliminado==False).all()
         
         #Traigo los grupos hijos
-        res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado
+        res_tareas = db.session.query(TareaAsignadaUsuario.id_usuario, TareaAsignadaUsuario.eliminado.label("asignada_usr_eliminado"), Tarea.id, Tarea.titulo, Tarea.id_tipo_tarea, Tarea.eliminado, Tarea.fecha_inicio, Tarea.fecha_fin
                                   ).join(Tarea, Tarea.id==TareaAsignadaUsuario.id_tarea).filter(TareaAsignadaUsuario.id_usuario== res.id).all()
         
 
@@ -35,7 +35,9 @@ def get_usuario_by_id(id):
                         "titulo": row.titulo,
                         "id_tipo_tarea": row.id_tipo_tarea,
                         "eliminado": row.eliminado,
-                        "reasignada": row.asignada_usr_eliminado
+                        "reasignada": row.asignada_usr_eliminado,
+                        "fecha_inicio": row.fecha_inicio,
+                        "fecha_fin":row.fecha_fin
                     }
                 tareas.append(tarea)
 
@@ -78,21 +80,28 @@ def get_usuario_by_id(id):
 
 def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
+    print("eliminado: ", eliminado)
+    print("suspendido: ", suspendido)
+    print("nombre: ", nombre)
+    print("apellido: ", apellido)
+    print("dni: ", dni)
+    print("username: ", username)
+    print("id_grupo: ", id_grupo)
 
     query = db.session.query(Usuario)
     if id_grupo:
         query = query.filter(Grupo.id == id_grupo)
 
-    if nombre != "":
+    if nombre and nombre != "":
         query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
 
-    if apellido != "":
+    if apellido and apellido != "":
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
 
-    if dni != "":
+    if dni and dni != "":
         query = query.filter(Usuario.dni.ilike(f"%{dni}%"))
 
-    if username != "":
+    if username and username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))    
 
     if eliminado is not None:
@@ -108,6 +117,13 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None,
 
 def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
+    print("eliminado: ", eliminado)
+    print("suspendido: ", suspendido)
+    print("nombre: ", nombre)
+    print("apellido: ", apellido)
+    print("dni: ", dni)
+    print("username: ", username)
+    print("id_grupo: ", id_grupo)
 
     query = db.session.query(Usuario)
 
@@ -115,17 +131,16 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     if id_grupo:
         query = query.filter(Grupo.id == id_grupo)
 
-    if len(nombre) > 0:
+    if nombre and nombre != "":
         query = query.filter(Usuario.nombre.ilike(f"%{nombre}%"))
 
-    if len(apellido) > 0:
+    if apellido and apellido != "":
         query = query.filter(Usuario.apellido.ilike(f"%{apellido}%"))
 
-    if len(dni) > 0:
-
+    if dni and dni != "":
         query = query.filter(Usuario.dni.ilike(f"%{dni}%"))
 
-    if username != "":
+    if username and username != "":
         query = query.filter(Usuario.username.ilike(f"%{username}%"))
         print("Total de usuarios: ", len(query.all()))
 
