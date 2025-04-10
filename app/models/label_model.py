@@ -62,7 +62,7 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
         fecha_eliminacion=fecha_eliminacion,
         fecha_creacion=datetime.now(),
         id_user_creacion=id_user_creacion,
-        id=nuevoID_label,
+        id_label=nuevoID_label,
         color=color,
         id_grupo_base=id_grupo_base,
         nombre=nombre,
@@ -76,12 +76,12 @@ def insert_label(username=None, nombre='', color= '', eliminado=False, fecha_eli
     ids_labels.append(str(nuevoID_label) )
     print('ids_labels:', ids_labels)
 
-    insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, username=username)
-
+    result = insert_label_tarea(ids_labels=ids_labels, id_tarea=id_tarea, username=username)
+    print('result Insert Label:', result)
        
     db.session.commit()
 
-    return nueva_label
+    return result
 
 
 def update_label(id='', **kwargs):
@@ -227,8 +227,7 @@ def get_active_labels(ids_grupos_base):
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea (username=None, **kwargs):
-
+def insert_label_tarea(username=None, **kwargs):
     if username is not None:
         id_user_actualizacion = verifica_username(username)
 
@@ -239,33 +238,49 @@ def insert_label_tarea (username=None, **kwargs):
     
     id_tarea = kwargs['id_tarea']
     ids_labels = kwargs['ids_labels']
-
-    labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea, LabelXTarea.activa == True).all()
+    
+    labelsTarea = db.session.query(LabelXTarea).filter(LabelXTarea.id_tarea == id_tarea).all()
    
-    taskLabels = []
+    active_labels = []
 
     # Convertir listas de etiquetas activas e inactivas a conjuntos de IDs para facilitar la comparación
     set_labelsTarea = {str(label.id_label) for label in labelsTarea}
-    if(len(ids_labels) >= 0):
+    if len(ids_labels) >= 0:
         set_ids_labels = set(ids_labels)
-        nuevos_labels = set_ids_labels - set_labelsTarea
-        viejos_labels = set_ids_labels - nuevos_labels 
+        nuevos_labels = set_ids_labels - set_labelsTarea  # Todos los labelsXtareas solicitados por el front que no están activos
+        viejos_labels = set_ids_labels & set_labelsTarea 
+        
         fecha_actualizacion = datetime.now()
 
-        if len(viejos_labels) >= 0:
-       
-            print('entra a actualizar labels')
+        print('set_labelsTarea:', set_labelsTarea)
+        print('set_ids_labels:', set_ids_labels)
+        print('nuevos_labels:', nuevos_labels)
+        print('viejos_labels:', viejos_labels)
+        
+        if len(viejos_labels) > 0:       
+            print('entra a actualizar labels, si no estan en viejos se desactivan')
+            # Actualizar etiquetas existentes
             for label in labelsTarea:
-                if (str(label.id_label) in viejos_labels or len(viejos_labels) == 0):
+                if str(label.id_label) not in viejos_labels:
                     label.activa = False
                     label.fecha_actualizacion = fecha_actualizacion
                     label.id_user_actualizacion = id_user_actualizacion
                     db.session.commit()
-
-        if(len(nuevos_labels) > 0):
+                    print('Desactivando label:', label.id_label, label.activa)
+                else:
+                    # Si la etiqueta ya existe y está activa, actualizar su fecha de actualización
+                    print('Label ya existe:', label.id_label)
+                    label.activa = True
+                    label.fecha_actualizacion = fecha_actualizacion
+                    label.id_user_actualizacion = id_user_actualizacion
+                    db.session.commit()
+                    print('Actualizando label:', label.id_label, label.activa)
+                    active_labels.append(label)
+     
+        if len(nuevos_labels) > 0:
             for id_label in nuevos_labels:
-                print('Creando nuevo registro para label: ', {id_label})
-                nuevoID_label_tarea=uuid.uuid4()
+                print('nuevos_labels id_label:', id_label)
+                nuevoID_label_tarea = uuid.uuid4()
 
                 nueva_label = LabelXTarea(
                     id=nuevoID_label_tarea,
@@ -273,22 +288,39 @@ def insert_label_tarea (username=None, **kwargs):
                     id_tarea=id_tarea,
                     activa=True,
                     fecha_actualizacion=fecha_actualizacion,
-                    id_user_actualizacion=id_user_actualizacion
+                    id_user_actualizacion = id_user_actualizacion
                 )
+                active_labels.append(nueva_label)
                 db.session.add(nueva_label)
                 db.session.commit()
-
-
-    ###################Formatear el resultado####################
-    response = {
-        'status': 'success',
-        'message': 'Labels actualizados correctamente',
-        'data': [label.id_label for label in taskLabels]
-        }
-    
-    print('response:', response)
-
-    return response
+        
+        if(len(set_ids_labels) == 0):
+            for label in labelsTarea:
+                label.activa = False
+                label.fecha_actualizacion = fecha_actualizacion
+                label.id_user_actualizacion = id_user_actualizacion
+                db.session.commit()
+                print('Desactivando label:', label.id_label, label.activa)
+    print("#############################################")
+    # Formatear el resultado
+    result = []
+    for l in active_labels:
+        labels = db.session.query(Label).filter(Label.id_label == l.id_label).first()
+        nombre= labels.nombre
+        color= labels.color
+        result.append({
+            "id": l.id,
+            "id_label": l.id_label,
+            "id_tarea": l.id_tarea,
+            "activa": l.activa,
+            "nombre": nombre,
+            "color": color,
+            "fecha_actualizacion": l.fecha_actualizacion,
+            "id_user_actualizacion": l.id_user_actualizacion
+        })
+    print('result:', result)
+    print("#############################################")  
+    return result
     
 
 def update_label_tarea(id_label='', id_tarea="", **kwargs):
@@ -337,9 +369,9 @@ def get_label_by_tarea(id_tarea):
                 Label.nombre,
                 Label.color
             ).join(
-                Label, LabelXTarea.id_label == Label.id
+                Label, LabelXTarea.id_label == Label.id_label
             ).filter(
-                Label.id == row.id_label,
+                Label.id_label == row.id_label,
                 Label.eliminado == False
             ).first()  # Use `.first()` instead of `.all()` to avoid unnecessary lists
             print('Active label:', active_label)

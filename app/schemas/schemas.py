@@ -1246,7 +1246,7 @@ class LabelIn(Schema):
     fecha_eliminacion = String(validate=validate_fecha)
     # fecha_actualizacion = String(validate=validate_fecha)
     id_tarea = String()
-    ids_labels = List(String(),required=False, many=True)
+    #ids_labels = List(String(),required=False, many=True)
 
 
 class LabelPatchIn(Schema):
@@ -1275,7 +1275,7 @@ class LabelOut(Schema):
     
 
 class LabelAllOut(Schema):
-    id = String()
+    id_label = String()
     nombre = String()
     color = String()
     eliminado = Boolean()
@@ -1333,16 +1333,30 @@ class LabelXTareaPatchIn(Schema):
     # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
 
+class LabelXTareaInsert(Schema):
+    id = String(required=True)
+    # activa= Boolean()
+    id_tarea = String(required=True)
+    id_label = String(required=True)
+    # id_user_actualizacion = String()
+    # fecha_actualizacion = String(validate=validate_fecha)
     
 class LabelXTareaOut(Schema):
     status = fields.String(required=True)
     message = fields.String(required=True)
-    data = fields.List(fields.String(), required=True)
+    data = fields.List(fields.Nested(LabelXTareaInsert))
     # activa= Boolean()
     # id_tarea = String(required=True)
     # id_label = String(required=True)
     # id_user_actualizacion = String(required=True)
     # fecha_actualizacion = String(validate=validate_fecha)
+
+class LabelXTareaPrueba(Schema):
+    status = fields.String(required=True)
+    message = fields.String(required=True)
+    data = fields.List(fields.Nested(LabelXTareaInsert))
+
+
 
 class LabelXTareaAllOut(Schema):
     id = String()

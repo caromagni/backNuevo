@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from schemas.schemas import LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
+from schemas.schemas import LabelXTareaPrueba, LabelGetIn, LabelIn, LabelOut, LabelCountOut, LabelXTareaPatchIn, LabelIdOut, MsgErrorOut, LabelXTareaIdOut, LabelXTareaOut, LabelXTareaIn, PageIn, LabelXTareaIdCountAllOut, LabelCountAllOut, LabelAllOut, LabelPatchIn, LabelIdOut
 from models.label_model import get_all_label, get_label_by_id, delete_label_tarea_model, get_active_labels, insert_label_tarea,  insert_label, delete_label, update_label, get_label_by_tarea
 from common.error_handling import DataError, DataNotFound, ValidationError
 from models.alch_model import Usuario, Rol, Label
@@ -115,7 +115,7 @@ def get_label(id:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.post('/label')
 @label_b.input(LabelIn)
-@label_b.output(LabelOut)
+#@label_b.output(LabelOut)
 def post_label(json_data: dict):
     try:
         print("#"*50)
@@ -132,7 +132,26 @@ def post_label(json_data: dict):
                 }
             res = MsgErrorOut().dump(result)
         
-        return LabelOut().dump(res)
+        labels = []
+        """ for label in res:
+            print("label:", label)
+            print("label:", label.id_label)
+            if label != []: 
+                labels.append(LabelXTareaIdOut().dump(label)) """
+
+        data = {
+                "data": LabelXTareaIdOut().dump(res, many=True)
+            }
+        
+        
+        return data
+
+        # Prepare the response data
+        data = {
+                "data": labels
+            }
+        print("result:", data)
+        return data
     
     except Exception as err:
         print(traceback.format_exc())
@@ -193,7 +212,7 @@ def get_label_tarea(id_tarea:str):
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.put('/label_tarea')
 @label_b.input(LabelXTareaIn)
-@label_b.output(LabelXTareaOut)
+# @label_b.output(LabelXTareaOut)
 def put_label_tarea(json_data: dict):
     try:
         print("#"*50)
@@ -205,13 +224,28 @@ def put_label_tarea(json_data: dict):
         if res is None:
             result = {
                     "valido":"fail",
-                    "code": 800,
-                    "error": "Error en insert label",
-                    "error_description": "No se pudo insertar la label"
+                    "ErrorCode": 800,
+                    "ErrorDesc": "Error en insert label",
+                    "ErrorMsg": "No se pudo insertar la label"
                 }
+     
             res = MsgErrorOut().dump(result)
+
+        labels = []
+        for label in res:
+            if label != []: 
+                labels.append(LabelXTareaIdOut().dump(label))
+
         
-        return LabelXTareaOut().dump(res)
+
+        # Prepare the response data
+        data = {
+                "data": labels
+            }
+        print("result:", data)
+        return data
+        
+        # return LabelXTareaPrueba().dump(res)
     
     except Exception as err:
         print(traceback.format_exc())
@@ -219,7 +253,7 @@ def put_label_tarea(json_data: dict):
     
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.delete('/label_tarea_del/<string:id>')
+@label_b.delete('/label_tarea/<string:id>')
 # @label_b.input(LabelXTareaPatchIn)
 # @label_b.output(LabelXTareaIdOut)
 def delete_label_tarea(id: str):
