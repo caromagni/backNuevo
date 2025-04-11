@@ -295,6 +295,8 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
     db.session.add(nueva_tarea) 
 
+    usuariosxdefault = []
+
     if grupo is not None:
         for group in grupo:
             id_grupo=group['id_grupo']
@@ -309,7 +311,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
 
             id_usuario_asignado = existe_grupo.id_user_asignado_default
-            
+            usuariosxdefault.append(id_usuario_asignado)
             nuevoID_tareaxgrupo=uuid.uuid4()
             tareaxgrupo= TareaXGrupo(
                 id=nuevoID_tareaxgrupo,
@@ -374,20 +376,23 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
                     fecha_actualizacion=datetime.now()
                 )
                 db.session.add(asigna_usuario)
-    
-    if id_usuario_asignado is not None:
-        existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
-        if existe_usuario is not None:
-            nuevoID=uuid.uuid4()
-            asigna_usuario = TareaAsignadaUsuario(
-                id=nuevoID,
-                id_tarea=nuevoID_tarea,
-                id_usuario=id_usuario_asignado,
-                id_user_actualizacion=id_user_actualizacion,
-                fecha_asignacion=datetime.now(),
-                fecha_actualizacion=datetime.now()
-            )
-            db.session.add(asigna_usuario)
+        
+
+    #Asignno la tarea a los usuarios por defecto de cada grupo ingresado
+    if len(usuariosxdefault)> 0:
+        for id_usuario_asignado in usuariosxdefault:    
+            existe_usuario = db.session.query(Usuario).filter(Usuario.id == id_usuario_asignado, Usuario.eliminado==False).first()
+            if existe_usuario is not None:
+                nuevoID=uuid.uuid4()
+                asigna_usuario = TareaAsignadaUsuario(
+                    id=nuevoID,
+                    id_tarea=nuevoID_tarea,
+                    id_usuario=id_usuario_asignado,
+                    id_user_actualizacion=id_user_actualizacion,
+                    fecha_asignacion=datetime.now(),
+                    fecha_actualizacion=datetime.now()
+                )
+                db.session.add(asigna_usuario)
 
            
        
