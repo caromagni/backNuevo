@@ -75,10 +75,11 @@ def get_grupo_by_id(id):
                 usuarios.append(usuario)
 
         if res_tarea is not None:
-            print("tiene tareas: ", len(res_tarea))
+            #print("tiene tareas: ", len(res_tarea))
             tareas=[]
 
             for row in res_tarea:
+                
                 tarea = {
                     "id": row.id,
                     "titulo": row.titulo,
