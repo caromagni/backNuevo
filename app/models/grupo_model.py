@@ -15,9 +15,7 @@ from cache import cache
 @cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
-    #session: scoped_session = current_app.session
     res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
-    #print("Grupo encontrado:", res.nombre)
     results=[]
     hijos=[]
     padres=[]
