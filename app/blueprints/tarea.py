@@ -372,6 +372,8 @@ def get_tareas(query_data: dict):
         #############################################################
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        prioridad=None
+        estado=None
         cant=0
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -380,8 +382,10 @@ def get_tareas(query_data: dict):
         titulo=request.args.get('titulo')
         id_expediente=request.args.get('id_expediente')
         id_actuacion=request.args.get('id_actuacion')
-        prioridad=int(request.args.get('prioridad'))
-        estado = int(request.args.get('estado'))
+        if(request.args.get('prioridad') is not None):
+            prioridad=int(request.args.get('prioridad'))
+        if(request.args.get('estado') is not None):
+            estado = int(request.args.get('estado'))    
         eliminado=request.args.get('eliminado')
         id_tipo_tarea=request.args.get('id_tipo_tarea')
         id_usuario_asignado=request.args.get('id_usuario_asignado')
@@ -425,6 +429,8 @@ def get_tareas_detalle(query_data: dict):
         usuario = g.get('username')
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        prioridad=None
+        estado=None
         cant=0
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -434,8 +440,10 @@ def get_tareas_detalle(query_data: dict):
         label=request.args.get('label')
         id_expediente=request.args.get('id_expediente')
         id_actuacion=request.args.get('id_actuacion')
-        prioridad=int(request.args.get('prioridad'))
-        estado = int(request.args.get('estado'))
+        if(request.args.get('prioridad') is not None):
+            prioridad=int(request.args.get('prioridad'))
+        if(request.args.get('estado') is not None):
+            estado = int(request.args.get('estado'))    
         eliminado=request.args.get('eliminado')
         id_tipo_tarea=request.args.get('id_tipo_tarea')
         id_usuario_asignado=request.args.get('id_usuario_asignado')

@@ -159,6 +159,8 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':
                     query = db.session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
+                    #if query is None:
+                    #    query = db.session.query(Usuario).filter(Usuario.username == valid_attributes['email']).first()
                 if entity == 'organismo':
                     query = db.session.query(Organismo).filter(Organismo.id == entity_id).first()
                 if entity == 'inhabilidad':
