@@ -9,6 +9,7 @@ COPY ./uwsgi.ini .
 RUN mkdir /app/tmp
 RUN python3 -m pip install --upgrade pip
 RUN pip install --progress-bar off -r requirements.txt
+#RUN pip install -r requirements.txt
 #ppp
 
 COPY code/ .

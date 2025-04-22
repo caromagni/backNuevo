@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 #from sqlalchemy.ext.declarative import declarative_base
 
 import uuid
+from datetime import datetime
 
 # metadata = Base.metadata
 
@@ -85,6 +86,20 @@ class Auditoria_TareaAsignadaUsuario(Base):
     usuario_actualizacion = Column(String, nullable=False)
     ip_usuario = Column(String, nullable=False)    
 
+class Organismo(Base):
+    __tablename__ = 'organismo'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    circunscripcion_judicial = Column(String, nullable=False)
+    id_fuero = Column(UUID)
+    descripcion = Column(String)
+    descripcion_corta = Column(String)
+    habilitado = Column(Boolean, nullable=False)
+    id_tarea_grupo_base  = Column(UUID)
+    instancia = Column(String)
+
+
 class Nomenclador(Base):
     __tablename__ = 'nomenclador'
     __table_args__ = {'schema': 'tareas'}
@@ -122,6 +137,7 @@ class Usuario(Base):
     username = Column(String)
     dni = Column(String)
     email = Column(String)
+    habilitado = Column(Boolean)
 
 class TipoActuacionExt(Base):
     __tablename__ = 'tipo_actuacion_ext'
@@ -212,8 +228,8 @@ class Label(Base):
     fecha_creacion = Column(DateTime, nullable=False)
     fecha_eliminacion = Column(DateTime)
     fecha_actualizacion = Column(DateTime)
-    id = Column(UUID, primary_key=True)
-    id_grupo_padre = Column(UUID)
+    id_label = Column('id', UUID, primary_key=True)
+    id_grupo_base = Column(UUID)
     id_user_creacion = Column(UUID, nullable=False)
     id_user_actualizacion = Column(UUID)
     nombre = Column(String)
@@ -331,17 +347,20 @@ class Inhabilidad(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
+    #id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
+    id_tipo_inhabilidad = Column(UUID)
+    tipo = Column(String)
+    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    id_juez =Column(UUID)
     fecha_desde = Column(Time)
     fecha_hasta = Column(DateTime)
-    fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID, nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
     descripcion = Column(String)
 
     grupo = relationship('Grupo')
-    tipo_inhabilidad = relationship('TipoInhabilidad')
-
+    organismo = relationship('Organismo')
 
 
 class Tarea(Base):
@@ -511,7 +530,8 @@ class Rol(Base):
     rol = Column(String, nullable=False)
     id_rol_ext= Column(UUID)
     id_organismo = Column(UUID)
-    url_api = Column(String, nullable=False)
+    url_api = Column(String)
+    tabla = Column(String)
     descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
 

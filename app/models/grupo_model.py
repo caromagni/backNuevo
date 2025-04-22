@@ -15,9 +15,7 @@ from cache import cache
 @cache.memoize(timeout=500)
 def get_grupo_by_id(id):
 
-    #session: scoped_session = current_app.session
     res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
-    #print("Grupo encontrado:", res.nombre)
     results=[]
     hijos=[]
     padres=[]
@@ -77,10 +75,11 @@ def get_grupo_by_id(id):
                 usuarios.append(usuario)
 
         if res_tarea is not None:
-            print("tiene tareas: ", len(res_tarea))
+            #print("tiene tareas: ", len(res_tarea))
             tareas=[]
 
             for row in res_tarea:
+
                 tarea = {
                     "id": row.id,
                     "titulo": row.titulo,
@@ -121,14 +120,18 @@ def get_grupo_by_id(id):
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+        #.date()
     else:
-        fecha_hasta=datetime.now().date()
+        fecha_hasta=datetime.now()
+        #.date()
+
+    fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
 
     start_time = datetime.now()
     
@@ -207,24 +210,25 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         cursor = db.session.execute(subquery)
     
     # Use the datetime objects for date filtering
+    #query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    
     # Build all filters in a list
     filters = []
 
     if nombre and nombre != "":
         filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado:
-        filters.append(Grupo.eliminado == eliminado)
-    if suspendido:
+    if eliminado is not None:
+        filters.append(Grupo.eliminado == eliminado)    
+    if suspendido is not None:
         filters.append(Grupo.suspendido == suspendido)
 
     # Apply all filters at once
     if filters:
         query = query.filter(*filters)
-
+    
     total = query.count()
    
+
     if cursor:
         for reg in cursor:
             grupo = query.filter(Grupo.id == reg.id_hijo).first()
@@ -463,8 +467,9 @@ def get_all_base(id, usuarios=False):
 #@cache.cached(timeout=500, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
 @cache.memoize(timeout=500)
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y'), path_name=False): 
+    fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
     #fecha_hasta = fecha_hasta + " 23:59:59"
-    
+    print("Fecha hasta:", fecha_hasta) 
     #fecha_desde = datetime.strptime(fecha_desde, "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
     #fecha_hasta = datetime.strptime(fecha_hasta, "%d/%m/%Y").replace(hour=23, minute=59, second=59, microsecond=0)
     
@@ -487,15 +492,17 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None): 
    
     if fecha_desde is not None:
-        fecha_desde = datetime.strptime(fecha_desde, '%Y-%m-%d').date()
+        fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
         fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
 
     if fecha_hasta is not None:
-        fecha_hasta = datetime.strptime(fecha_hasta, '%Y-%m-%d').date()
+        fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
+        #.date()
     else:
-        fecha_hasta=datetime.now().date()
-
+        fecha_hasta=datetime.now()
+        #.date()
+    fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
     query= db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
 
     filters = []
