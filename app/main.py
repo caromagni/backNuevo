@@ -31,7 +31,7 @@ from alchemy_db import db
 from flask_caching import Cache
 sys.setrecursionlimit(100)
 from cache import cache  # Import the shared cache instance
-
+import threading
 
 def create_app():
 
@@ -192,12 +192,12 @@ def create_app():
     register_error_handlers(app)
     
     ############### CODIGO PARA LANZAR THREADS ################
-    """  if uwsgi.worker_id() == 1:
+    if uwsgi.worker_id() == 1:
         thread = threading.Thread(target=chk_messagges, args=(app, db.session))
         thread.daemon = True
         thread.start()
         print("Hilo de recepción de mensajes iniciado.")
- """
+ 
     return app
 
 

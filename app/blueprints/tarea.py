@@ -18,6 +18,7 @@ import uuid
 import json
 from flask import g
 from alchemy_db import db
+from decorators.role import require_role
 
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
@@ -408,6 +409,7 @@ def get_tareas(query_data: dict):
 @tarea_b.get('/tarea')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountAllOut)
+@require_role("Operador")
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")
