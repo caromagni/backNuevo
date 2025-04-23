@@ -198,6 +198,8 @@ def create_app():
         thread.daemon = True
         thread.start()
         print("Hilo de recepción de mensajes iniciado.")
+        
+
     return app
 
 

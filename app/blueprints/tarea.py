@@ -51,6 +51,10 @@ def before_request():
 @tarea_b.input(PageIn, location='query')
 def get_tipoTareas(query_data: dict):
     try:
+        user_name = g.username
+        cu = ['consultar-tarea']
+        rol = 'Administrador'
+        accede = get_usr_cu(user_name, rol, cu)
 
         #reeplace with decorator 
         # user_name = g.username
