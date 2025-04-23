@@ -6,7 +6,7 @@ from flask import current_app, jsonify, request,make_response
 from alchemy_db import db
 from models.alch_model import  Grupo, Usuario
 from models.usuario_model import  get_all_usuarios, get_all_usuarios_detalle, get_grupos_by_usuario, insert_usuario, update_usuario, get_usuario_by_id, delete_usuario, get_rol_usuario
-from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioRolOut, UsuarioAllOut
+from schemas.schemas import  UsuarioIn, UsuarioInPatch, UsuarioGetIn, UsuarioCountOut,UsuarioCountAllOut, UsuarioOut, GroupsUsuarioOut, UsuarioIdOut, UsuarioRolOut, UsuarioAllOut, UsuarioCountRolOut, MsgErrorOut
 from common.error_handling import ValidationError, DataError, DataNotFound
 from common.auth import verify_header
 from common.logger_config import logger
@@ -250,13 +250,26 @@ def del_usuario(id: str):
         raise ValidationError(err)
 
 ##########Prueba Roles################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Roles del usuario', summary='Roles del Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+#@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Roles del usuario', summary='Roles del Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario_rol')
-#@usuario_b.output(UsuarioRolOut)
+@usuario_b.output(UsuarioCountRolOut)
 def get_rol_usr():
     username=g.username
     res=get_rol_usuario(username)
+
+    if res is None:
+            result={
+                    "valido":"fail",
+                    "code": 800,
+                    "error":"Error en insert de tipo de tarea",
+                    "error_description":"No se pudo insertar el tipo de tarea"
+                }
+            res = MsgErrorOut().dump(result)
+            return res
+    
     data = {
+                "count": len(res),
                 "data": UsuarioRolOut().dump(res, many=True)
             }
         

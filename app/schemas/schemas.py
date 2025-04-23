@@ -853,7 +853,8 @@ class DetalleUsuarioCountAllOut(Schema):
 
 class UsuarioCountAllOut(Schema):
     count = Integer()
-    data = Nested(UsuarioAllOut, many=True) 
+    data = Nested(UsuarioAllOut, many=True)
+
 
 class UsuarioCountOut(Schema):
     count = Integer()
@@ -864,6 +865,9 @@ class UsuarioRolOut(Schema):
     email = String()
     rol= String()
 
+class UsuarioCountRolOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioRolOut, many=True)
 
 class TareaAllOut(Schema):
     id = String()
