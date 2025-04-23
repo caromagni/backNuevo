@@ -5,7 +5,7 @@ from common.utils import *
 from common.logger_config import logger
 from flask import current_app
 from alchemy_db import db
-from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea
+from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
 
 
 def get_usuario_by_id(id):
@@ -383,6 +383,17 @@ def update_usuario(id='',username=None, **kwargs):
     db.session.commit()
     return usuario
 
+def get_rol_usuario(username=None):
+    if username is not None:
+        id_user_actualizacion = verifica_username(username)
+        if id_user_actualizacion is not None:
+            verifica_usr_id(id_user_actualizacion)
+        
+    res = db.session.query(Rol.email, Rol.rol).filter(Rol.email == username).distinct().all()
+    print("username:",username)
+    print("rol:",res)
+    return res
+    
 def delete_usuario(username=None, id=None):
     
     if username is not None:

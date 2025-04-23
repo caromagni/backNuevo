@@ -55,30 +55,17 @@ def get_usr_cu(nombre_usuario=None, rol='', cu=[]):
             
         db.session.commit()
         
-    #query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.url_api.like(f"%{url_api}%")).all()
     print("email:",email)
     print("cu:",cu)
     #query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), Rol.descripcion_ext.like(f"%{cu}%")).all()
+    
+    ######AGREGAR CONTROL DE ROL DE USUARIO##########
     query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
-    # or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])
-    if query_permisos is None:
+    if len(query_permisos)==0:
         logger.error("No tiene permisos")
         return False
     else:
         logger.info("Usuario tiene permisos")
         return True
 
-    tiene_permisos=False
-    if len(query_permisos)>0:
-        for p in query_permisos:
-            print("Permisos:",p.descripcion_ext)
-            if p.descripcion_ext in cu:
-                tiene_permisos=True
-                logger.info("Usuario tiene permisos")
-                break
-            else:
-                tiene_permisos=False
-                logger.error("Usuario no tiene permisos")
-                    
-    return tiene_permisos              
     
