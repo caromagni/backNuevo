@@ -18,6 +18,7 @@ import uuid
 import json
 from flask import g
 from alchemy_db import db
+from decorators.role import require_role
 
 
 tarea_b = APIBlueprint('tarea_blueprint', __name__)
@@ -55,9 +56,15 @@ def get_tipoTareas(query_data: dict):
         rol = 'Administrador'
         accede = get_usr_cu(user_name, rol, cu)
 
-        if accede is False:
-            logger.error("No tiene permisos para acceder a la API")
-            #raise UnauthorizedError(403, "No tiene permisos para acceder a la API")
+        #reeplace with decorator 
+        # user_name = g.username
+        # cu = ['consultar-tarea','eliminar-tarea']
+        # rol = 'administrador'
+        # accede = get_usr_cu(user_name, rol, cu)
+
+        # if accede is False:
+        #     logger.error("No tiene permisos para acceder a la API")
+        #     #raise UnauthorizedError(403, "No tiene permisos para acceder a la API")
         
         cant=0
         page=1
@@ -325,6 +332,7 @@ def get_tareas(query_data: dict):
 @tarea_b.get('/tarea')
 @tarea_b.input(TareaGetIn, location='query')
 @tarea_b.output(TareaCountAllOut)
+@require_role(["consultar-tarea"])
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")

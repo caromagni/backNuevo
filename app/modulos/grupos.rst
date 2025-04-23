@@ -1,67 +1,133 @@
 Grupos
 ======
 
-El módulo de Grupos es una componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la organización, colaboración y gestión eficiente de equipos dentro del ámbito judicial o administrativo. Este módulo permite la creación y administración de estructuras jerárquicas de grupos, proporcionando una base sólida para la asignación de tareas, control de accesos y la coordinación de actividades entre diferentes unidades o equipos de trabajo.
+El módulo de **Grupos** es una componente fundamental del Sistema de Gestión de Tareas, diseñado para facilitar la organización, colaboración y gestión eficiente de equipos dentro del ámbito judicial o administrativo.
+
+Permite la creación y administración de estructuras jerárquicas de grupos, proporcionando una base sólida para la asignación de tareas, control de accesos y coordinación entre unidades o equipos de trabajo.
+
 Grupo Base: corresponde a un organismo dentro de la institución, y contendrá los grupos que representan las diferentes áreas de trabajo.
 
-Características principales
----------------------------
+.. contents::
+   :local:
+   :depth: 2
 
-1. **Creación flexible de grupos**:
-   - Capacidad para crear grupos y subgrupos con múltiples niveles de jerarquía.
-   - Opciones para definir grupos basados en departamentos, roles, proyectos o cualquier otra estructura organizativa.
+1. Introducción general
+-----------------------
 
-2. **Gestión de membresía**:
-   - Interfaz intuitiva para añadir o remover miembros de los grupos.
-   - Soporte para roles dentro de los grupos (ej. líder, miembro, observador).
+El módulo de Grupos actúa como la **columna vertebral organizativa** del sistema. Permite representar la complejidad de las estructuras judiciales con precisión, mejorar la asignación de recursos, fortalecer la seguridad a través de permisos, y fomentar la colaboración entre unidades mediante herramientas internas.
 
-3. **Permisos y accesos**:
-   - Control granular de permisos a nivel de grupo.
-   - Herencia de permisos para subgrupos con opción de personalización.
+2. Características principales
+------------------------------
 
-4. **Asignación de tareas**:
-   - Capacidad para asignar tareas a grupos completos o miembros específicos dentro de un grupo.
-   - Distribución automática de tareas basada en reglas predefinidas o carga de trabajo.
+- **Creación flexible de grupos**:
+  - Estructuras jerárquicas de múltiples niveles (ej. áreas, departamentos, roles).
+  - Plantillas preconfiguradas para crear grupos según modelos comunes.
 
-5. **Comunicación interna**:
-   - Herramientas de comunicación integradas para cada grupo (ej. tableros de mensajes, chats).
-   - Notificaciones específicas de grupo para actualizaciones importantes.
+- **Gestión de membresía**:
+  - Asignación de usuarios a grupos de forma intuitiva y predefinida.
 
-6. **Paneles de grupo**:
-   - Dashboards personalizados mostrando actividades, tareas pendientes y métricas relevantes para cada grupo.
-   - Vistas consolidadas de tareas y proyectos asociados al grupo.
+- **Permisos y accesos**:
+  - Control granular por grupo o subgrupo.
+  - Herencia de permisos con personalización opcional.
 
-7. **Reportes y análisis**:
-   - Generación de informes sobre el rendimiento y actividades de los grupos.
-   - Herramientas de análisis para evaluar la eficiencia y distribución de trabajo en los grupos.
+- **Asignación de tareas**:
+  - A nivel de grupo o individual.
+  - Reglas de distribución automática según carga u orden.
 
-8. **Integración con otros módulos**:
-   - Sincronización con el módulo de Calendario para eventos y plazos específicos de grupo.
-   - Interacción con el módulo de Tareas Anidadas para manejar proyectos complejos a nivel de grupo.
+- **Comunicación interna**:
+  - Notificaciones y mensajes internos segmentados por grupo.
 
-9. **Plantillas de grupo**:
-   - Capacidad para crear y aplicar plantillas predefinidas de estructuras de grupo.
-   - Configuraciones rápidas para tipos comunes de grupos en el entorno judicial.
+- **Dashboards y visualización**:
+  - Paneles dinámicos con métricas, tareas pendientes y estado.
 
-10. **Flexibilidad y escalabilidad**:
-    - Capacidad para reorganizar y reestructurar grupos según evolucionen las necesidades.
-    - Soporte para un gran número de grupos y miembros sin comprometer el rendimiento.
+- **Reportes y auditoría**:
+  - Informes por grupo.
+  - Registro detallado de cambios y acciones realizadas.
 
-11. **Auditoría y seguimiento**:
-    - Registro detallado de cambios en la estructura y membresía de los grupos.
-    - Trazabilidad de acciones y decisiones tomadas a nivel de grupo.
+- **Integración con otros módulos**:
+  - Tareas y Usuarios.
 
-Funcionalidad
--------------
+3. Casos de uso frecuentes
+--------------------------
 
-El módulo de Grupos actúa como la columna vertebral organizativa del Sistema de Gestión de Tareas, proporcionando una estructura flexible y potente para la gestión de equipos y flujos de trabajo. Facilita una organización eficiente del personal judicial y administrativo, permitiendo una distribución óptima de tareas y responsabilidades.
+- Crear un grupo para una nueva unidad judicial.
+- Reorganizar áreas o mover miembros entre grupos.
+- Asignar tareas a todo un equipo o a un líder de grupo.
+- Auditar actividad de un grupo en un periodo determinado.
+- Reactivar un grupo eliminado accidentalmente.
+- Suspender o activar grupos según necesidades operativas.
 
-La capacidad de crear estructuras jerárquicas de grupos refleja la complejidad de las organizaciones judiciales modernas, permitiendo una representación precisa de diferentes departamentos, unidades especializadas, equipos de proyecto y roles funcionales. Esto no solo mejora la organización interna, sino que también facilita una asignación más precisa y eficiente de tareas y recursos.
+4. Uso del servicio 
+-------------------
 
-El control granular de permisos y accesos asegura que la información y las tareas sean accesibles solo para los miembros apropiados, manteniendo la confidencialidad y la integridad de los procesos judiciales. Al mismo tiempo, las herramientas de comunicación integradas fomentan la colaboración y el intercambio de información dentro de los grupos, mejorando la coordinación y la eficacia del equipo.
+El sistema cuenta con un conjunto de interfaces que permiten a los administradores gestionar completamente la estructura de grupos a través del servicio. Estas operaciones están integradas con validaciones visuales, formularios dinámicos y protección contra errores lógicos como la eliminación de grupos con hijos o asignaciones inválidas.
 
-Los paneles y reportes específicos de grupo proporcionan una visibilidad clara del progreso y rendimiento, permitiendo a los líderes y administradores tomar decisiones informadas sobre la distribución de recursos y la gestión de cargas de trabajo. Esto es particularmente valioso en entornos judiciales donde la eficiencia y la gestión efectiva del tiempo son cruciales.
+Acciones habilitadas desde la interfaz:
 
-La integración con otros módulos del sistema crea un ecosistema cohesivo donde las tareas, calendarios, y proyectos se gestionan de manera unificada a nivel de grupo, mejorando la coherencia y eficiencia general del sistema judicial.
+- Crear un nuevo grupo.
+- Modificar los datos de un grupo existente (nombre, estado, jerarquía).
+- Eliminar un grupo (de forma lógica, puede recuperarse).
+- Restaurar un grupo eliminado o suspendido.
+- Consultar jerarquías y niveles organizativos.
+- Buscar grupos por nombre, fechas o estado.
+- Consultar los usuarios que pertenecen a un grupo específico.
 
-En resumen, el módulo de Grupos es esencial para estructurar y optimizar las operaciones en entornos judiciales complejos, proporcionando las herramientas necesarias para una gestión eficaz de equipos, tareas y recursos en el marco de la administración de justicia.
+Flujos funcionales disponibles
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Creación de grupos**
+
+- Definición de grupo principal o dependiente.
+- Validaciones: longitud mínima, sin símbolos ni números iniciales.
+- Selección de grupo padre mediante lo que permite crear grupos y sub-grupos.
+
+**Edición de grupos**
+
+- Modificación de nombre, descripción y usuario asignado por defecto.
+- Visualización previa con avatar del grupo.
+- Confirmación de cambios antes de guardar.
+
+**Eliminación de grupos**
+
+- Eliminación lógica con validación previa de jerarquía (no debe tener hijos).
+- Confirmación visual y feedback inmediato.
+
+**Suspensión y restauración**
+
+- Permite suspender temporalmente o reactivar grupos.
+- Restauración de grupos eliminados desde la misma tabla.
+
+**Visualización de detalles**
+
+- Datos clave del grupo: nombre, descripción, fecha, usuarios asignados.
+- Avatar representativo y estructura jerárquica visual.
+
+**Filtros y búsqueda avanzada**
+
+- Filtros por nombre, descripción, estado, fechas.
+- `Switch` para incluir o excluir suspendidos y eliminados.
+- Aplicación en tiempo real sobre la tabla.
+
+**Tabla de gestión**
+
+- Vista general de grupos con acciones rápidas.
+- Íconos para ver, editar, suspender, eliminar o restaurar.
+- Integración con paneles laterales y diálogos contextuales.
+
+**Mensajes del sistema**
+
+- `Snackbars` informan al usuario de forma inmediata.
+- Errores y validaciones claras, como:
+  - "El grupo tiene hijos asociados."
+  - "El nombre debe tener al menos 6 caracteres."
+  - "Error al intentar restaurar el grupo."
+
+Beneficios para el usuario funcional
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Previene errores comunes gracias a validaciones automatizadas.
+- Facilita la gestión de estructuras complejas en pocos clics.
+- Centraliza todas las acciones del módulo en una única vista operativa.
+- Mejora la trazabilidad, seguridad y productividad del sistema judicial.
+
+---
