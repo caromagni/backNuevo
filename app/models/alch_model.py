@@ -91,6 +91,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_ext = Column(UUID)
     circunscripcion_judicial = Column(String, nullable=False)
     id_fuero = Column(UUID)
     descripcion = Column(String)
@@ -132,6 +133,7 @@ class Usuario(Base):
     nombre = Column(String)
     apellido = Column(String)
     id_persona_ext = Column(UUID)
+    id_ext = Column(UUID)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
     username = Column(String)
@@ -347,6 +349,7 @@ class Inhabilidad(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
+    id_ext = Column(UUID)
     #id_tipo_inhabilidad = Column(ForeignKey('tareas.tipo_inhabilidad.id'), nullable=False)
     id_tipo_inhabilidad = Column(UUID)
     tipo = Column(String)

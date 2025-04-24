@@ -1,5 +1,6 @@
 import pika
 import json
+import time
 import os
 from flask import current_app
 from alchemy_db import db
@@ -9,6 +10,7 @@ import uuid
 from sqlalchemy import text
 from datetime import datetime
 from common.utils import verifica_username
+from flask import g
 
 def generar_update(entity, campos, valid_attributes, db_session=None, sqlalchemy_obj=None):
     if entity in ['tipo_act_juzgado', 'tipo_act_parte']:
@@ -44,6 +46,7 @@ def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy
         
         nuevo_obj = sqlalchemy_model_class()
 
+        nuevo_obj.id = str(uuid.uuid4()) 
         for key, value in valid_attributes.items():
             if key == 'id':
                 nuevo_obj.id_ext = value
@@ -53,10 +56,13 @@ def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy
                 nuevo_obj.codigo_humano = value
             elif key == 'habilitado':
                 nuevo_obj.eliminado = not value
+            elif key=='id':
+                nuevo_obj.id_ext = value    
             else:
                 setattr(nuevo_obj, key, value)
 
         nuevo_obj.fecha_actualizacion = datetime.now()
+        nuevo_obj.id_user_actualizacion = g.id_user
         db_session.add(nuevo_obj)
         db_session.commit()
 
@@ -67,17 +73,17 @@ def generar_insert(entity, campos, valid_attributes, db_session=None, sqlalchemy
     
 
 def construct_update_query(entity, campos, valid_attributes):
-    if entity == 'usuario':
-        original_id = valid_attributes.get('id')
-        valid_attributes['id_persona_ext'] = original_id  # original va en id_pers_ext
+    #if entity == 'usuario':
+    #    original_id = valid_attributes.get('id')
+    valid_attributes['id_ext'] = valid_attributes.get('id')  # original va en id_pers_ext
     # Filter campos to only include fields present in valid_attributes
     update_fields = [field for field in campos if field in valid_attributes and field != 'id']
     
     # Construct the SET clause
     set_clause = ', '.join([f"{field} = :{field}" for field in update_fields])
-    query = f'UPDATE tareas.{entity} SET {set_clause} WHERE id = :id'
+    query = f'UPDATE tareas.{entity} SET {set_clause} WHERE id_ext = :id'
     values = {field: valid_attributes[field] for field in update_fields}
-    values['id'] = valid_attributes['id']
+    values['id'] = valid_attributes['id']    
     return query, values
 
 def construct_insert_query(entity, campos, valid_attributes):
@@ -86,7 +92,7 @@ def construct_insert_query(entity, campos, valid_attributes):
         original_id = valid_attributes.get('id')
 
         valid_attributes['id'] = new_id  # nuevo UUID como id
-        valid_attributes['id_persona_ext'] = original_id  # original va en id_pers_ext
+        valid_attributes['id_ext'] = original_id  # original va en id_pers_ext
 
 
     # Filter campos to only include fields present in valid_attributes
@@ -109,7 +115,7 @@ def construct_insert_query(entity, campos, valid_attributes):
 def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("Checking updates...")
         print(datetime.now())
-
+        print("entity a buscar: ", entity)
         res = db.session.query(Parametros).filter(Parametros.table == entity).first()
         if not res:
             print(f"No se encontró la tabla {entity} en los parámetros.")
@@ -121,15 +127,12 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
         print("campos: ", campos)
         if action in ["POST", "PUT"]:
             print("action: ", action)
-            #usher_apikey = os.environ.get('USHER_API_KEY', 'default_apikey')
             usher_apikey = os.environ.get('USHER_API_KEY')
-            #system_apikey = os.environ.get('SYSTEM_API_KEY', 'default_system')
             system_apikey = os.environ.get('SYSTEM_NAME')
-            print("usher_apikey: ", usher_apikey)
-            print("system_apikey: ", system_apikey)
             headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
             params = {"usuario_consulta": "csolanilla@mail.jus.mendoza.gov.ar"}
             id_user = verifica_username('pusher')
+            g.id_user = id_user
             print("id user: ", id_user)
             try:
                 response = requests.get(url, params=params, headers=headers).json()
@@ -163,17 +166,17 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                 if entity=='tipo_act_juzgado' or entity=='tipo_act_parte':
                     query = db.session.query(TipoTarea).filter(TipoTarea.id_ext == entity_id).first()
                 if entity == 'usuario':
-                    query = db.session.query(Usuario).filter(Usuario.id_persona_ext == entity_id).first()
+                    query = db.session.query(Usuario).filter(Usuario.id_ext == entity_id).first()
                     if query is None:
                         query = db.session.query(Usuario).filter(Usuario.username == valid_attributes['email']).first()
                 if entity == 'organismo':
-                    query = db.session.query(Organismo).filter(Organismo.id == entity_id).first()
+                    query = db.session.query(Organismo).filter(Organismo.id_ext == entity_id).first()
                 if entity == 'inhabilidad':
-                    query = db.session.query(Inhabilidad).filter(Inhabilidad.id == entity_id).first()    
+                    query = db.session.query(Inhabilidad).filter(Inhabilidad.id_ext == entity_id).first()    
                 
                 if query is not None:
                     #Updates
-
+                    print("Registro encontrado en", entity, ", actualizando... ID:", entity_id)
                     query_final, values = generar_update(
                                 entity,
                                 campos,
@@ -181,10 +184,12 @@ def check_updates(session, entity='', action='', entity_id=None, url=''):
                                 db_session=db.session,
                                 sqlalchemy_obj=query  # el objeto ya cargado de la BD
                             )
+                    print("query_final: ", query_final)
                     
                 else:
                     #Inserts
                     #Agregar entity=='tipo_act_juzgado' or entity=='tipo_act_parte'
+                    print("Registro no encontrado en", entity, ", insertando... ID:", entity_id)
                     query_final, values = generar_insert(
                                 entity,
                                 campos,
@@ -210,6 +215,7 @@ class RabbitMQHandler:
         self.connection = None
         self.channel = None
         self.objeto = None
+        self.max_retries = 5
 
     def connect(self):
         rabbitmq_params = {
@@ -219,30 +225,42 @@ class RabbitMQHandler:
             'port': int(os.environ.get('RABBITMQ_PORT', 5672)),
             'vhost': os.environ.get('RABBITMQ_VHOST', '/')
         }
+        retry_count = 0
+        while retry_count < self.max_retries:
 
-        try:
-            connection_params = pika.ConnectionParameters(
-                host=rabbitmq_params['host'],
-                port=rabbitmq_params['port'],
-                virtual_host=rabbitmq_params['vhost'],
-                credentials=pika.PlainCredentials(
-                    rabbitmq_params['user'], rabbitmq_params['password']
+            try:
+                connection_params = pika.ConnectionParameters(
+                    host=rabbitmq_params['host'],
+                    port=rabbitmq_params['port'],
+                    virtual_host=rabbitmq_params['vhost'],
+                    credentials=pika.PlainCredentials(
+                        rabbitmq_params['user'], rabbitmq_params['password']
+                    )
                 )
-            )
-            self.connection = pika.BlockingConnection(connection_params)
-            self.channel = self.connection.channel()
-            self.channel.queue_declare(queue='tareas_params', durable=True, passive=True)
-            print("RabbitMQ conectado.")
-        except Exception as e:
-            print("Error conectando a RabbitMQ:", e)
-            self.connection, self.channel = None, None
+                self.connection = pika.BlockingConnection(connection_params)
+                self.channel = self.connection.channel()
+                self.channel.queue_declare(queue='tareas_params', durable=True, passive=True)
+                print("RabbitMQ conectado.")
+                return
+            except Exception as e:
+                retry_count += 1
+                #wait_time = 2 ** retry_count
+                print(f" Error conectando a RabbitMQ (intento {retry_count}): {e}")
+                print(f" Reintentando en 10 segundos...")
+                time.sleep(10)
+                #self.connection, self.channel = None, None
 
 
     def callback(self, ch, method, properties, body):
         print(f" [x] Received {body}")
-        self.objeto = json.loads(body.decode('utf-8'))
-        with current_app.app_context():
-            self.process_message(db.session)
+        try:
+            self.objeto = json.loads(body.decode('utf-8'))
+            with current_app.app_context():
+                self.process_message(db.session)
+            #ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+        except Exception as e:
+            print("Error procesando el mensaje:", e)
+            
 
     def process_message(self, session):
         if not self.objeto:
@@ -262,7 +280,10 @@ class RabbitMQHandler:
             print("No se puede consumir mensajes sin conexión.")
             raise Exception("No se puede consumir mensajes sin conexión.")
 
-        self.channel.basic_consume(queue='tareas_params', auto_ack=False, on_message_callback=self.callback)
+        self.channel.basic_consume(queue='tareas_params', 
+                                   auto_ack=False, 
+                                   on_message_callback=self.callback
+                )
         print(' [*] Waiting for messages. To exit press CTRL+C')
         try:
             self.channel.start_consuming()

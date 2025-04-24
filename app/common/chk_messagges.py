@@ -2,7 +2,7 @@ from time import sleep
 import uwsgi
 from common.rabbitmq_utils import RabbitMQHandler
 from alchemy_db import db
-
+import time
 # Consumir mensajes de la cola
 #def chk_messagges(app, session_factory):
 def chk_messagges(app, session):    
@@ -19,6 +19,8 @@ def chk_messagges(app, session):
                     sleep(tiempo)
                 except Exception as e:
                     print("Error en chk_messagges:", e)
+                    time.sleep(5)
+                    handler.connect()
                     #session.rollback()
               
             

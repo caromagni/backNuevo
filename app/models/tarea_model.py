@@ -1989,7 +1989,7 @@ def usuarios_tarea(tarea_id=""):
     usuarios = db.session.query(Usuario.nombre.label('nombre'),
                         Usuario.apellido.label('apellido'),
                         Usuario.id.label('id'),
-                        Usuario.id_persona_ext.label('id_persona_ext'),
+                        Usuario.id_ext.label('id_ext'),
                         Usuario.id_user_actualizacion.label('id_user_actualizacion'),
                         Usuario.fecha_actualizacion.label('fecha_actualizacion'))\
                         .join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario)\
