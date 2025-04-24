@@ -62,7 +62,7 @@ def get_usuario_by_id(id):
             "dni": res.dni,
             "username": res.username,
             "email": res.email,
-            "id_persona_ext": res.id_persona_ext,
+            "id_ext": res.id_ext,
             "id_user_actualizacion": res.id_user_actualizacion,
             "fecha_actualizacion": res.fecha_actualizacion,
             "eliminado": res.eliminado,
@@ -189,7 +189,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
                 "id": res.id,
                 "nombre": res.nombre,
                 "apellido": res.apellido,
-                "id_persona_ext": res.id_persona_ext,
+                "id_ext": res.id_ext,
                 "id_user_actualizacion": res.id_user_actualizacion,
                 "fecha_actualizacion": res.fecha_actualizacion,
                 "eliminado": res.eliminado,
@@ -235,7 +235,7 @@ def get_grupos_by_usuario(id):
     return res
 
 
-def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_persona_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
+def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_ext=None, id_grupo=None, id_user_actualizacion=None, grupo=None, dni='', email='', username=''):
     
 
     if user_actualizacion is not None:
@@ -264,7 +264,7 @@ def insert_usuario(user_actualizacion=None, id='', nombre='', apellido='', id_pe
         dni = dni,
         username = username,
         email = email.lower(),
-        id_persona_ext=id_persona_ext,
+        id_ext=id_ext,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -327,8 +327,8 @@ def update_usuario(id='',username=None, **kwargs):
         usuario.username = kwargs['email'].lower()
         usuario.email = kwargs['email'].lower()  
 
-    if 'id_persona_ext' in kwargs:
-        usuario.id_persona_ext = kwargs['id_persona_ext']
+    if 'id_ext' in kwargs:
+        usuario.id_ext = kwargs['id_ext']
         usuario.id_user_actualizacion = id_user_actualizacion
     if 'suspendido' in kwargs:
         usuario.suspendido = kwargs['suspendido']
