@@ -71,7 +71,7 @@ class Usuario(Base):
     id_user_actualizacion = Column(UUID(as_uuid=True))
     nombre = Column(String, nullable=False)
     apellido = Column(String)
-    id_persona_ext = Column(UUID(as_uuid=True))
+    id_ext = Column(UUID(as_uuid=True))
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
