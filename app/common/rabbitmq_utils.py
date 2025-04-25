@@ -242,13 +242,19 @@ class RabbitMQHandler:
                 self.channel.queue_declare(queue='tareas_params', durable=True, passive=True)
                 print("RabbitMQ conectado.")
                 return
+            except pika.exceptions.ChannelClosedByBroker as e:
+                if e.reply_code == 404:
+                    #el canal se cierra cuando passive=True
+                    self.channel = self.connection.channel()
+                    self.channel.queue_declare(queue='tareas_params', durable=True)
+                else:
+                    raise
+            """      
             except Exception as e:
                 retry_count += 1
-                #wait_time = 2 ** retry_count
                 print(f" Error conectando a RabbitMQ (intento {retry_count}): {e}")
                 print(f" Reintentando en 10 segundos...")
-                time.sleep(10)
-                #self.connection, self.channel = None, None
+                time.sleep(10) """
 
 
     def callback(self, ch, method, properties, body):
@@ -257,9 +263,12 @@ class RabbitMQHandler:
             self.objeto = json.loads(body.decode('utf-8'))
             with current_app.app_context():
                 self.process_message(db.session)
-            #ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
+            ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmamos que se procesó correctamente
         except Exception as e:
             print("Error procesando el mensaje:", e)
+            #reintentar o descartar el mensaje (requeue=False)
+            #ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazamos el mensaje y lo reencolamos
+            
             
 
     def process_message(self, session):
@@ -281,12 +290,13 @@ class RabbitMQHandler:
             raise Exception("No se puede consumir mensajes sin conexión.")
 
         self.channel.basic_consume(queue='tareas_params', 
-                                   auto_ack=True, 
+                                   auto_ack=False, 
                                    on_message_callback=self.callback
                 )
         print(' [*] Waiting for messages. To exit press CTRL+C')
         try:
             self.channel.start_consuming()
+
         except KeyboardInterrupt:
             print("Consumo de mensajes detenido manualmente.")
             raise Exception("Consumo de mensajes detenido manualmente.")
