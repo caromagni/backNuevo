@@ -19,9 +19,9 @@ from common.logger_config import logger
 def check_updates_new( rabbit_message: dict):
         
         entity = rabbit_message.get('entity_type').lower()
-        action = rabbit_message.get('action').lower()
-        entity_id = rabbit_message.get('entity_id').lower()
-        empty_stuff = rabbit_message.get('empty_stuff').lower()
+        action = rabbit_message.get('action')
+        entity_id = rabbit_message.get('entity_id')
+        empty_stuff = rabbit_message.get('empty_stuff')
         url = rabbit_message.get('url').lower()
         
         if not entity:
@@ -51,6 +51,7 @@ def check_updates_new( rabbit_message: dict):
             id_user = utils.get_username_id('pusher')
             g.id_user = id_user
             print("id user: ", id_user)
+            print("entity: ", entity)
             try:
                 match entity:
                     case 'tipo_act_juzgado':
@@ -120,8 +121,8 @@ class RabbitMQHandler:
         try:
             logger.info(f"Mensaje procesado: {body.decode('utf-8')}")
             self.objeto = json.loads(body.decode('utf-8'))
-            with current_app.app_context():
-                self.process_message(db.session)
+            #with current_app.app_context():
+            #    self.process_message(db.session)
           
             print(f" [x] Received {body}")
 
@@ -147,8 +148,9 @@ class RabbitMQHandler:
     #     entity_id = self.objeto.get('entity_id', '')
     #     url = self.objeto.get('url', '')
 
-    #     #check_updates(session, entity, action, entity_id, url)
-    #     check_updates_new(session, entity, action, entity_id, url)
+        #check_updates(session, entity, action, entity_id, url)
+        
+        #check_updates_new(session, entity, action, entity_id, url)
 
 
     def start_consuming(self):
