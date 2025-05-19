@@ -553,14 +553,3 @@ class EP(Base):
     caso_uso = Column(JSONB)
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(UUID)
-
-class CU(Base):
-    __tablename__ = 'caso_uso'
-    __table_args__ = {'schema': 'tareas'}
-
-    id = Column(UUID, primary_key=True)
-    codigo = Column(String)
-    descripcion = Column(String)
-    fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(UUID)      
-    

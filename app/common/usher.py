@@ -6,6 +6,7 @@ import uuid
 from alchemy_db import db
 from sqlalchemy import or_
 import os
+import json
 
 def get_roles(username=''):
     url=os.environ.get('PUSHER_URL')+username
@@ -21,7 +22,7 @@ def get_roles(username=''):
     return resp
 
 ######################Casos de uso de la api######################
-def get_api_cu(url=None):
+def get_api_cu_1(url=None):
     cu=[]
     if url is not None:
         cu_query= db.session.query(EP).filter(EP.url == url).first()
@@ -29,6 +30,25 @@ def get_api_cu(url=None):
             #print("caso de uso:",cu_query.caso_uso)
             cu=cu_query.caso_uso
        
+    return cu
+
+def get_api_cu(url=None, archivo_json="ep_cu.json"):
+    logger.info("get_api_cu - url: %s", url)
+    cu = []
+    if url is None:
+        return cu
+
+    if not os.path.exists(archivo_json):
+        raise FileNotFoundError(f"El archivo {archivo_json} no existe.")
+
+    with open(archivo_json, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    for ep in data:
+        if ep.get("url") == url:
+            cu = [item["codigo"] for item in ep.get("caso_uso", [])]
+            break
+
     return cu
 
 ######################Control de acceso######################
@@ -90,6 +110,7 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
         db.session.commit()
     
     #Controlo si el usuario con el rol elegido tiene permisos
+    print("ROL:",rol_usuario)
     query_permisos = db.session.query(Rol).filter(Rol.email == email, Rol.rol == rol_usuario, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
     if len(query_permisos)==0:
         logger.error("No tiene permisos")
