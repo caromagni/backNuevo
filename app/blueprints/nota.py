@@ -8,6 +8,7 @@ from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from flask import g, request
+from cache import cache
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
@@ -112,6 +113,7 @@ def del_tipo_nota(id: str):
 
 ################################ NOTAS ################################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@cache.cached(timeout=500, query_string=True)
 @nota_b.get('/nota')
 @nota_b.input(schema.NotaGetIn, location='query')
 @nota_b.output(schema.NotaCountOut)

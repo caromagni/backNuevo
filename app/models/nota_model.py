@@ -8,6 +8,7 @@ from flask import current_app
 from alchemy_db import db
 from .alch_model import Nota, TipoNota, Tarea, Usuario, TareaAsignadaUsuario, Grupo, TareaXGrupo, Inhabilidad
 import traceback
+from cache import cache
 ##########################  TIPO NOTAS #############################################
 
 def get_all_tipo_nota(page=1, per_page=10):
@@ -191,29 +192,11 @@ def update_nota(id='', **kwargs):
     db.session.commit()
     return result
 
+@cache.cached(timeout=500, query_string=True)
 def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None):
-   
-    
-    
-    print('consulta por fechas y id')
-    print(fecha_desde)
-    print(fecha_hasta)
-    # # Convert fecha_desde to datetime object
-    # if isinstance(fecha_desde, str):
-    #     fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y')
-    
-    # # Set fecha_hasta to current datetime if not provided
-    # if fecha_hasta is None:
-    #     fecha_hasta = datetime.now()
-
-    # elif isinstance(fecha_hasta, str):
-    #     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
 
     query = db.session.query(Nota).filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta), Nota.eliminado==False)
-    # filter(Nota.fecha_creacion.between(fecha_desde, fecha_hasta))
-    print('consulta por parámetros de notas')
-    print("id tarea:",id_tarea)
-    
+
     print(query.count())
     if titulo != '':
         query = query.filter(Nota.titulo.ilike(f'%{titulo}%'))
@@ -230,20 +213,16 @@ def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=Non
     if eliminado is not None:
         query = query.filter(Nota.eliminado == eliminado)
 
-    #muestra datos
-    print("Query:", query.all())
+    
     total= len(query.all()) 
 
     result = query.order_by(Nota.fecha_creacion).offset((page-1)*per_page).limit(per_page).all()
     
     return result, total
 
-def get_nota_by_id(id):
-    
+def get_nota_by_id(id):    
     res = db.session.query(Nota).options(joinedload(Nota.tipo_nota)).filter(Nota.id == id).first()
-    print('consulta notas por id')
-    print(res)
-
+   
     if res is not None:
         return res 
     else:
@@ -251,7 +230,6 @@ def get_nota_by_id(id):
         return None
 
 def delete_nota(username=None, id_nota=None):
-    
     
     if username is not None:
         id_user_actualizacion = get_username_id(username)
@@ -287,10 +265,7 @@ def delete_nota(username=None, id_nota=None):
             #print("Tarea con notas:", t.id)
             print("Nota a elimnar:", id_nota)
             print("Id de nota sin eliminar:", t.id) """
-        
-    
-    
-
+      
     
     db.session.commit()
     return nota    

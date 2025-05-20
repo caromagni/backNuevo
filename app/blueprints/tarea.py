@@ -8,6 +8,7 @@ from common.logger_config import logger
 from flask import g
 from apiflask import APIBlueprint
 from flask import request, current_app
+from cache import cache
 
 
 
@@ -36,6 +37,7 @@ def before_request():
     
 ####################TIPO DE TAREA######################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@cache.cached(timeout=500, query_string=True)
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaCountOut)
 @tarea_b.input(schema.PageIn, location='query')

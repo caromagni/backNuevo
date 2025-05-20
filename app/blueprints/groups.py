@@ -7,6 +7,7 @@ import traceback
 from flask import g
 from apiflask import APIBlueprint, HTTPTokenAuth
 from flask import request, current_app
+from cache import cache
 
 auth = HTTPTokenAuth()
 groups_b = APIBlueprint('groups_Blueprint', __name__)
@@ -51,6 +52,7 @@ def patch_grupo(id_grupo: str, json_data: dict):
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
+@cache.cached(timeout=500, query_string=True)
 @groups_b.get('/grupo')
 @groups_b.input(schema.GroupGetIn,  location='query')
 @groups_b.output(schema.GetGroupCountOut)
@@ -157,6 +159,7 @@ def get_all_grupobase(query_data: dict):
         raise error_handling.ValidationError(err)        
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
+@cache.cached(timeout=500, query_string=True)
 @groups_b.get('/usuarios_grupo')
 @groups_b.input(schema.UsuariosGroupIn, location='query')
 @groups_b.output(schema.UsuariosGroupOut(many=True))
