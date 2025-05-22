@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
-from flask import current_app
 from alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
 from collections import defaultdict

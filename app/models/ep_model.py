@@ -1,7 +1,8 @@
-from common.utils import *
+import common.utils as utils
+import common.logger_config as logger_config
 import json
 import os
-from datetime import datetime
+from flask import current_app
 ##########################  TIPO NOTAS #############################################
 
 def get_all_EP(username=None):
@@ -23,12 +24,12 @@ def get_all_EP(username=None):
 
 def insert_EP(username, **kwargs):
     if username is not None:
-        id_user_actualizacion = get_username_id(username)
+        id_user_actualizacion = utils.get_username_id(username)
     else:
         raise Exception("Usuario no ingresado")
 
     if id_user_actualizacion is not None:
-        verifica_usr_id(id_user_actualizacion)
+        utils.verifica_usr_id(id_user_actualizacion)
 
     metodo = kwargs.get('metodo', '').upper()
     url = kwargs.get('url', '').lower()
@@ -61,23 +62,6 @@ def insert_EP(username, **kwargs):
     with open(ruta_archivo, 'w', encoding='utf-8') as f:
         json.dump(datos, f, indent=4, ensure_ascii=False)
 
-    print("Datos guardados en el archivo JSON:", nuevo_registro_json)
+    logger_config.logger.info(f"Datos guardados en el archivo JSON: {nuevo_registro_json}")
     return nuevo_registro_json
 
-""" def exportar_eps_a_json():
-    path_archivo = "ep_cu.json"
-    eps = db.session.query(EP).all()
-    resultado = []
-
-    for ep in eps:
-        resultado.append({
-            "url": ep.url,
-            "descripcion": ep.descripcion,
-            "caso_uso": [{"codigo": c} for c in ep.caso_uso]  # asumimos que es una lista de strings
-        })
-
-    with open(path_archivo, 'w', encoding='utf-8') as f:
-        json.dump(resultado, f, ensure_ascii=False, indent=4)
-    cant = len(resultado)
-    return resultado, cant     """
-    

@@ -2,11 +2,6 @@ import uuid
 from sqlalchemy.orm import aliased
 from datetime import datetime
 from sqlalchemy import text
-from sqlalchemy.sql import func
-from sqlalchemy.dialects import postgresql
-from apiflask.fields import Integer, String
-from flask import current_app
-#from common.utils import *
 import common.utils as utils
 import common.logger_config as logger_config
 from alchemy_db import db

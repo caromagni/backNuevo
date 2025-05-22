@@ -1,15 +1,10 @@
-
-from traceback import print_exception
-#from fastapi import HTTPException
 from apiflask   import HTTPError
 import secrets
 import string
 import bcrypt
 import json
-#from utils import *
 from datetime import datetime, timedelta
 import base64
-import os
 
 ###########   CODE TO GENERATE API KEY ###########
 ###   THIS CAN BE RAN IN A SEPARATE PY FILE   ###
