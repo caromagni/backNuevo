@@ -12,7 +12,7 @@ from decorators.role import require_role
 ai_assistant = APIBlueprint('ai_assistant_blueprint', __name__)
 
 @ai_assistant.post('/chat')
-# @cache.cached(timeout=500, query_string=True)
+@cache.cached(timeout=500, query_string=True)
 def chat():
     try:
         data = request.get_json()

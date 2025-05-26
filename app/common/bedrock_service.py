@@ -6,8 +6,6 @@ from flask import jsonify, current_app
 from schemas.schemas import ActuacionOut, TipoActuacionOut,TareaAllOut
 
 
-
-
 # Initialize Bedrock client once
 bedrock_client = boto3.client(
     service_name='bedrock-runtime',
