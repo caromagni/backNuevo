@@ -886,17 +886,14 @@ class UsuarioCountRolOut(Schema):
 
 class TareaAllOut(Schema):
     id = String()
-    #id_grupo = String()
-    #prioridad = Integer()
-    #estado = Integer()
-    prioridad = fields.Nested(PrioridadSchema, metadata={
-        "description": "1 (alta), 2 (media), 3 (baja)"
-    })
-    #prioridad = Integer()
-    estado = fields.Nested(EstadoSchema, metadata={
-        "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    })
-    #estado = Integer()
+    estado = Integer()
+    #prioridad = fields.Nested(PrioridadSchema, metadata={
+    #    "description": "1 (alta), 2 (media), 3 (baja)"
+    #})
+    prioridad = Integer()
+    #estado = fields.Nested(EstadoSchema, metadata={
+    #    "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
+    #})
     id_actuacion = String()
     titulo = String()
     cuerpo = String()
