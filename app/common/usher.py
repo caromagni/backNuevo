@@ -55,7 +55,8 @@ def get_usr_cu(username=None, rol_usuario='', cu=None):
     
     pull_roles = True
     #tiempo_vencimiento = timedelta(days=1)
-    tiempo_vencimiento = timedelta(minutes=3)
+    #tiempo_vencimiento = timedelta(hours=1)
+    tiempo_vencimiento = timedelta(minutes=30)
     try:
         query_usr = db.session.query(Usuario).filter(Usuario.email == username).first()
         if query_usr is None:
