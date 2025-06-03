@@ -1,7 +1,7 @@
 from sqlalchemy.exc import NoResultFound
 from models.alch_model import HerarquiaGrupoGrupo
 from flask import current_app
-from cache import cache
+from common.cache import cache
 
 
 @cache.memoize(timeout=60 * 60 * 24)  # Cache for 24 hours

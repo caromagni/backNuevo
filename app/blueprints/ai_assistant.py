@@ -3,7 +3,7 @@ from common.bedrock_service import invoke_bedrock_model
 from flask import request, jsonify, current_app
 from common.auth import verify_header
 from common.error_handling import ValidationError
-from cache import cache
+from common.cache import cache
 from models.tarea_model import get_all_tarea_detalle
 from schemas.schemas import ActuacionOut, TipoActuacionOut,TareaAllOut
 from flask import g

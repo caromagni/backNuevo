@@ -8,7 +8,8 @@ from common.logger_config import logger
 from flask import g
 from apiflask import APIBlueprint
 from flask import request, current_app
-from cache import cache
+from common.cache import cache
+
 
 
 
@@ -43,12 +44,7 @@ def before_request():
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaCountOut)
 @tarea_b.input(schema.PageIn, location='query')
-<<<<<<< HEAD
-# @rol.require_role(["consultar-tarea"])
-# @cache.cached(timeout=50)
-=======
 @rol.require_role("Operador")
->>>>>>> main
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username

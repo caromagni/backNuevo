@@ -9,7 +9,8 @@ from datetime import datetime
 from flask import request
 from flask import g
 import traceback
-from cache import cache
+from common.cache import cache
+
 
 label_b = APIBlueprint('label_blueprint', __name__)
 

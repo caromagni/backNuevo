@@ -8,7 +8,8 @@ from apiflask import APIBlueprint
 from flask import request, current_app
 from datetime import datetime
 from flask import g, request
-from cache import cache
+from common.cache import cache
+
 
 nota_b = APIBlueprint('nota_blueprint', __name__)
 #################Before requests ##################
