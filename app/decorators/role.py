@@ -3,9 +3,10 @@ import jwt
 from functools import wraps
 from common.usher import get_usr_cu
 from common.logger_config import logger
-
 from flask import request
 import time
+
+
 def require_role(use_cases):
     def decorator(f):
         @wraps(f)

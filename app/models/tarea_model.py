@@ -948,9 +948,12 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-# @cache.memoize(timeout=3600)
+@cache.cached(timeout=50)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
+    print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
+    print(cache.cache._cache)
+
     
     todo = db.session.query(TipoTarea).all()
     total= len(todo)
@@ -983,9 +986,7 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
     return nuevo_tipo_tarea
 
 
-def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
-
-    
+def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):    
 
     if username is not None:
         id_user_actualizacion = get_username_id(username)
@@ -1038,6 +1039,7 @@ def delete_tipo_tarea(username=None, id=None):
         return None
     
 #########################SUBTIPO TAREA############################################
+@cache.memoize(timeout=50)
 def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     
@@ -1087,8 +1089,6 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
 
 def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
 
-    
-
     if username is not None:
         id_user_actualizacion = get_username_id(username)
 
@@ -1116,7 +1116,6 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     return subtipo_tarea
 
 def delete_subtipo_tarea(username=None, id=None):
-    
 
     if username is not None:
         id_user_actualizacion = get_username_id(username)
@@ -1217,7 +1216,7 @@ def get_tarea_historia_usr_by_id(id):
     print (result)
     return result
 
-
+@cache.memoize(timeout=50)
 def get_tarea_by_id(id):
     
     res = db.session.query(Tarea).filter(Tarea.id == id).first()
@@ -1335,9 +1334,9 @@ def get_tarea_by_id(id):
     
     return results 
 
+@cache.memoize(timeout=50)
 def get_tarea_grupo(username=None, page=1, per_page=10):
-    
-    
+        
     if username is not None:
         id_user = get_username_id(username)
         if id_user is None:
@@ -1548,9 +1547,8 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
 
 
 
-
-def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
-    
+@cache.memoize(timeout=50)
+def get_tarea_grupo_by_id(username=None, page=1, per_page=10): 
     
     results = []
 
@@ -1689,13 +1687,63 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
+# def memoize(func):
+#     cache = {}
 
+#     def wrapper(*args):
+#         if args in cache:
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
+
+#             print("Returning cached result for:", args)
+#             return cache[args]
+#         result = func(*args)
+#         cache[args] = result
+#         return result
+
+#     return wrapper
+
+# @cache.memoize(timeout=50)
+# @cache.cached(timeout=50)
+
+# @memoize
 @cache.memoize(timeout=500)
-# @cache.memoize(timeout=3600)
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-    print("*******************************************************")
-    print("get_all_tarea_detalle")
-    print("*******************************************************")
+def get_all_tarea_detalle(page=1, per_page=10, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas):
+
+    print("**************************START TIME*****************************")
+    print("**************************START TIME*****************************")
+    print(page, per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)
+# def get_all_tarea_detalle(page=1):
+#     print("**************************START TIME*****************************")
+#     exec_time = datetime.now()
+#     print(exec_time)
+#     per_page=10
+#     titulo=''
+#     label=''
+#     labels=''
+#     id_expediente=None
+#     id_actuacion=None
+#     id_tipo_tarea=None
+#     id_usuario_asignado="dca6564c-a5bc-2e90-8380-a3567b944418"
+#     grupos=None
+#     id_tarea=None
+#     fecha_desde=None
+#     fecha_hasta=None
+#     fecha_fin_desde=None
+#     fecha_fin_hasta=None
+#     prioridad=0
+#     estado=0
+#     eliminado=None
+#     tiene_notas=False
+#     print("*******************************************************")
+ 
+#     print("*******************************************************")
     
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
@@ -1868,16 +1916,16 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
             "reasignada_grupo": reasignada_grupo
         }
         results.append(result)
-
-        print("Resultado:", result)
+    # print("time taken for this task:", datetime.now() - exec_time)
+    #print("Resultado:", result)
 
     return results, total
 
 
 
 #def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-# @cache.memoize(timeout=3600)
-@cache.cached(timeout=500, query_string=True)
+# @cache.memoize(timeout=50)
+@cache.memoize(timeout=50)
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
@@ -2002,8 +2050,9 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
 
     return results, total
 
-def usuarios_tarea(tarea_id=""):
-    
+
+@cache.memoize(timeout=50)
+def usuarios_tarea(tarea_id=""):    
     print("Usuarios por tarea:", tarea_id)    
     usuarios = db.session.query(Usuario.nombre.label('nombre'),
                         Usuario.apellido.label('apellido'),
@@ -2017,6 +2066,7 @@ def usuarios_tarea(tarea_id=""):
                         .all()
     print("Usuarios por tarea:", usuarios)
     return usuarios
+
 
 def delete_tarea(username=None, id_tarea=None):
     

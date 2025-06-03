@@ -7,6 +7,7 @@ from alchemy_db import db
 from sqlalchemy import or_
 import os
 
+
 def get_roles(username=''):
     url=os.environ.get('PUSHER_URL')+username
     #url='http://dev-backend.usher.pjm.gob.ar/api/v1/all_info/?desc_sistema=tareas&usuario_consulta='+username 
@@ -17,7 +18,7 @@ def get_roles(username=''):
     r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
     
     resp=r.json()
-    print("json roles:",resp)
+    # print("json roles:",resp)
     return resp
 
 
@@ -54,7 +55,7 @@ def get_usr_cu(username=None, rol_usuario='Operador', cu=[]):
 
     #######Consultar CU Api P-usher##########
     if pull_roles:
-        logger.info("Get roles desde p-usher")
+        # logger.info("Get roles desde p-usher")
         roles = get_roles(username)
         for r in roles['lista_roles_cus']:
             ######ROL USHER##########

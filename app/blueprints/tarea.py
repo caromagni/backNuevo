@@ -40,8 +40,8 @@ def before_request():
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaCountOut)
 @tarea_b.input(schema.PageIn, location='query')
-@rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500, query_string=True)
+# @rol.require_role(["consultar-tarea"])
+# @cache.cached(timeout=50)
 def get_tipoTareas(query_data: dict):
     try:
         user_name = g.username
@@ -329,15 +329,17 @@ def get_tareas(query_data: dict):
         raise error_handling.ValidationError(err) 
 
 
+
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de tareas', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.get('/tarea')
 @tarea_b.input(schema.TareaGetIn, location='query')
 @tarea_b.output(schema.TareaCountAllOut)
-@rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500, query_string=True)
+# @rol.require_role(["consultar-tarea"])
+@cache.cached(timeout=500)
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")
+        print("Mostrando cache almacenado", cache.cache._cache)
         ##########ROLES - REVEER ####################
         #token='eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJsTVhjMjlEdmFtdEZhZ2tiUWoxQ2Fib1pqSk9OY1lxTE5teE1CWERIZmx3In0.eyJleHAiOjE3MjcyNjMzOTEsImlhdCI6MTcyNTk2OTA1OCwiYXV0aF90aW1lIjoxNzI1OTY3MzkxLCJqdGkiOiJhZDU5MzlhNS03NjkwLTQwNmUtYmZiMi1hNWM1OTMzZTg1MzciLCJpc3MiOiJodHRwczovL2Rldi1hdXRoLnBqbS5nb2IuYXIvYXV0aC9yZWFsbXMvZGV2b3BzIiwiYXVkIjoiYWNjb3VudCIsInN1YiI6Ijg5MWFiOTA5LTMzNzQtNDU2YS04Y2U5LTdiZDJkZjExOWQwYSIsInR5cCI6IkJlYXJlciIsImF6cCI6InVzaGVyIiwibm9uY2UiOiI2MGE5ZGRlZS01ZGY3LTQxNjYtYjk3Ny0zMTBhZDk1MWI3NmIiLCJzZXNzaW9uX3N0YXRlIjoiYTFiMDA2NWQtMzhiOC00YTFmLTk2YzAtMTg0NmU0MzliY2VjIiwiYWxsb3dlZC1vcmlnaW5zIjpbIioiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwidW1hX2F1dGhvcml6YXRpb24iXX0sInJlc291cmNlX2FjY2VzcyI6eyJ1c2hlciI6eyJyb2xlcyI6WyJhZG1pbiJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsInNpZCI6ImExYjAwNjVkLTM4YjgtNGExZi05NmMwLTE4NDZlNDM5YmNlYyIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibmFtZSI6IlNpbHZpYSBTLiBJbXBlcmlhbGUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzaW1wZXJpYWxlIiwiZ2l2ZW5fbmFtZSI6IlNpbHZpYSBTLiIsImZhbWlseV9uYW1lIjoiSW1wZXJpYWxlIiwiZW1haWwiOiJzaW1wZXJpYWxlQG1haWwuanVzLm1lbmRvemEuZ292LmFyIn0.OnfYhSdrZfz7bL6r1sy3-6DCTeFH8G7VesMbGWh4XGCiFM2IuqpXldrjlhKWI8ahRTKAJEdvXlBn8ht5JtGY1y-ee8RbeVrxtmjmmBHJt-nejXNflhsoXcF_20r3rMyfvM210vtFaUy26YZi7ttIBS6mQaql4Y_DPgL_wAMVoa431ThaDw3Kijcl7nJQ40fBeti0YgiwS3KKvEamf8E-CbX1gCUNoZX_pyP4dWSh9kduNh_K0QU4uqyvVzwyt8_jikcPxWmHQ9SHh31M5_31b6uEgSXx7QqKECs-VzH4GnkdZB3TwRb7fnj0D4jSuSvuUp5Wk_lPcrdNMDX4RxA84w'
         #nombre_usuario='simperiale@mail.jus.mendoza.gov.ar'
@@ -379,7 +381,14 @@ def get_tareas_detalle(query_data: dict):
         fecha_fin_hasta=request.args.get('fecha_fin_hasta')
         tiene_notas=request.args.get('tiene_notas')
         print("right before the get_all_tarea_detalle call")
-        res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        print("right before the get_all_tarea_detalle call")
+        #res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {
                 "count": cant,
@@ -397,7 +406,7 @@ def get_tareas_detalle(query_data: dict):
 @tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(schema.TareaIdOut(many=True))
 @rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500, query_string=True)
+#@cache.cached(timeout=50, query_string=True)
 def get_tarea(id_tarea:str):
     try:
         res = tarea_model.get_tarea_by_id(id_tarea) 
@@ -415,7 +424,7 @@ def get_tarea(id_tarea:str):
 @tarea_b.get('/tarea_historia_usr/<string:id_tarea>')
 @tarea_b.output(schema.TareaHIstoriaUserIdOut(many=True))
 @rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500, query_string=True)
+#@cache.cached(timeout=50, query_string=True)
 def get_tarea_historia_usr(id_tarea:str):
     try:
         res = tarea_model.get_tarea_historia_usr_by_id(id_tarea) 
@@ -433,7 +442,7 @@ def get_tarea_historia_usr(id_tarea:str):
 @tarea_b.get('/tarea_grupo')
 @tarea_b.output(schema.TareaCountAllOut)
 @rol.require_role(["consultar-tarea"])
-@cache.cached(timeout=500, query_string=True)
+#@cache.cached(timeout=50, query_string=True)
 def get_tareas_grupo():    
     try:
         page=1

@@ -9,6 +9,7 @@ from common.utils import *
 from common.error_handling import ValidationError
 from common.logger_config  import logger
 from models.grupo_hierarchy import find_parent_id_recursive
+from cache import cache
 
 
 
@@ -212,7 +213,7 @@ def delete_label(username=None, id_label=None):
 
 ############################## LABELS x GRUPO BASE ########################################
 ### Busca las etiquetas activas según el grupo base disponibles para todo el árbol de dicho grupo ####
-
+# @cache.memoize(timeout=50)
 def get_active_labels(ids_grupos_base):
     print('entra a get de labels por grupo base aaaahhhhhhhhhhkfhaksfhkasdfhñasdfh')
     print('ids_grupos_base:', ids_grupos_base)

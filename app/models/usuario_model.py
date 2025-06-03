@@ -6,10 +6,11 @@ from common.logger_config import logger
 from flask import current_app
 from alchemy_db import db
 from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, Rol
+from cache import cache
 
 
+@cache.memoize(timeout=50)
 def get_usuario_by_id(id):
-    
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False, Usuario.suspendido==False).first()
     
@@ -78,6 +79,7 @@ def get_usuario_by_id(id):
     
     return results 
 
+@cache.memoize(timeout=50)
 def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
     print("eliminado: ", eliminado)
@@ -115,6 +117,7 @@ def get_all_usuarios(page=1, per_page=10, nombre="", apellido="", id_grupo=None,
     return query, total
 
 
+@cache.memoize(timeout=50)
 def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_grupo=None, dni="", username="", eliminado=None, suspendido=None):
     
     print("eliminado: ", eliminado)
@@ -209,6 +212,7 @@ def get_all_usuarios_detalle(page=1, per_page=10, nombre="", apellido="", id_gru
     return results, total 
         
  
+@cache.memoize(timeout=50)
 def get_grupos_by_usuario(id):
     
     res = db.session.query(Usuario).filter(Usuario.id == id, Usuario.eliminado==False).first()
@@ -383,6 +387,8 @@ def update_usuario(id='',username=None, **kwargs):
     db.session.commit()
     return usuario
 
+
+@cache.cached(timeout=50)
 def get_rol_usuario(username=None):
     if username is not None:
         id_user_actualizacion = get_username_id(username)
@@ -393,6 +399,7 @@ def get_rol_usuario(username=None):
     print("username:",username)
     print("rol:",res)
     return res
+
     
 def delete_usuario(username=None, id=None):
     

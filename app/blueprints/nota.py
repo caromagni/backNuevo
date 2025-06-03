@@ -33,7 +33,7 @@ def before_request():
 @nota_b.get('/tipo_nota')
 @nota_b.output(schema.TipoNotaCountOut)
 @nota_b.input(schema.PageIn, location='query')
-@rol.require_role(["consultar-nota"])
+# @rol.require_role(["consultar-nota"])
 def get_tipoNotas(query_data: dict):
     try:
         cant=0
@@ -113,11 +113,11 @@ def del_tipo_nota(id: str):
 
 ################################ NOTAS ################################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@cache.cached(timeout=500, query_string=True)
+@cache.cached(timeout=5000, query_string=True)
 @nota_b.get('/nota')
 @nota_b.input(schema.NotaGetIn, location='query')
 @nota_b.output(schema.NotaCountOut)
-@rol.require_role(["consultar-nota"])
+# @rol.require_role(["consultar-nota"])
 def get_notas(query_data: dict):
     try:
         page = 1
@@ -172,7 +172,7 @@ def get_notas(query_data: dict):
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.get('/nota/<string:id>')
 @nota_b.output(schema.NotaIdOut)
-@rol.require_role(["consultar-nota"])
+# @rol.require_role(["consultar-nota"])
 def get_nota(id:str):
     print('nota.py')
     try:

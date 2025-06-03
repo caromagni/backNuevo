@@ -2,7 +2,7 @@ from alchemy_db import db
 from models.alch_model import ActuacionExt, TipoActuacionExt
 from cache import cache
 
-@cache.memoize(timeout=3600)
+@cache.memoize(timeout=50)
 def get_all_actuaciones():
     
     return db.session.query(ActuacionExt.id,

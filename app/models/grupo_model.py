@@ -13,7 +13,7 @@ from .alch_model import Grupo, HerarquiaGrupoGrupo, UsuarioGrupo, Usuario, Tarea
 from cache import cache
 
 
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=50)
 def get_grupo_by_id(id):
 
     res = db.session.query(Grupo).filter(Grupo.id == str(id)).first()
@@ -117,7 +117,7 @@ def get_grupo_by_id(id):
     
     return results    
 
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=50)
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     
     if fecha_desde is not None:
@@ -265,6 +265,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
         result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
         return result_paginated, total
 
+@cache.memoize(timeout=50)
 def encontrar_grupo_base(res_grupos, id):
     print("Encontrar grupo base para el ID:", id)
     for r in res_grupos:
@@ -278,6 +279,7 @@ def encontrar_grupo_base(res_grupos, id):
                 # Llamada recursiva con el padre como nuevo ID
                 return encontrar_grupo_base(res_grupos, str(r['id_padre']))    
 
+@cache.memoize(timeout=50)
 def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     if grupos_acumulados is None:
         grupos_acumulados = []
@@ -305,7 +307,7 @@ def buscar_mismos_base(res_grupos, id, grupos_acumulados=None, visitados=None):
     
     return grupos_acumulados
 
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=50)
 def get_all_base(id, usuarios=False):
     cursor=None
    
@@ -471,8 +473,8 @@ def get_all_base(id, usuarios=False):
 
    
     #return res, i
-#@cache.cached(timeout=500, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
-@cache.memoize(timeout=500)
+#@cache.cached(timeout=50, make_cache_key='get_all_grupos_'+page+'_'+per_page+'_'+nombre+'_'+fecha_desde+'_'+fecha_hasta+'_'+path_name)
+@cache.memoize(timeout=50)
 def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fecha_hasta=datetime.now().strftime('%d/%m/%Y'), path_name=False): 
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
     #fecha_hasta = fecha_hasta + " 23:59:59"
@@ -495,7 +497,7 @@ def get_all_grupos(page=1, per_page=10, nombre="", fecha_desde='01/01/2000', fec
 
     return result, total
     
-@cache.memoize(timeout=500)
+@cache.memoize(timeout=50)
 def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, suspendido=None, fecha_desde=None, fecha_hasta=None): 
    
     if fecha_desde is not None:
@@ -611,12 +613,13 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
 
     return results, total
 
-
+@cache.memoize(timeout=50)
 def get_all_herarquia():
     #session: scoped_session = current_app.session
     res =db.session.query(HerarquiaGrupoGrupo).all()
     return res
 
+@cache.memoize(timeout=50)
 def get_grupos_herarquia():
     #session: scoped_session = current_app.session
     res=db.session.query(Grupo.id, Grupo.nombre, HerarquiaGrupoGrupo.id_hijo, HerarquiaGrupoGrupo.id_padre)\
@@ -625,6 +628,7 @@ def get_grupos_herarquia():
     #print(len(res))
     return res
 
+@cache.memoize(timeout=50)
 def get_grupos_herarquia_labels():
     GrupoPadre = aliased(Grupo)
     GrupoHijo = aliased(Grupo)
@@ -915,7 +919,7 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', codigo_nomencl
 
     return data
 
-
+@cache.cached(timeout=50)
 def get_usuarios_by_grupo(grupos):
     print("Grupos:", grupos)
     res = []
