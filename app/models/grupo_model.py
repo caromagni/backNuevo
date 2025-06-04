@@ -114,39 +114,51 @@ def get_grupo_by_id(id):
     return results    
 
 @cache.memoize(timeout=50)
-def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
+def exececuteSubquery(subquery):
+    """
+    Ejecuta una subconsulta y devuelve los resultados en formato serializable.
+    """
+    try:
+        cursor = db.session.execute(subquery)
+        # Use cursor.mappings() to get rows as dictionary-like objects
+        results = [dict(row) for row in cursor.mappings()]
+        return results
+    except Exception as e:
+        logger_config.logger.error(f"Error executing subquery: {e}")
+        raise e
     
+
+@cache.memoize(timeout=500)
+def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
+    """
+    Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
+    """
+    # Parse and normalize date filters
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
-        fecha_desde=datetime.strptime("30/01/1900","%d/%m/%Y").date()
+        fecha_desde = datetime.strptime("30/01/1900", "%d/%m/%Y").date()
 
     if fecha_hasta is not None:
         fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y')
-        #.date()
     else:
-        fecha_hasta=datetime.now()
-        #.date()
+        fecha_hasta = datetime.now()
 
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
 
-    start_time = datetime.now()
-    
-    print("TIMETRACK_INITIAL:", start_time)
+    print("TIMETRACK_INITIAL:", datetime.now())
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
-    print("Tipo fecha desde:", type(fecha_desde))
-    print("Tipo fecha hasta:", type(fecha_hasta))
     print("Eliminado:", eliminado)
     print("Suspendido:", suspendido)
     print("Path name:", path_name)
 
-    cursor = None
-    
+    result = []
+
     # Subconsulta recursiva
     if path_name is True or path_name == 'true':
-        subquery = text("""WITH RECURSIVE GroupTree AS (
-                -- Anchor member: Start with all parentless nodes
+        subquery = text("""
+            WITH RECURSIVE GroupTree AS (
                 SELECT 
                     g.id AS id_padre,
                     g.id AS id_hijo,
@@ -154,9 +166,9 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                     g.descripcion AS child_name,
                     g.id::text AS path,
                     COALESCE(g.nombre, hgg1.id_hijo::text) AS path_name,
-                    0 AS level,  -- Set level to 0 for parentless groups
+                    0 AS level,
                     true AS is_parentless,
-                    g.id AS group_id  -- Add the group ID column
+                    g.id AS group_id
                 FROM 
                     tareas.grupo g
                 LEFT JOIN 
@@ -166,7 +178,6 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
 
                 UNION ALL
 
-                -- Recursive member: Join with the hierarchical table to find child groups
                 SELECT 
                     hgg.id_padre,
                     hgg.id_hijo,
@@ -176,7 +187,7 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                     gt.path_name || ' -> ' || COALESCE(gp_hijo.nombre, hgg.id_hijo::text) AS path_name,
                     gt.level + 1 AS level,
                     false AS is_parentless,
-                    gp_hijo.id AS group_id  -- Add the group ID column for children
+                    gp_hijo.id AS group_id
                 FROM 
                     tareas.herarquia_grupo_grupo hgg
                 INNER JOIN 
@@ -186,8 +197,6 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                 INNER JOIN 
                     tareas.grupo gp_hijo ON hgg.id_hijo = gp_hijo.id
             )
-
-            -- Select from the CTE to get the full hierarchy
             SELECT 
                 gt.id_padre,
                 gt.parent_name,
@@ -197,69 +206,52 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
                 gt.path_name,
                 gt.level,
                 gt.is_parentless,
-                gt.group_id  -- Include the new group ID column in the final select
+                gt.group_id
             FROM 
                 GroupTree gt
             ORDER BY 
-                gt.path;""")
-        
-        result = []
-        cursor = db.session.execute(subquery)
-    
-    # Use the datetime objects for date filtering
-    #query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde_dt, fecha_hasta_dt))
-    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
-    # Build all filters in a list
-    filters = []
+                gt.path;
+        """)
 
-    if nombre and nombre != "":
-        filters.append(Grupo.nombre.ilike(f"%{nombre}%"))
-    if eliminado is not None:
-        filters.append(Grupo.eliminado == eliminado)    
-    if suspendido is not None:
-        filters.append(Grupo.suspendido == suspendido)
+        # Execute the subquery and get serializable results
+        result = exececuteSubquery(subquery)
 
-    # Apply all filters at once
-    if filters:
-        query = query.filter(*filters)
-    
-    total = query.count()
-   
-
-    if cursor:
-        for reg in cursor:
-            grupo = query.filter(Grupo.id == reg.id_hijo).first()
-            if grupo is not None:
-                data = {
-                    "id": reg.id_hijo,
-                    "nombre": grupo.nombre,
-                    "base": grupo.base,
-                    "path": reg.path,
-                    "path_name": reg.path_name,
-                    "fecha_actualizacion": grupo.fecha_actualizacion,
-                    "level": reg.level,
-                    "descripcion": grupo.descripcion,
-                    "nomenclador": grupo.nomenclador,
-                    "codigo_nomenclador": grupo.codigo_nomenclador,
-                    "fecha_creacion": grupo.fecha_creacion,
-                    "id_user_actualizacion": grupo.id_user_actualizacion,
-                    "user_actualizacion": grupo.user_actualizacion,
-                    "id_user_asignado_default": grupo.id_user_asignado_default,
-                    "user_asignado_default": grupo.user_asignado_default,
-                    "eliminado": grupo.eliminado,
-                    "suspendido": grupo.suspendido
-                }
-                result.append(data)
-
+        # Paginate the results
         start = (page - 1) * per_page
         end = start + per_page
-
-        # Extraer los registros de la página actual
         result_paginated = result[start:end]
-        return result_paginated, total
-    else:
-        result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
-        return result_paginated, total
+
+        return result_paginated
+
+    # Query for non-hierarchical groups
+    query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
+
+    # Apply filters
+    if nombre:
+        query = query.filter(Grupo.nombre.ilike(f"%{nombre}%"))
+    if eliminado is not None:
+        query = query.filter(Grupo.eliminado == eliminado)
+    if suspendido is not None:
+        query = query.filter(Grupo.suspendido == suspendido)
+
+    total = query.count()
+    result_paginated = query.order_by(Grupo.nombre).offset((page - 1) * per_page).limit(per_page).all()
+
+    # Convert query results into serializable format
+    result = [
+        {
+            "id": grupo.id,
+            "nombre": grupo.nombre,
+            "descripcion": grupo.descripcion,
+            "fecha_creacion": grupo.fecha_creacion,
+            "fecha_actualizacion": grupo.fecha_actualizacion,
+            "eliminado": grupo.eliminado,
+            "suspendido": grupo.suspendido,
+        }
+        for grupo in result_paginated
+    ]
+
+    return result
 
 @cache.memoize(timeout=50)
 def encontrar_grupo_base(res_grupos, id):
@@ -1256,6 +1248,6 @@ def undelete_grupo(username=None, id=None):
         raise Exception("Grupo no encontrado")
     grupo.eliminado = False
     db.session.commit()
-    return grupo    
+    return grupo
 
 

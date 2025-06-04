@@ -76,10 +76,9 @@ def get_grupo(query_data: dict):
         fecha_desde = request.args.get('fecha_desde')
         fecha_hasta = request.args.get('fecha_hasta')
 
-        res, cant = grupo_model.get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
-        
+        res = grupo_model.get_all_grupos_nivel(page, per_page, nombre, fecha_desde, fecha_hasta, path_name, eliminado, suspendido)
         data = {
-            "count": cant,
+            "count": len(res),
             "data": schema.GetGroupOut().dump(res, many=True)
         }
         
