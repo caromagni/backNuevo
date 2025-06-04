@@ -885,8 +885,8 @@ def update_lote_tareas(username=None, **kwargs):
 @cache.cached(timeout=50)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
-    print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
-    print(cache.cache._cache)
+    # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
+    # print(cache.cache._cache)
 
     
     todo = db.session.query(TipoTarea).all()

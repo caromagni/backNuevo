@@ -191,17 +191,18 @@ def update_nota(id='', **kwargs):
     db.session.commit()
     return result
 
-@cache.memoize(timeout=360)
-def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), eliminado=None):
+@cache.cached(timeout=360)
+def get_all_nota(page=1, per_page=10, titulo='', id_tipo_nota=None, id_tarea=None, id_user_creacion=None, fecha_desde='01/01/2000', fecha_hasta=None, eliminado=None):
 
-    print(page, per_page, titulo,  id_tarea, fecha_desde,  fecha_hasta,  eliminado, )
+    print('datos con los que llamo a get all tareas previo a la clave', page, per_page, titulo,  id_tarea, fecha_desde,  fecha_hasta,  eliminado, )
 
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
-        return f"get_all_nota:{page}:{per_page}:{titulo}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{eliminado}:{id_user_creacion}:{id_tipo_nota}"
+        return f"get_all_nota:{page}:{per_page}:{titulo}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{eliminado}:{id_tipo_nota}"
 
     # Use the generated cache key
     cache_key = make_cache_key()
+    print('Clave de cache en get all notas', cache_key)
     cached_result = cache.get(cache_key)
     if cached_result:
         return cached_result
