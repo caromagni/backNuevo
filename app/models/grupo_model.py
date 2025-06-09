@@ -215,13 +215,14 @@ def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha
 
         # Execute the subquery and get serializable results
         result = exececuteSubquery(subquery)
+        total = len(result)
 
         # Paginate the results
         start = (page - 1) * per_page
         end = start + per_page
         result_paginated = result[start:end]
 
-        return result_paginated
+        return result_paginated, total
 
     # Query for non-hierarchical groups
     query = db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
