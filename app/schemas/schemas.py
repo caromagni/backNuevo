@@ -329,6 +329,24 @@ class GroupsUsuarioOut(Schema):
     fecha_actualizacion= String()
     id_user_actualizacion= String()
     
+class UsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_ext = String()
+    nombre_completo = String(dump_only=True)  
+    username = String()
+    email = String()
+    dni = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
     
 class GroupsBaseUsrOut(Schema):
     #id_usuario = String()
@@ -396,7 +414,8 @@ class TipoTareaOut(Schema):
     id = String()
     nombre = String()
     codigo_humano = String()
-    id_user_actualizacion = String()
+    user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    fecha_actualizacion = String()
     eliminado = Boolean()
     base = Boolean()
 
