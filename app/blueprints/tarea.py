@@ -42,7 +42,7 @@ def before_request():
 ####################TIPO DE TAREA######################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tarea')
-@tarea_b.output(schema.TipoTareaCountOut)
+@tarea_b.output(schema.TipoTareaSubtipoCountOut)
 @tarea_b.input(schema.PageIn, location='query')
 @rol.require_role("Operador")
 def get_tipoTareas(query_data: dict):
@@ -62,7 +62,7 @@ def get_tipoTareas(query_data: dict):
         
         data = {
                 "count": cant,
-                "data": schema.TipoTareaOut().dump(res, many=True)
+                "data": schema.TipoTareaSubtipoOut().dump(res, many=True)
             }
         
         
