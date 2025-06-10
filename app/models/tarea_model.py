@@ -14,6 +14,7 @@ from models.alch_model import Auditoria_TareaAsignadaUsuario
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
+import json
 
 
 def nombre_estado(estado):
@@ -892,7 +893,39 @@ def get_all_tipo_tarea(page=1, per_page=10):
     todo = db.session.query(TipoTarea).all()
     total= len(todo)
     res = db.session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
-    return res, total
+    if res is not None:
+        tipo_list = []
+        #Busco los subtipo de tarea asociados a cada tipo de tarea
+        for tipo in res:
+            query_subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id_tipo == tipo.id, SubtipoTarea.eliminado==False).order_by(SubtipoTarea.nombre).all()
+            #Agrego los subtipos al array subtipos
+            subtipo_list = []
+            if query_subtipo is not None:
+                for subtipo in query_subtipo:
+                    subtipo = {
+                        "id": subtipo.id,
+                        "nombre": subtipo.nombre,
+                        "base": subtipo.base,
+                        "origen_externo": subtipo.origen_externo,
+                    }
+                    subtipo_list.append(subtipo)
+
+            #Formateo el resultado
+            tipo_tarea = {
+                "id": tipo.id,
+                "codigo_humano": tipo.codigo_humano,
+                "nombre": tipo.nombre,
+                "base": tipo.base,
+                "origen_externo": tipo.origen_externo,
+                "subtipo_tarea": subtipo_list,
+                "user_actualizacion": tipo.user_actualizacion,
+                "fecha_actualizacion": tipo.fecha_actualizacion
+            }
+            tipo_list.append(tipo_tarea)
+
+    print("Tipo de tareas obtenidos:", tipo_list)   
+
+    return tipo_list, total
 
 def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     
@@ -911,6 +944,7 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
         codigo_humano=codigo_humano,
         nombre=nombre,
         base=base,
+        origen_externo=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -939,11 +973,9 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.codigo_humano = kwargs['codigo_humano']
     if 'nombre' in kwargs:
         tipo_tarea.nombre = kwargs['nombre']
-    if 'base' in kwargs:
-        tipo_tarea.base = kwargs['base'] 
-    else:
-        tipo_tarea.base = False
-
+    #if 'base' in kwargs:
+    tipo_tarea.base =False
+    tipo_tarea.origen_externo = False
     tipo_tarea.id_user_actualizacion = id_user_actualizacion
     tipo_tarea.fecha_actualizacion = datetime.now()
     db.session.commit()
@@ -985,7 +1017,7 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False, origen_externo=False):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1007,7 +1039,8 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
         id=nuevoID,
         id_tipo=id_tipo,
         nombre=nombre,
-        base=base,
+        base=False,
+        origen_externo=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -1034,11 +1067,8 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     if 'nombre' in kwargs:
         subtipo_tarea.nombre = kwargs['nombre']
         
-    if 'base' in kwargs:
-        subtipo_tarea.base = kwargs['base']
-    else:
-        subtipo_tarea.base = False   
-
+    subtipo_tarea.base = False
+    subtipo_tarea.origen_externo = False
     subtipo_tarea.id_user_actualizacion = id_user_actualizacion    
     subtipo_tarea.fecha_actualizacion = datetime.now()
     db.session.commit()

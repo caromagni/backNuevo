@@ -294,6 +294,7 @@ class TipoTarea(Base):
     id_user_actualizacion  = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
+    origen_externo = Column(Boolean, default=False)
     id_ext = Column(UUID)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
 
@@ -308,6 +309,7 @@ class SubtipoTarea(Base):
     id_user_actualizacion = Column(UUID, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
+    origen_externo = Column(Boolean, default=False)
 
     tipo_tarea = relationship('TipoTarea')
 
