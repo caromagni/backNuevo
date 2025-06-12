@@ -14,8 +14,8 @@ from models.alch_model import Auditoria_TareaAsignadaUsuario
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
-
-
+import decorators.cache_error_wrapper as cache_error_wrapper
+import common.cache as cache_common
 def nombre_estado(estado):
     if estado == 1:
         return "Pendiente"
@@ -1585,25 +1585,18 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 #     return wrapper
 
-# @cache.memoize(CACHE_TIMEOUT_LONG)
-# @cache.cached(CACHE_TIMEOUT_LONG)
-
-# @memoize
-# @cache.memoize(CACHE_TIMEOUT_LONG, make_cache_key=lambda: f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}")
-# def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None,  fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-    def make_cache_key():
-        # Generate a unique cache key based on the function arguments
-        return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
+    # def make_cache_key():
+    #     # Generate a unique cache key based on the function arguments
+    #     return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
 
-    # Use the generated cache key
-    cache_key = make_cache_key()
-    cached_result = cache.get(cache_key)
-    if cached_result:
-        return cached_result
-
+    # # Use the generated cache key
+    # cache_key = make_cache_key()
+    # cached_result = cache.get(cache_key)
+    # if cached_result:
+    #     return cached_result
+    #raise Exception("Esta función ha sido reemplazada por get_all_tarea_detalle")
     print("**************************START TIME*****************************")
     print("**************************START TIME*****************************")
     print(page, per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde,  fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)
@@ -1794,16 +1787,17 @@ def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None,
     #print("Resultado:", result)
 
     result = (results, total)
-    cache.set(cache_key, result, CACHE_TIMEOUT_LONG)
+    #cache.set(cache_key, result, CACHE_TIMEOUT_LONG)
     return result
     # return results, total
 
 
 
 #def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_tarea=None, id_usuario_asignado=None, id_grupo=None, fecha_desde='01/01/2000', fecha_hasta=datetime.now(), prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-# @cache.memoize(CACHE_TIMEOUT_LONG)
+
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+    
     if fecha_desde is not None:
         fecha_desde = datetime.strptime(fecha_desde, '%d/%m/%Y').date()
     else:
