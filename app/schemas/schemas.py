@@ -397,6 +397,7 @@ class TipoTareaIn(Schema):
     ])
     id_user_actualizacion = String()
     base = Boolean(default=False)
+    origen_externo = Boolean(default=False)
 
 class TipoTareaPatchIn(Schema):
     codigo_humano = String(validate=[
@@ -409,6 +410,7 @@ class TipoTareaPatchIn(Schema):
     ])
     id_user_actualizacion = String()
     base = Boolean(default=False)
+    origen_externo = Boolean(default=False)
 
 class TipoTareaOut(Schema):
     id = String()
@@ -418,6 +420,7 @@ class TipoTareaOut(Schema):
     fecha_actualizacion = String()
     eliminado = Boolean()
     base = Boolean()
+    origen_externo = Boolean()
 
 
 class SubtipoTareaIn(Schema):
@@ -426,7 +429,12 @@ class SubtipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    nombre_corto = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
     base = Boolean(default=False)
+    origen_externo = Boolean(default=False)
     id_user_actualizacion = String()
 
 class SubtipoTareaPatchIn(Schema):
@@ -435,25 +443,52 @@ class SubtipoTareaPatchIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    nombre_corto = String(required=True, validate=[
+        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate_char
+    ])
     base = Boolean(default=False)
+    origen_externo = Boolean(default=False)
     id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
     id_tipo_tarea = String()
-    eliminado = Boolean()
+    eliminado = Boolean(default=False)
+    origen_externo = Boolean(default=False)
 
 class SubtipoTareaOut(Schema):
     id = String()
+    id_ext = String()
     id_tipo = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre"))
     nombre = String()
+    nombre_corto = String()
     eliminado = Boolean()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
+    origen_externo = Boolean()
 
+class SubtipoTareaShortOut(Schema):
+    id = String()
+    nombre = String()
+    nombre_corto = String()
+    eliminado = Boolean()
+    base = Boolean()
+    origen_Externo = Boolean()
+
+class TipoTareaSubtipoOut(Schema):
+    id = String()
+    nombre = String()
+    codigo_humano = String()
+    user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    fecha_actualizacion = String()
+    eliminado = Boolean()
+    base = Boolean()
+    origen_externo = Boolean()
+    subtipo_tarea = List(Nested(SubtipoTareaShortOut))
 
 class TareaxGroupOut(Schema):
     id = String()    
@@ -1019,6 +1054,9 @@ class UsuarioIdOut(Schema):
     tareas = List(Nested(TareaUsrOut, only=("id", "titulo", "reasignada", "fecha_inicio", "fecha_fin")))
     grupo = List(Nested(GroupOut, only=("id_grupo", "nombre")))
     
+class TipoTareaSubtipoCountOut(Schema):
+    count = Integer()
+    data = Nested(TipoTareaSubtipoOut, many=True)
 
 class TipoTareaCountOut(Schema):
     count = Integer()

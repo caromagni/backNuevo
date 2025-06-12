@@ -16,6 +16,9 @@ import common.utils as utils
 import common.logger_config as logger_config
 import decorators.cache_error_wrapper as cache_error_wrapper
 import common.cache as cache_common
+import json
+
+
 def nombre_estado(estado):
     if estado == 1:
         return "Pendiente"
@@ -882,7 +885,7 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-@cache.cached(CACHE_TIMEOUT_LONG)
+#@cache.cached(CACHE_TIMEOUT_LONG)
 def get_all_tipo_tarea(page=1, per_page=10):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
@@ -892,7 +895,44 @@ def get_all_tipo_tarea(page=1, per_page=10):
     todo = db.session.query(TipoTarea).all()
     total= len(todo)
     res = db.session.query(TipoTarea).order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
-    return res, total
+    
+    if res is not None:
+        tipo_list = []
+        #Busco los subtipo de tarea asociados a cada tipo de tarea
+        for tipo in res:
+            query_subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id_tipo == tipo.id, SubtipoTarea.eliminado==False).order_by(SubtipoTarea.nombre).all()
+            #Agrego los subtipos al array subtipos
+            subtipo_list = []
+            if query_subtipo is not None:
+                for subtipo in query_subtipo:
+                    subtipo = {
+                        "id": subtipo.id,
+                        "id_ext": subtipo.id_ext,
+                        "nombre": subtipo.nombre,
+                        "nombre_corto": subtipo.nombre_corto,
+                        "base": subtipo.base,
+                        "origen_externo": subtipo.origen_externo,
+                    }
+                    subtipo_list.append(subtipo)
+
+            #Formateo el resultado
+            tipo_tarea = {
+                "id": tipo.id,
+                "codigo_humano": tipo.codigo_humano,
+                "nombre": tipo.nombre,
+                "base": tipo.base,
+                "origen_externo": tipo.origen_externo,
+                "subtipo_tarea": subtipo_list,
+                "user_actualizacion": tipo.user_actualizacion,
+                "fecha_actualizacion": tipo.fecha_actualizacion
+            }
+            tipo_list.append(tipo_tarea)
+
+    print("Tipo de tareas obtenidos:", tipo_list)   
+    
+    #paginacion del resultado
+
+    return tipo_list, total
 
 def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
     
@@ -911,6 +951,7 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
         codigo_humano=codigo_humano,
         nombre=nombre,
         base=base,
+        origen_externo=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -939,11 +980,9 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.codigo_humano = kwargs['codigo_humano']
     if 'nombre' in kwargs:
         tipo_tarea.nombre = kwargs['nombre']
-    if 'base' in kwargs:
-        tipo_tarea.base = kwargs['base'] 
-    else:
-        tipo_tarea.base = False
-
+    #if 'base' in kwargs:
+    tipo_tarea.base =False
+    tipo_tarea.origen_externo = False
     tipo_tarea.id_user_actualizacion = id_user_actualizacion
     tipo_tarea.fecha_actualizacion = datetime.now()
     db.session.commit()
@@ -985,7 +1024,7 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualizacion='', base=False):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', base=False, origen_externo=False):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1007,7 +1046,9 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', id_user_actualiza
         id=nuevoID,
         id_tipo=id_tipo,
         nombre=nombre,
-        base=base,
+        nombre_corto=nombre_corto,
+        base=False,
+        origen_externo=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -1033,12 +1074,12 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     
     if 'nombre' in kwargs:
         subtipo_tarea.nombre = kwargs['nombre']
-        
-    if 'base' in kwargs:
-        subtipo_tarea.base = kwargs['base']
-    else:
-        subtipo_tarea.base = False   
 
+    if 'nombre_corto' in kwargs:
+        subtipo_tarea.nombre_corto = kwargs['nombre_corto']    
+        
+    subtipo_tarea.base = False
+    subtipo_tarea.origen_externo = False
     subtipo_tarea.id_user_actualizacion = id_user_actualizacion    
     subtipo_tarea.fecha_actualizacion = datetime.now()
     db.session.commit()
@@ -1563,39 +1604,17 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
     return results, total         
 
 
-# def memoize(func):
-#     cache = {}
-
-#     def wrapper(*args):
-#         if args in cache:
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-#             print("PRINTING CACHE VIENDO QUE PASA CON EL CACHE *******************************************************")
-
-#             print("Returning cached result for:", args)
-#             return cache[args]
-#         result = func(*args)
-#         cache[args] = result
-#         return result
-
-#     return wrapper
-
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
-    # def make_cache_key():
-    #     # Generate a unique cache key based on the function arguments
-    #     return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
+    def make_cache_key():
+        # Generate a unique cache key based on the function arguments
+        return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
 
-    # # Use the generated cache key
-    # cache_key = make_cache_key()
-    # cached_result = cache.get(cache_key)
-    # if cached_result:
-    #     return cached_result
+    # Use the generated cache key
+    cache_key = make_cache_key()
+    cached_result = cache.get(cache_key)
+    if cached_result:
+        return cached_result
     #raise Exception("Esta función ha sido reemplazada por get_all_tarea_detalle")
     print("**************************START TIME*****************************")
     print("**************************START TIME*****************************")

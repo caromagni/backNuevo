@@ -56,16 +56,21 @@ def create_app():
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
-    if is_redis_available():
-        print("Redis is available, using RedisCache")
-        app.config['CACHE_TYPE'] = 'RedisCache'
-    # ... Redis config
+    
+    if cache_common.cache_enabled == False :
+        print("Using NullCache, caching is disabled")
+        app.config['CACHE_TYPE'] = 'NullCache'  # Tipo de caché
     else:
-        print("Redis is not available, using SimpleCache")
-        app.config['CACHE_TYPE'] = 'SimpleCache'
+        if is_redis_available():
+            print("Redis is available, using RedisCache")
+            app.config['CACHE_TYPE'] = 'RedisCache'
+        # ... Redis config
+        else:
+            print("Redis is not available, using SimpleCache")
+            app.config['CACHE_TYPE'] = 'SimpleCache'
 
     # Configurar Redis como backend de caché
-    app.config['CACHE_ENABLED'] = True  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
+   # app.config['CACHE_ENABLED'] = False  # Global toggle TRAER ESTO DESDE EL CONFIGS INICIAL
     
     app.config['CACHE_REDIS_HOST'] = cache_common.redis_host
     app.config['CACHE_REDIS_PORT'] = cache_common.redis_port
