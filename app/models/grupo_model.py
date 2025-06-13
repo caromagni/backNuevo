@@ -129,7 +129,7 @@ def exececuteSubquery(subquery):
         raise e
     
 
-#@cache.memoize(CACHE_TIMEOUT_LONG)
+@cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_grupos_nivel(page=1, per_page=10, nombre="", fecha_desde=None, fecha_hasta=None, path_name=None, eliminado=None, suspendido=None):
     """
     Obtiene todos los grupos con nivel jerárquico, con soporte para caché.
