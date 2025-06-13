@@ -327,7 +327,7 @@ def get_tareas(query_data: dict):
 def get_tareas_detalle(query_data: dict):
     try:
         print("ENTRANDO A GET TAREAS")
-        usuario = g.get('username')
+        username = g.get('username')
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         prioridad=None
@@ -363,7 +363,7 @@ def get_tareas_detalle(query_data: dict):
         print("right before the get_all_tarea_detalle call")
         print("right before the get_all_tarea_detalle call")
         print("right before the get_all_tarea_detalle call")
-        res,cant = tarea_model.get_all_tarea_detalle(page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
+        res,cant = tarea_model.get_all_tarea_detalle(username, page,per_page, titulo, label, labels, id_expediente, id_actuacion, id_tipo_tarea, id_usuario_asignado, grupos, id_tarea, fecha_desde, fecha_hasta, fecha_fin_desde, fecha_fin_hasta, prioridad, estado, eliminado, tiene_notas)    
         # res,cant = tarea_model.get_all_tarea_detalle(page)    
 
         data = {
@@ -418,6 +418,7 @@ def get_tarea_historia_usr(id_tarea:str):
 @rol.require_role("Operador")
 def get_tareas_grupo():    
     try:
+        logger.info("ENTRANDO A GET TAREAS GRUPO")
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         cant=0

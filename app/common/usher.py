@@ -128,15 +128,14 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             logger_config.logger.info("Controla roles vencidos")
             query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).all()
         
+        #Traigo los roles del usuario desde P-USHER
         if len(query_rol)==0 or len(query_vencido)>0:
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
             roles = get_roles(username)
-            #print("roles:", roles)
             if 'lista_roles_cus' in roles:
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
-                print("Borrando roles vencidos")
                 query_vencido = db.session.query(Rol).filter(Rol.email == email, Rol.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
                 pull_roles = True    
 
@@ -165,13 +164,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             db.session.commit()
         
         #Controlo si el usuario con el rol elegido tiene permisos
-        #cu = {item['codigo']: item for item in casos}  # Convertir a un diccionario para facilitar la búsqueda
-        #query_permisos = db.session.query(Rol.descripcion_ext).filter(Rol.email == email, Rol.rol == rol_usuario, Rol.fecha_actualizacion + tiempo_vencimiento >= datetime.now(), or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])).all()
-        #, or_(*[Rol.descripcion_ext.like(f"%{perm}%") for perm in cu])
        
-        #cu = [item['codigo'] for item in casos]
-        print("casos:", casos)
-
         query_permisos = db.session.query(Rol.descripcion_ext
                 ).filter(
                     Rol.email == email,

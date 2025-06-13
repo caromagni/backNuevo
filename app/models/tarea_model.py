@@ -912,6 +912,8 @@ def get_all_tipo_tarea(page=1, per_page=10):
                         "nombre_corto": subtipo.nombre_corto,
                         "base": subtipo.base,
                         "origen_externo": subtipo.origen_externo,
+                        "inactivo": subtipo.inactivo,
+                        "eliminado": subtipo.eliminado
                     }
                     subtipo_list.append(subtipo)
 
@@ -924,17 +926,17 @@ def get_all_tipo_tarea(page=1, per_page=10):
                 "origen_externo": tipo.origen_externo,
                 "subtipo_tarea": subtipo_list,
                 "user_actualizacion": tipo.user_actualizacion,
-                "fecha_actualizacion": tipo.fecha_actualizacion
+                "fecha_actualizacion": tipo.fecha_actualizacion,
+                "inactivo": tipo.inactivo,
+                "eliminado": tipo.eliminado,
             }
             tipo_list.append(tipo_tarea)
 
-    print("Tipo de tareas obtenidos:", tipo_list)   
-    
     #paginacion del resultado
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False):
+def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion=''):
     
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -950,8 +952,10 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
-        base=base,
+        base=False,
         origen_externo=False,
+        inactivo=False,
+        eliminado=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -980,6 +984,14 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.codigo_humano = kwargs['codigo_humano']
     if 'nombre' in kwargs:
         tipo_tarea.nombre = kwargs['nombre']
+    if 'eliminado' in kwargs:
+        tipo_tarea.eliminado = kwargs['eliminado']
+    else:
+        tipo_tarea.eliminado = False
+    if 'inactivo' in kwargs:
+        tipo_tarea.inactivo = kwargs['inactivo']
+    else:
+        tipo_tarea.inactivo = False              
     #if 'base' in kwargs:
     tipo_tarea.base =False
     tipo_tarea.origen_externo = False
@@ -1024,7 +1036,7 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', base=False, origen_externo=False):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion=''):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1049,6 +1061,8 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
         nombre_corto=nombre_corto,
         base=False,
         origen_externo=False,
+        eliminado=False,
+        inactivo=False,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -1077,6 +1091,16 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
 
     if 'nombre_corto' in kwargs:
         subtipo_tarea.nombre_corto = kwargs['nombre_corto']    
+
+    if 'eliminado' in kwargs:
+        subtipo_tarea.eliminado = kwargs['eliminado']
+    else:
+        subtipo_tarea.eliminado = False
+
+    if 'inactivo' in kwargs:
+        subtipo_tarea.inactivo = kwargs['inactivo']
+    else:
+        subtipo_tarea.inactivo = False              
         
     subtipo_tarea.base = False
     subtipo_tarea.origen_externo = False
@@ -1605,7 +1629,19 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 
 
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_tarea_detalle(page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_actuacion=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
+    
+    """logger_config.logger.info("username: %s", username)
+    if username is not None:
+        id_user_actualizacion = utils.get_username_id(username)
+
+    if id_user_actualizacion is not None:
+        utils.verifica_usr_id(id_user_actualizacion)
+    else:
+        raise Exception("Usuario no ingresado")
+    
+    logger_config.logger.info("ID usuario actualizacion: %s", id_user_actualizacion) """
+
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
         return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
