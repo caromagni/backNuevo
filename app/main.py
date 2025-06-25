@@ -163,7 +163,7 @@ def create_app():
     
     with app.app_context():
         #db.create_all() 
-        Base.metadata.create_all(db.engine)
+        Base.metadata.create_all(db.engine, checkfirst=True)
    
 
     # Enable CORS

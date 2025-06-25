@@ -26,10 +26,11 @@ def before_request():
     else:
             user_origin = jsonHeader['user_name']
             type_origin = jsonHeader['type']
+            g.rol = jsonHeader.get('user_rol', '')
     
     g.username = user_origin
     g.type = type_origin
-    g.rol = jsonHeader.get('user_rol', '')
+    
 
 
 ####################TIPO DE NOTA######################
