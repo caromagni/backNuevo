@@ -417,6 +417,11 @@ class TipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    eliminado = Boolean(default=False)
+    base = Boolean(default=False)
+    origen_externo = Boolean(default=False)
+    inactivo = Boolean(default=False)
+    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"})
     id_user_actualizacion = String()
     
 
@@ -429,9 +434,9 @@ class TipoTareaPatchIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    eliminado = Boolean(default=False)
     id_user_actualizacion = String()
     base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
     inactivo = Boolean(default=False)
 
 class TipoTareaOut(Schema):
@@ -505,6 +510,7 @@ class SubtipoTareaShortOut(Schema):
 
 class TipoTareaSubtipoOut(Schema):
     id = String()
+    id_ext = String()
     nombre = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
@@ -514,6 +520,7 @@ class TipoTareaSubtipoOut(Schema):
     base = Boolean()
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
+    nivel = String()
 
 class TareaxGroupOut(Schema):
     id = String()    
