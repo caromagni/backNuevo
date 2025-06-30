@@ -414,12 +414,11 @@ class TipoTareaIn(Schema):
         validate_char
     ])
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
         validate_char
     ])
     eliminado = Boolean(default=False)
     base = Boolean(default=False)
-    origen_externo = Boolean(default=False)
     inactivo = Boolean(default=False)
     nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"})
     id_user_actualizacion = String()
@@ -431,16 +430,21 @@ class TipoTareaPatchIn(Schema):
         validate_char
     ])
     nombre = String(validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
         validate_char
     ])
     eliminado = Boolean(default=False)
     id_user_actualizacion = String()
     base = Boolean(default=False)
     inactivo = Boolean(default=False)
+    origen_externo = Boolean(default=False)
+    id_ext = String()
+    nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})
 
 class TipoTareaOut(Schema):
     id = String()
+    id_ext = String()
+    base = Boolean()
     nombre = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
@@ -449,6 +453,12 @@ class TipoTareaOut(Schema):
     inactivo = Boolean()
     base = Boolean()
     origen_externo = Boolean()
+
+class TipoTareaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    origen_externo = Boolean(default=False)
+    nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
 
 
 class SubtipoTareaIn(Schema):

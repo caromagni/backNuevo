@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.ep_model as ep_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import decorators.role as rol
 import common.auth as auth_token
 import common.usher as usher
@@ -43,7 +44,7 @@ def get_ep():
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)     
+        raise exceptions.ValidationError(err)     
     
 @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Endpoints', summary='Endpoints', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.post('/ep')
@@ -59,7 +60,7 @@ def post_ep(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
 
 @ep_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Migrar cu a la base', summary='Migrar cu', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @ep_b.post('/migra_ep')
@@ -78,4 +79,4 @@ def post_migraep():
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)            
+        raise exceptions.ValidationError(err)            

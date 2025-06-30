@@ -4,6 +4,7 @@ import decorators.role as rol
 import schemas.schemas as schemas
 import models.expediente_model as expediente_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.auth as auth_token 
 
 expediente_b = APIBlueprint('expediente_blueprint', __name__)
@@ -36,4 +37,4 @@ def get_expedientes():
         return res
 
     except Exception as err:
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)

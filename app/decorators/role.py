@@ -10,7 +10,7 @@ def require_role(rol=''):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            try:
+            #try:
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
                 x_api_key = request.headers.get('x-api-key')
                 if x_api_key:
@@ -43,9 +43,9 @@ def require_role(rol=''):
             
             # Si tiene permisos, continuar con la función original
                 return f(*args, **kwargs)
-            except Exception as e:
-                logger_config.logger.error(f"Error en require_role decorator: {e}")
-                raise e    
+            #except Exception as e:
+            #    logger_config.logger.error(f"Error en require_role decorator: {e}")
+            #    raise e    
                                                
         return wrapped
     return decorator
