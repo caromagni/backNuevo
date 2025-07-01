@@ -2,6 +2,7 @@ from flask import request, current_app
 import jwt
 import common.api_key as api_key
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.logger_config as logger_config
 import json
 import base64
@@ -33,28 +34,28 @@ def verify_jwt_in_header():
             return payload
             
         except jwt.ExpiredSignatureError:
-            raise error_handling.UnauthorizedError('Token expirado. Inicie sesión nuevamente.')
+            raise Exception('Token expirado. Inicie sesión nuevamente.')
         except jwt.InvalidTokenError as e:
-            raise error_handling.UnauthorizedError( 'Token inválido. Inicie sesión nuevamente.')
+            raise Exception( 'Token inválido. Inicie sesión nuevamente.')
         except Exception as e:
-            raise error_handling.UnauthorizedError( 'Error al decodificar el token. Inicie sesión nuevamente.')
+            raise Exception( 'Error al decodificar el token. Inicie sesión nuevamente.')
 
 def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
     if not api_key_provided:
         logger_config.logger.error("No se proporciono api-key")
         #return False
-        raise error_handling.UnauthorizedError( 'No se proporciono api-key')
+        raise Exception( 'No se proporciono api-key')
     if not authorized_system:
         logger_config.logger.error("No se proporciono api-system")
         #return False
-        raise error_handling.UnauthorizedError( 'No se proporciono api-system')
+        raise Exception( 'No se proporciono api-system')
 
     #find the api key in the file and compare the hash
     stored_hashed_api_key='NOT_FOUND'
     file_path = './json/api_keys.json'
     if not os.path.exists(file_path):
         logger_config.logger.error(f"El archivo {file_path} no existe.")
-        raise FileNotFoundError(f"El archivo {file_path} no existe.")
+        raise Exception(f"El archivo {file_path} no existe.")
     with open(file_path, 'r') as f:
         data = json.load(f)
     for api_key in data:
@@ -76,7 +77,7 @@ def verify_api_key_in_header(api_key_provided=None, authorized_system=None):
         return bcrypt.checkpw(api_key_provided.encode('utf-8'), stored_api_key)
     except Exception as err:
         logger_config.logger.error(err)
-        raise error_handling.UnauthorizedError(err)
+        raise Exception(err)
 
 def verify_header():
     ############### verifico si viene api key######################
@@ -96,7 +97,7 @@ def verify_header():
             # Verificar si se proporciona el token o API key
             if token_payload is None and x_api_key is None:
                 logger_config.logger.info("Token o api key no validos")
-                raise error_handling.UnauthorizedError("Token o api-key no validos")
+                raise Exception("Token o api-key no validos")
         
             if token_payload is not None:    
                 logger_config.logger.info("Token valido")        
@@ -105,11 +106,12 @@ def verify_header():
         
             if x_api_key is not None:
                 if x_api_system is None:
-                    raise error_handling.UnauthorizedError("api-system no valida")
+                    #raise exceptions.UnauthorizedError("api-system no valida")
+                    raise Exception("UnauthorizedError('api-system no valida')")
                 
                 result=verify_api_key_in_header(x_api_key, x_api_system)  
                 if not result:
-                    raise error_handling.UnauthorizedError("api-key no valida")
+                    raise Exception("api-key no valida")
                 else:
                     logger_config.logger.info(f"API Key valido: {x_api_key} - x_api_system: {x_api_system}")
                     return {"type":"api_key","user_name":x_api_system, "user_rol":x_user_rol} 
@@ -117,5 +119,5 @@ def verify_header():
     except Exception as err:
         logger_config.logger.info("Error en la verificacion de header")
         logger_config.logger.error(err)
-        raise error_handling.UnauthorizedError(err)
+        raise Exception(err)
         

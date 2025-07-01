@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.tarea_model as tarea_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import decorators.role as rol
 import common.usher as usher
 import common.auth as auth_token
@@ -47,4 +48,4 @@ def get_alerta_tarea(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)     
+        raise exceptions.ValidationError(err)     

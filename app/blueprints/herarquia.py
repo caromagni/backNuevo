@@ -2,6 +2,7 @@ from apiflask import APIBlueprint
 import models.grupo_model as grupo_model
 import schemas.schemas as schemas
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.auth as auth_token
 from flask import request, g
 
@@ -56,7 +57,7 @@ def get_gruposh():
        
     
     except Exception as err:
-        raise error_handling.ValidationError(err)   
+        raise exceptions.ValidationError(err)   
     
 @herarquia_b.doc(description='Listado de Grupos padres e hijos con niveles', summary='Grupos Padres - Hijos con Niveles', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})    
 @herarquia_b.get('/niveles_grupos')
@@ -83,7 +84,7 @@ def get_niveles():
  
     
     except Exception as err:
-        raise error_handling.ValidationError(err)       
+        raise exceptions.ValidationError(err)       
 
 
 @herarquia_b.get('/herarquias_all')
@@ -114,7 +115,7 @@ def herarquias_all_(query_data: dict):
  
     
     except Exception as err:
-        raise error_handling.ValidationError(err)       
+        raise exceptions.ValidationError(err)       
 
 
 

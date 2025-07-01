@@ -296,6 +296,7 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     id_ext = Column(UUID)
+    nivel = Column(String)
     inactivo = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
 

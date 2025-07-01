@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.grupo_model as grupo_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import decorators.role as rol
 import common.auth as auth_token
 import traceback
@@ -32,13 +33,13 @@ def patch_grupo(id_grupo: str, json_data: dict):
         username=g.username
         res = grupo_model.update_grupo(username, id_grupo, **json_data)
         if res is None:
-            raise error_handling.DataNotFound("Grupo no encontrado")
+            raise exceptions.DataNotFound("Grupo no encontrado")
             
         return res
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
  ###############CONSULTA SIMPLE DE GRUPOS###################   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta simple de grupos.', summary='Consulta simple de grupos por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})                                           
@@ -74,7 +75,7 @@ def get_grupo(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 #############DETALLE DE GRUPOS###################    
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de grupos con usuarios y tareas ', summary='Consulta detallada de grupo por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -107,7 +108,7 @@ def get_grupo_detalle(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de grupos por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupo/<string:id>')
@@ -122,7 +123,7 @@ def get_grupo_id(id: str):
         return res
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de todos los grupos del grupo base de un grupo determinado. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo del grupo base por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/grupos_grupobase')
@@ -144,7 +145,7 @@ def get_all_grupobase(query_data: dict):
         return res
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)        
+        raise exceptions.ValidationError(err)        
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Usuarios pertenecientes a un grupo', summary='Usuarios por grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
 @groups_b.get('/usuarios_grupo')
@@ -164,7 +165,7 @@ def get_usrsbygrupo(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     
 #################POST####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un grupo', summary='Alta de un nuevo grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -189,7 +190,7 @@ def post_grupo(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
      
 ##############DELETE####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de un grupo', summary='Baja de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -205,12 +206,12 @@ def del_grupo(id: str):
         # todos=False
         res = grupo_model.delete_grupo(username, id, todos)
         if res is None:
-            raise error_handling.DataNotFound("Grupo no encontrado")
+            raise exceptions.DataNotFound("Grupo no encontrado")
   
         return res
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 ##################UNDELETE####################
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Recuperar un grupo', summary='Recuperar un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'}) 
@@ -222,7 +223,7 @@ def restaura_grupo(id: str):
         todos=False
         res = grupo_model.undelete_grupo(username, id)
         if res is None:
-            raise error_handling.DataNotFound("Grupo no encontrado")
+            raise exceptions.DataNotFound("Grupo no encontrado")
 
         result={
                     "Msg":"Registro restaurado",
@@ -233,7 +234,7 @@ def restaura_grupo(id: str):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
   
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de todos los grupos del grupo base por id. Ejemplo de url: /grupo?id=id_grupo', summary='Consulta de grupo por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -254,4 +255,4 @@ def getGrupoBase(id: str):
         return res
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)

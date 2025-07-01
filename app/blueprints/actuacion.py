@@ -4,6 +4,7 @@ import decorators.role as rol
 import schemas.schemas as schemas
 import models.actuacion_model as actuacion_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.auth as auth_token
 
 
@@ -54,7 +55,7 @@ def get_actuaciones():
         return res
     
     except Exception as err:
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     
 @actuacion_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Tipo de actuaciones', summary='Tipo de actuaciones', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @actuacion_b.get('/tipo_actuaciones')
@@ -76,4 +77,4 @@ def get_tipoactuaciones():
         return res
     
     except Exception as err:
-        raise error_handling.ValidationError(err)      
+        raise exceptions.ValidationError(err)      
