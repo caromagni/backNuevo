@@ -41,6 +41,8 @@ def get_tipoTareas(query_data: dict):
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
         nivel=None
         origen_externo=None
+        inactivo=False
+        eliminado=False
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
@@ -49,9 +51,13 @@ def get_tipoTareas(query_data: dict):
         if (request.args.get('nivel') is not None):
             nivel=request.args.get('nivel')
         if (request.args.get('origen_externo') is not None):
-            origen_externo=request.args.get('origen_externo')        
+            origen_externo=request.args.get('origen_externo') 
+        if (request.args.get('inactivo') is not None):
+            inactivo = request.args.get('inactivo')
+        if (request.args.get('eliminado') is not None):
+            eliminado = request.args.get('eliminado')
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, inactivo, eliminado)
     
         
         data = {

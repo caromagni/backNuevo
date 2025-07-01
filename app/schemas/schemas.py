@@ -459,7 +459,8 @@ class TipoTareaGetIn(Schema):
     per_page = Integer(default=10)
     origen_externo = Boolean(default=False)
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
-
+    eliminado = Boolean(default=False)
+    inactivo = Boolean(default=False)
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)

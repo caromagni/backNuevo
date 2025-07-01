@@ -35,11 +35,15 @@ def get_grupo_by_id(id):
                                     Usuario.id,
                                     Usuario.nombre,
                                     Usuario.apellido,
-                                    UsuarioGrupo.eliminado).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False).all()
+                                    UsuarioGrupo.eliminado).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario  
+                                ).filter(UsuarioGrupo.id_grupo == res.id, UsuarioGrupo.eliminado==False
+                                ).order_by(Usuario.apellido).all()
         
         
         res_tarea = db.session.query(Tarea
-                                ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id).filter(TareaXGrupo.id_grupo==res.id and TareaXGrupo.eliminado==False).all()
+                                ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id
+                                ).filter(TareaXGrupo.id_grupo==res.id and TareaXGrupo.eliminado==False
+                                ).order_by(Tarea.fecha_creacion.desc).all()
         
         if res_hijos is not None:
             #print("tiene hijos")

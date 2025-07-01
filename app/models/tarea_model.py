@@ -885,12 +885,15 @@ def update_lote_tareas(username=None, **kwargs):
     db.session.commit()
     return result
 
-#@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None):
+@cache.cached(CACHE_TIMEOUT_LONG)
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, inactivo=False, eliminado=False):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
-    query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==False, TipoTarea.inactivo==False).order_by(TipoTarea.nombre)
+    print("inactivo:", inactivo)
+    print("eliminado:", eliminado)
+    query = db.session.query(TipoTarea).filter(TipoTarea.eliminado==eliminado, TipoTarea.inactivo==inactivo).order_by(TipoTarea.nombre)
+    
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:

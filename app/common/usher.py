@@ -49,15 +49,20 @@ def migrar_cu(username):
 
 def get_roles(username=''):
     print("get_roles")
-    url=os.environ.get('PUSHER_URL')+username
+    try:
+        url=os.environ.get('PUSHER_URL')+username
+        print("url:", url)
+        x_api_key=os.environ.get('PUSHER_API_KEY')
+        x_api_system=os.environ.get('PUSHER_API_SYSTEM')
+        
+        r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
+        resp=r.json()
+        return resp
+    #except requests.exceptions.RequestException as e:
+    except Exception as err:
+        logger_config.logger.error(f"Error al obtener roles desde P-USHER: {err}")
+        raise Exception(f"Error al obtener roles desde P-USHER: {err}")
     
-    x_api_key=os.environ.get('PUSHER_API_KEY')
-    x_api_system=os.environ.get('PUSHER_API_SYSTEM')
-    
-    r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
-    resp=r.json()
-    return resp
-
 ######################Casos de uso de cada url######################
 ############desde la base de datos############
 #@cache.memoize(CACHE_TIMEOUT_LONG)
