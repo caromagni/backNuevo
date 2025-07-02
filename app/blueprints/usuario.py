@@ -5,6 +5,7 @@ import schemas.schemas as schema
 import models.usuario_model as usuario_model
 import models.grupo_hierarchy as grupo_hierarchy
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import decorators.role as rol
 import common.auth as auth_token
 import traceback
@@ -39,7 +40,7 @@ def get_grupos_by_usr(id_usuario: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
     
 #####################POST#########################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de nuevo Usuario', summary='Alta de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -68,7 +69,7 @@ def post_usuario(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 #################UPDATE####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -101,7 +102,7 @@ def patch_usuario(usuario_id: str, json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 ###############GET BY ID####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de usuario. Ejemplo de url: /usuario?id=id_usuario', summary='Consulta de usuario por id', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -166,7 +167,7 @@ def get_usuario(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
     
 #####################DETALLE DE USUARIOS#######################   
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de usuarios con sus grupos y tareas', summary='Consulta detallada de usuarios por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})                                           
@@ -203,7 +204,7 @@ def get_usuarios_detalle(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     
 ######################DELETE######################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de un Usuario', summary='Baja de un Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -215,7 +216,7 @@ def del_usuario(id: str):
         print("Username usuario.py:",username)
         res = usuario_model.delete_usuario(username, id)
         if res is None:
-            raise error_handling.DataNotFound("Usuario no encontrado")
+            raise exceptions.DataNotFound("Usuario no encontrado")
             
         else:
             data={
@@ -228,7 +229,7 @@ def del_usuario(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 ##########Prueba Roles################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -308,5 +309,5 @@ def get_groups_base_by_usr(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     

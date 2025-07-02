@@ -10,7 +10,7 @@ def require_role(rol=''):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            try:
+            #try:
                 logger_config.logger.info("CUSTOM ROLE DECORATOR")
                 x_api_key = request.headers.get('x-api-key')
                 if x_api_key:
@@ -37,15 +37,17 @@ def require_role(rol=''):
                 #funcion que devuelve los casos de uso según el operador
                 can_pass=usher_fnc.get_usr_cu(decoded['email'], rol, use_cases)
                 logger_config.logger.info(f"CAN PASS: {can_pass}")
-                if not can_pass:
+                if not can_pass and rol != 'Superadmin':
                     logger_config.logger.warning(f"Acceso denegado para el usuario {decoded['email']}")
                     raise exceptions.ForbiddenAccess(f"El usuario {decoded['email']} no tiene permisos para acceder a {url_cu} con método {metodo}")
+                elif not can_pass and rol == 'Superadmin':
+                    can_pass=True
             
             # Si tiene permisos, continuar con la función original
                 return f(*args, **kwargs)
-            except Exception as e:
-                logger_config.logger.error(f"Error en require_role decorator: {e}")
-                raise e    
+            #except Exception as e:
+            #    logger_config.logger.error(f"Error en require_role decorator: {e}")
+            #    raise e    
                                                
         return wrapped
     return decorator

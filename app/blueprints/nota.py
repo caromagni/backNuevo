@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.nota_model as nota_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.auth as auth_token
 import decorators.role as rol
 import traceback
@@ -57,7 +58,7 @@ def get_tipoNotas(query_data: dict):
    
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
  
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Notas', summary='Alta de Tipo de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -73,7 +74,7 @@ def post_tipo_nota(json_data: dict):
             result={
                     "valido":"fail",
                     "code": 800,
-                    "error":"Error en insert grupo",
+                    "error":"Error en insert nota",
                     "error_description":"No se pudo insertar el tipo de nota"
                 }
             res = schema.MsgErrorOut().dump(result)
@@ -84,7 +85,7 @@ def post_tipo_nota(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Nota', summary='Baja de tipo de nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @nota_b.delete('/tipo_nota/<string:id>')
@@ -95,7 +96,7 @@ def del_tipo_nota(id: str):
         username = g.username
         res = nota_model.delete_tipo_nota(username, id)
         if res is None:
-            raise error_handling.DataNotFound("Tipo de nota no encontrado")
+            raise exceptions.DataNotFound("Tipo de nota no encontrado")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -108,7 +109,7 @@ def del_tipo_nota(id: str):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 ################################ NOTAS ################################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de nota', summary='Consulta de notas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -166,12 +167,12 @@ def get_notas(query_data: dict):
         
         return data
     
-    except error_handling.ValidationError as err:
+    except exceptions.ValidationError as err:
         print(traceback.format_exc())
         return {"error": str(err)}, 400
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de nota por ID', summary='Nota por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -183,18 +184,18 @@ def get_nota(id:str):
     try:
         res = nota_model.get_nota_by_id(id)
         if res is None:
-            raise error_handling.DataNotFound("Nota no encontrada")
+            raise exceptions.DataNotFound("Nota no encontrada")
 
         result = schema.NotaIdOut().dump(res)
         
         return result
     
-    except error_handling.DataNotFound as err:
+    except exceptions.DataNotFound as err:
         print(traceback.format_exc())
-        raise error_handling.DataError(800, err)
+        raise exceptions.DataError(800, err)
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Nota', summary='Alta y asignación de notas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -222,7 +223,7 @@ def post_nota(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
 
 #################DELETE########################
 @nota_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Nota', summary='Baja de Nota', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -236,7 +237,7 @@ def del_nota(id: str):
         res = nota_model.delete_nota(username,id)
         print("res:",res)
         if res is None:
-           raise error_handling.DataNotFound("Nota no encontrada")
+           raise exceptions.DataNotFound("Nota no encontrada")
         else:
             if (type(res) != str):
                 result={
@@ -251,9 +252,9 @@ def del_nota(id: str):
             return result 
 
     
-    except error_handling.DataNotFound as err:
+    except exceptions.DataNotFound as err:
         print(traceback.format_exc())
-        raise error_handling.DataError(800, err)
+        raise exceptions.DataError(800, err)
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)

@@ -1,5 +1,6 @@
 from datetime import datetime
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 
 #import requests
 from flask import request, has_request_context
@@ -24,7 +25,7 @@ def controla_fecha(fecha_in=''):
             
             return fecha
         except:
-            raise error_handling.ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
+            raise exceptions.ValidationError("Error en el ingreso de fecha, el formato debe ser dd/mm/aaaa")
    
 
 def formato_expte(expte):

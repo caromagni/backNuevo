@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.tarea_model as tarea_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import decorators.role as rol
 import common.auth as auth_token
 import traceback
@@ -30,7 +31,7 @@ def before_request():
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de Tipos de Tarea', summary='Tipos de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaSubtipoCountOut)
-@tarea_b.input(schema.PageIn, location='query')
+@tarea_b.input(schema.TipoTareaGetIn, location='query')
 @rol.require_role()
 def get_tipoTareas(query_data: dict):
     try:
@@ -38,13 +39,23 @@ def get_tipoTareas(query_data: dict):
         cant=0
         page=1
         per_page=int(current_app.config['MAX_ITEMS_PER_RESPONSE'])
+        nivel=None
+        origen_externo=None
 
         if(request.args.get('page') is not None):
             page=int(request.args.get('page'))
         if(request.args.get('per_page') is not None):
             per_page=int(request.args.get('per_page'))
+        if (request.args.get('nivel') is not None):
+            nivel=request.args.get('nivel')
+        if (request.args.get('origen_externo') is not None):
+            origen_externo=request.args.get('origen_externo') 
+        if (request.args.get('habilitado') is not None):
+            habilitado = request.args.get('habilitado')
+        if (request.args.get('eliminado') is not None):
+            eliminado = request.args.get('eliminado')
 
-        res, cant = tarea_model.get_all_tipo_tarea(page,per_page)
+        res, cant = tarea_model.get_all_tipo_tarea(page,per_page, nivel, origen_externo, habilitado, eliminado)
     
         
         data = {
@@ -57,7 +68,7 @@ def get_tipoTareas(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
  
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -83,7 +94,7 @@ def post_tipo_tarea(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Modificación de un Tipos de Tarea', summary='Modificación de un Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -109,7 +120,7 @@ def update_tipotarea(tipo_tarea_id:str,json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
     
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/tipo_tarea/<string:id>')
@@ -120,7 +131,7 @@ def del_tipo_tarea(id: str):
         username=g.username
         res = tarea_model.delete_tipo_tarea(username, id)
         if res is None:
-            raise error_handling.DataNotFound("Tipo de tarea no encontrado")
+            raise exceptions.DataNotFound("Tipo de tarea no encontrado")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -133,7 +144,7 @@ def del_tipo_tarea(id: str):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 ###############################SUBTIPO_TAREA################################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de Subtipos de Tareas', summary='Subtipos de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -173,7 +184,7 @@ def get_subtipoTarea(query_data: dict):
    
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
  
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Subtipos de Tarea', summary='Alta de Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -199,7 +210,7 @@ def post_subtipo_tarea(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)  
+        raise exceptions.ValidationError(err)  
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Modificación de un Subtipos de Tarea', summary='Modificación de un Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.patch('/subtipo_tarea/<string:subtipo_id>')
@@ -223,7 +234,7 @@ def update_subtipotarea(subtipo_id:str,json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Subtipo de Tarea', summary='Baja de subtipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/subtipo_tarea/<string:id>')
@@ -234,7 +245,7 @@ def del_subtipo_tarea(id: str):
         username=g.username
         res = tarea_model.delete_subtipo_tarea(username, id)
         if res is None:
-            raise error_handling.DataNotFound("Subtipo de tarea no encontrado")
+            raise exceptions.DataNotFound("Subtipo de tarea no encontrado")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -246,7 +257,7 @@ def del_subtipo_tarea(id: str):
  
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
         
 ################################TAREAS################################
 #@tarea_b.doc(description='Consulta de tarea', summary='Consulta de tareas por parámetros', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -292,7 +303,7 @@ def get_tareas(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 
 
@@ -348,7 +359,7 @@ def get_tareas_detalle(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_detalle/<string:id_tarea>')
@@ -358,14 +369,14 @@ def get_tarea(id_tarea:str):
     try:
         res = tarea_model.get_tarea_by_id(id_tarea) 
         if res is None or len(res) == 0:
-            raise error_handling.DataNotFound("Tarea no encontrada")
+            raise exceptions.DataNotFound("Tarea no encontrada")
 
         
         return res
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}],description='Consulta de usuarios x tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_historia_usr/<string:id_tarea>')
@@ -375,14 +386,14 @@ def get_tarea_historia_usr(id_tarea:str):
     try:
         res = tarea_model.get_tarea_historia_usr_by_id(id_tarea) 
         if res is None or len(res) == 0:
-            raise error_handling.DataNotFound("Tarea no encontrada")
+            raise exceptions.DataNotFound("Tarea no encontrada")
 
         
         return res
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_grupo')
@@ -409,7 +420,7 @@ def get_tareas_grupo():
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)     
+        raise exceptions.ValidationError(err)     
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/usuario_tarea/<string:tarea_id>')
@@ -423,7 +434,7 @@ def get_usuarios_asignados(tarea_id:str):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 #@tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}], description='Asignación de tarea a usuario', summary='Asignación a usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 #@tarea_b.post('/tarea_usr')
@@ -454,7 +465,7 @@ def post_usuario_tarea(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/tarea/<string:tarea_id>')
@@ -478,7 +489,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/lote_tareas')
@@ -504,7 +515,7 @@ def patch_lote_tareas(json_data: dict):
      
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
 
 ################V2 LOTE TAREAS####################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
@@ -532,7 +543,7 @@ def patch_lote_tareasv2(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Tarea', summary='Alta y asignación de tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
@@ -560,7 +571,7 @@ def post_tarea(json_data: dict):
             else:
                 #Esto es para probar sin header - no debería pasar - sacarlo en produccion
                 logger.info("NO HEADER ORIGIN")
-                raise error_handling.ValidationError(800, "No tiene permisos para acceder a la API")
+                raise exceptions.ValidationError(800, "No tiene permisos para acceder a la API")
                 #res = insert_tarea(**json_data)    
       
         if res is None:
@@ -577,7 +588,7 @@ def post_tarea(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
 
 #################DELETE########################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
@@ -588,7 +599,7 @@ def del_tarea(id: str):
         username=g.get('username')
         res = tarea_model.delete_tarea(username, id)
         if res is None:
-           raise error_handling.DataNotFound("Tarea no encontrada")
+           raise exceptions.DataNotFound("Tarea no encontrada")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -599,5 +610,5 @@ def del_tarea(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
     

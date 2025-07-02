@@ -202,6 +202,7 @@ class GroupGetIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     path_name = Boolean(default=False)
+    grupo_usr =Boolean(default=False)
 
 class UsuarioDefaultOut(Schema):
     id = String()
@@ -414,9 +415,14 @@ class TipoTareaIn(Schema):
         validate_char
     ])
     nombre = String(required=True, validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
         validate_char
     ])
+    eliminado = Boolean(default=False)
+    base = Boolean(default=False)
+    habilitado = Boolean(default=True)
+    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+                   validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
     id_user_actualizacion = String()
     
 
@@ -426,25 +432,39 @@ class TipoTareaPatchIn(Schema):
         validate_char
     ])
     nombre = String(validate=[
-        validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
+        validate.Length(min=6, max=100, error="El campo debe ser mayor a 6 y menor a 100 caracteres"),
         validate_char
     ])
+    eliminado = Boolean(default=False)
     id_user_actualizacion = String()
     base = Boolean(default=False)
+    habilitado = Boolean(default=False)
     origen_externo = Boolean(default=False)
-    inactivo = Boolean(default=False)
+    id_ext = String()
+    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+                   validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
 
 class TipoTareaOut(Schema):
     id = String()
+    id_ext = String()
+    base = Boolean()
     nombre = String()
+    nivel = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
-    inactivo = Boolean()
+    habilitado = Boolean()
     base = Boolean()
     origen_externo = Boolean()
 
+class TipoTareaGetIn(Schema):
+    page = Integer(default=1)
+    per_page = Integer(default=10)
+    origen_externo = Boolean(default=False)
+    nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
+    eliminado = Boolean(default=False)
+    habilitado = Boolean(default=False)
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
@@ -470,7 +490,7 @@ class SubtipoTareaPatchIn(Schema):
     ])
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
-    inactivo = Boolean(default=False)
+    habilitado = Boolean(default=False)
     id_user_actualizacion = String()
 
 class SubtipoTareaGetIn(Schema):
@@ -488,7 +508,7 @@ class SubtipoTareaOut(Schema):
     nombre = String()
     nombre_corto = String()
     eliminado = Boolean()
-    inactivo = Boolean()
+    habilitado = Boolean()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
@@ -505,15 +525,17 @@ class SubtipoTareaShortOut(Schema):
 
 class TipoTareaSubtipoOut(Schema):
     id = String()
+    id_ext = String()
     nombre = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
-    inactivo = Boolean()
+    habilitado = Boolean()
     base = Boolean()
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
+    nivel = String()
 
 class TareaxGroupOut(Schema):
     id = String()    

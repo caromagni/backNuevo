@@ -1,6 +1,7 @@
 import schemas.schemas as schema
 import models.label_model as label_model
 import common.error_handling as error_handling
+import common.exceptions as exceptions
 import common.auth as auth_token
 import decorators.role as rol
 from apiflask import APIBlueprint
@@ -76,7 +77,7 @@ def get_labels(query_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por ID', summary='Label por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -88,7 +89,7 @@ def get_label(id:str):
     try:
         res = label_model.get_label_by_id(id)
         if res is None:
-            raise error_handling.DataNotFound("Label no encontrada")
+            raise exceptions.DataNotFound("Label no encontrada")
 
         result = schema.LabelIdOut().dump(res)
         
@@ -96,7 +97,7 @@ def get_label(id:str):
  
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de Label', summary='Alta de label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -129,7 +130,7 @@ def post_label(json_data: dict):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
 
 #################DELETE########################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Label', summary='Baja de Label', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -142,7 +143,7 @@ def del_label(id: str):
         print("res:",res)
         print(type(res))
         if res is None:
-           raise error_handling.DataNotFound("Label no encontrada")
+           raise exceptions.DataNotFound("Label no encontrada")
         else:
             if (res['status'] == 'error'):
                 result = {
@@ -160,7 +161,7 @@ def del_label(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
     
 ################################ LABELS X TAREAS ################################
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de label por tarea', summary='Consulta de labels por tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -171,7 +172,7 @@ def get_label_tarea(id_tarea:str):
     try:
         res, cant = label_model.get_label_by_tarea(id_tarea)
         if res is None:
-            raise error_handling.DataNotFound("Label no encontrada")
+            raise exceptions.DataNotFound("Label no encontrada")
 
         data = {
             "count": cant,            
@@ -182,7 +183,7 @@ def get_label_tarea(id_tarea:str):
       
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err) 
+        raise exceptions.ValidationError(err) 
          
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Asignacion de Label a tarea', summary='Asignación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -225,7 +226,7 @@ def put_label_tarea(json_data: dict):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
     
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @label_b.doc(description='Elimina Label de tarea', summary='Eliminación de labels', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -237,7 +238,7 @@ def delete_label_tarea(id: str):
         username = g.username
         res = label_model.delete_label_tarea_model(username, id) 
         if res is None:
-            raise error_handling.DataNotFound("Tipo de tarea no encontrado")
+            raise exceptions.DataNotFound("Tipo de tarea no encontrado")
         else:
             result={
                     "Msg":"Registro eliminado",
@@ -248,7 +249,7 @@ def delete_label_tarea(id: str):
     
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)    
+        raise exceptions.ValidationError(err)    
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -257,7 +258,8 @@ def delete_label_tarea(id: str):
 @cache.cached(CACHE_TIMEOUT_LONG)
 def get_active_labels_grupo(ids_grupos_base: str):
     try:
-        # Fetch active labels and count
+        # Fetch active labels
+        print('ids_grupos_base:', ids_grupos_base)
         res, cant = label_model.get_active_labels(ids_grupos_base)
 
         if res is None:
@@ -285,4 +287,4 @@ def get_active_labels_grupo(ids_grupos_base: str):
 
     except Exception as err:
         print(traceback.format_exc())
-        raise error_handling.ValidationError(err)
+        raise exceptions.ValidationError(err)
