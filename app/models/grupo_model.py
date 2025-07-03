@@ -856,7 +856,7 @@ def update_grupo(username=None,id='', **kwargs):
                 #encuentra el usuario y lo reactiva 
                 usuario_grupo.eliminado = False
                 usuario_grupo.fecha_actualizacion = datetime.now()
-                usuario_grupo.id_user_actualizacion = herarquia.id_user_actualizacion    
+                usuario_grupo.id_user_actualizacion = id_user_actualizacion    
                 
 
     db.session.commit()
