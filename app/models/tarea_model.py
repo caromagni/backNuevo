@@ -1755,6 +1755,8 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.filter(Tarea.estado == estado)
     if eliminado is not None:
         query = query.filter(Tarea.eliminado == eliminado)
+    
+            
     if tiene_notas is not None:
         query = query.filter(Tarea.tiene_notas_desnz == tiene_notas)    
    
