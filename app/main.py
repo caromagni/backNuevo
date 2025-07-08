@@ -56,7 +56,7 @@ def create_app():
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
-    
+    cache_common.cache_enabled=False
     if cache_common.cache_enabled == False :
         print("Using NullCache, caching is disabled")
         app.config['CACHE_TYPE'] = 'NullCache'  # Tipo de caché
