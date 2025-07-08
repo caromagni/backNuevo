@@ -126,14 +126,14 @@ class Usuario(Base):
     id_user_actualizacion = Column(UUID)
     nombre = Column(String)
     apellido = Column(String)
-    id_persona_ext = Column(UUID)
     id_ext = Column(UUID)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
     username = Column(String)
-    dni = Column(String)
     email = Column(String)
+    dni = Column(String)
     habilitado = Column(Boolean)
+    id_persona_ext = Column(UUID)
 
 class TipoActuacionExt(Base):
     __tablename__ = 'tipo_actuacion_ext'
@@ -296,7 +296,6 @@ class TipoTarea(Base):
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
-    id_ext = Column(UUID)
     nivel = Column(String)
     inactivo = Column(Boolean, default=False)
     habilitado = Column(Boolean, default=True)
@@ -448,6 +447,24 @@ class UsuarioGrupo(Base):
     usuario = relationship('Usuario')
 
 
+class UsuarioRol(Base):
+    __tablename__ = 'usuario_rol'
+    __table_args__ = {'schema': 'tareas'}
+
+    id = Column(UUID, primary_key=True)
+    id_usuario_grupo = Column(ForeignKey('tareas.usuario_grupo.id'), nullable=False)
+    id_rol_ext = Column(ForeignKey('tareas.rol_ext.id'), nullable=False)
+    base_desnz = Column(Boolean, nullable=False)
+    fecha_actualizacion = Column(DateTime)
+    id_user_actualizacion = Column(UUID)
+    eliminado = Column(Boolean, default=False)
+    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+
+    usuario_grupo = relationship('UsuarioGrupo')
+    rol_ext = relationship('RolExt')
+    dominio = relationship('Dominio')
+
+
 class Agrupacion(Base):
     __tablename__ = 'agrupacion'
     __table_args__ = {'schema': 'tareas', 'comment': 'agrupa tareas para poderlas trabajar en conjunto. por ejemplo se pueden crear 4 tareas agrupadas de manera que 3 de esas tareas podrian ser de tipo notificar. y una cuarta tarea que sea de tipo remision. el id_conjunto es el que determina las tareas agrupadas. el numero de orden sirve para en el caso de que asi se desee, respetar el orden en el cual se van resolviendo las tareas.'}
@@ -556,15 +573,14 @@ class TareaXGrupo(Base):
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
 
-class Rol(Base):
-    __tablename__ = 'rol'
+class RolExt(Base):
+    __tablename__ = 'rol_ext'
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     email = Column(String)
     rol = Column(String, nullable=False)
-    id_rol_ext= Column(UUID)
+    id_rol_ext = Column(UUID)
     id_organismo = Column(UUID)
     descripcion_ext = Column(String)
     fecha_actualizacion = Column(DateTime)
@@ -621,18 +637,3 @@ class EP(Base):
     id_user_actualizacion = Column(UUID)
 
 
-class UsuarioGrupoRol(Base):
-    __tablename__ = 'usuario_grupo_rol'
-    __table_args__ = {'schema': 'tareas', 'comment': 'un usuario puede tener uno o mas roles en un grupo, esto determina que permisos tiene el usuario en el grupo, por ahora solo las entradas en id_grupo seran las de grupos base. pero podrian ser de otros grupos a futuro.'}
-
-    id = Column(UUID, primary_key=True)
-    id_usuario = Column(ForeignKey('tareas.usuario.id'), nullable=False)
-    id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=False)
-    id_rol = Column(ForeignKey('tareas.rol.id'), nullable=False)
-    fecha_actualizacion = Column(DateTime)
-    id_user_actualizacion = Column(UUID)
-    eliminado = Column(Boolean, default=False)
-
-    usuario = relationship('Usuario')
-    grupo = relationship('Grupo')
-    rol = relationship('Rol')
