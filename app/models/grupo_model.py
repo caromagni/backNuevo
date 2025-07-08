@@ -1,7 +1,7 @@
 import uuid
 from sqlalchemy.orm import aliased
 from datetime import datetime
-from sqlalchemy import text
+from sqlalchemy import text, desc
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
@@ -43,7 +43,7 @@ def get_grupo_by_id(id):
         res_tarea = db.session.query(Tarea
                                 ).join(TareaXGrupo, TareaXGrupo.id_tarea==Tarea.id
                                 ).filter(TareaXGrupo.id_grupo==res.id and TareaXGrupo.eliminado==False
-                                ).order_by(Tarea.fecha_creacion.desc).all()
+                                ).order_by(desc(Tarea.fecha_creacion)).all()
         
         if res_hijos is not None:
             #print("tiene hijos")
