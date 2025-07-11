@@ -146,7 +146,6 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
        
             #controlar si P-USHER no falla
             logger_config.logger.info("REQUEST PUSHER")
-            #agregar un try y except para controlar si da error de conexion
             roles = get_roles(username)
             #print("roles:", roles)
             if 'lista_roles_cus' in roles:
@@ -167,16 +166,14 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             logger_config.logger.info("Get roles desde p-usher")
             print ("id de usuario:", id_usuario)
             ####HACER LA BUSQUEDA DE GRUPO PARA EL ORGANISMO ACTUAL######
-            grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.id_grupo==id_grupo, UsuarioGrupo.eliminado==False).all()
-            #grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.eliminado==False).first()
-            
-            #if len(grupo_usuario) == 0:
-            if grupo_usuario is None or len(grupo_usuario) == 0:
+            #grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.id_grupo==id_grupo, UsuarioGrupo.eliminado==False)
+            grupo_usuario = db.session.query(UsuarioGrupo).filter(UsuarioGrupo.id_usuario==id_usuario, UsuarioGrupo.eliminado==False)
+            if grupo_usuario is None or grupo_usuario.count() == 0:
                 logger_config.logger.error("Usuario no pertenece a ningún grupo")
                 raise Exception("Usuario no pertenece a ningún grupo")
-            
+            else:
+                grupo_usuario = grupo_usuario.first()
             #roles = get_roles(username)
-            #print ("roles:", roles)
             for r in roles['lista_roles_cus']:
                     ######ROL USHER##########
                     print("rol:",r['descripcion_rol'])
@@ -186,7 +183,6 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         nuevo_rol = RolExt(
                             id=nuevoIDRol, 
                             email=email,
-                            #id_usuario=id_usuario, 
                             fecha_actualizacion=datetime.now(),
                             rol=r['descripcion_rol'],
                             id_rol_ext=r['id_usuario_sistema_rol'],
