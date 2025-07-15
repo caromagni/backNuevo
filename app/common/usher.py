@@ -187,35 +187,54 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 raise Exception("Usuario no pertenece a ningún grupo")
             else:
                 grupo_usuario = grupo_usuario.first()
+            
+            # Prepare bulk insert lists
+            nuevos_roles = []
+            nuevos_usuarios_roles = []
+            current_time = datetime.now()
+            id_user_actualizacion = utils.get_username_id(username)
+            
             #roles = get_roles(username)
             for r in roles['lista_roles_cus']:
-                    ######ROL USHER##########
-                    print("rol:",r['descripcion_rol'])
-                    ######Casos de uso del rol##########
-                    for caso_uso in r['casos_de_uso']:
-                        print("caso de uso:", caso_uso['descripcion_corta_cu']) 
-                        nuevoIDRol=uuid.uuid4()
-                        nuevo_rol = RolExt(
-                            id=nuevoIDRol, 
-                            email=email,
-                            fecha_actualizacion=datetime.now(),
-                            rol=r['descripcion_rol'],
-                            id_rol_ext=r['id_usuario_sistema_rol'],
-                            descripcion_ext=caso_uso['descripcion_corta_cu']
-                        )
-                        db.session.add(nuevo_rol)
+                ######ROL USHER##########
+                print("rol:",r['descripcion_rol'])
+                ######Casos de uso del rol##########
+                for caso_uso in r['casos_de_uso']:
+                    print("caso de uso:", caso_uso['descripcion_corta_cu']) 
+                    nuevoIDRol = uuid.uuid4()
+                    
+                    # Create RolExt object (don't add to session yet)
+                    nuevo_rol = RolExt(
+                        id=nuevoIDRol, 
+                        email=email,
+                        fecha_actualizacion=current_time,
+                        rol=r['descripcion_rol'],
+                        id_rol_ext=r['id_usuario_sistema_rol'],
+                        descripcion_ext=caso_uso['descripcion_corta_cu']
+                    )
+                    nuevos_roles.append(nuevo_rol)
 
-                        #for grupo in grupo_usuario:
-                        nuevo_usuarioRol = UsuarioRol(
-                                id=uuid.uuid4(),
-                                id_usuario_grupo=grupo_usuario.id,
-                                id_rol_ext=nuevoIDRol,
-                                fecha_actualizacion=datetime.now(),
-                                id_user_actualizacion=utils.get_username_id(username),
-                                eliminado=False,
-                                id_dominio=id_dominio
-                            )
-                        db.session.add(nuevo_usuarioRol)
+                    # Create UsuarioRol object (don't add to session yet)
+                    nuevo_usuarioRol = UsuarioRol(
+                        id=uuid.uuid4(),
+                        id_usuario_grupo=grupo_usuario.id,
+                        id_rol_ext=nuevoIDRol,
+                        fecha_actualizacion=current_time,
+                        id_user_actualizacion=id_user_actualizacion,
+                        eliminado=False,
+                        id_dominio=id_dominio
+                    )
+                    nuevos_usuarios_roles.append(nuevo_usuarioRol)
+            
+            # Bulk insert all RolExt objects at once
+            if nuevos_roles:
+                db.session.bulk_save_objects(nuevos_roles)
+                logger_config.logger.info(f"Bulk inserted {len(nuevos_roles)} RolExt records")
+            
+            # Bulk insert all UsuarioRol objects at once
+            if nuevos_usuarios_roles:
+                db.session.bulk_save_objects(nuevos_usuarios_roles)
+                logger_config.logger.info(f"Bulk inserted {len(nuevos_usuarios_roles)} UsuarioRol records")
                         
             db.session.commit()
         
