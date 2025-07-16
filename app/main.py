@@ -168,7 +168,6 @@ def create_app():
     app.register_blueprint(alerta_b)
     app.register_blueprint(ai_assistant)
     app.register_blueprint(ep_b)
-    # app.register_blueprint(ep_bj)
     app.register_blueprint(ep_url)
 
 
