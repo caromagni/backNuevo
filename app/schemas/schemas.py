@@ -88,6 +88,7 @@ class NomencladorOut(Schema):
 ############Organismos####################
 class OrganismoOut(Schema):
     id = String()
+    id_ext = String()
     circunscripcion_judicial = String()
     id_fuero = String()
     descripcion = String()

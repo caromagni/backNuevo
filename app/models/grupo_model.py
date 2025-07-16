@@ -383,7 +383,7 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.group_id
             FROM GroupTree gt
             {where_final}            
-            ORDER BY gt.group_id, gt.level DESC;
+            ORDER BY gt.group_id, name, gt.level DESC;
         """)
 
         # Armar cláusulas condicionales de JOIN y WHERE
@@ -617,7 +617,8 @@ def get_all_base(id, usuarios=False):
                                         Usuario.suspendido,
                                         UsuarioGrupo.eliminado.label("eliminado_grupo"),
                                         ).join(Usuario, Usuario.id == UsuarioGrupo.id_usuario
-                                        ).filter(UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado==False).all()
+                                        ).filter(UsuarioGrupo.id_grupo == id_grupo, UsuarioGrupo.eliminado==False
+                                        ).order_by(Usuario.apellido).all()
                 
                 if res_usuarios is not None:
                     for row in res_usuarios:
@@ -736,7 +737,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                                         Usuario.eliminado.label("eliminado_usr"), 
                                         Usuario.suspendido.label("suspendido_usr"), 
                                         Usuario.fecha_actualizacion
-                        ).join(Usuario, Usuario.id==UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo==res.id).all()
+                        ).join(Usuario, Usuario.id==UsuarioGrupo.id_usuario).filter(UsuarioGrupo.id_grupo==res.id).order_by(Usuario.apellido).all()
             
             res_tareas = db.session.query(TareaXGrupo.id_grupo, 
                                        Tarea.id, 
@@ -750,7 +751,7 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
                                        Tarea.fecha_actualizacion,
                                        TareaXGrupo.eliminado.label("eliminado_tareaxgrupo"),
                                        ).join(Tarea, Tarea.id==TareaXGrupo.id_tarea
-                                                   ).filter(TareaXGrupo.id_grupo==res.id).all()
+                                                   ).filter(TareaXGrupo.id_grupo==res.id).order_by(desc(Tarea.fecha_creacion)).all()
             
             if res_usuario is not None:
                 for row in res_usuario:
@@ -1123,27 +1124,7 @@ def get_usuarios_by_grupo(grupos):
             ).order_by(Grupo.nombre).all()
     #.distinct()
     return usrs
-    #res.append(usrs)
-    
-    """ print("Usuarios grupo:", usrs)
-
-        if usrs is not None:
-            for row in usrs:
-                usuario = {
-                    "id_grupo": row.id_grupo,
-                    "nombre_grupo": row.nombre_grupo,
-                    "id_usuario": row.id_usuario,
-                    "nombre": row.nombre,
-                    "apellido": row.apellido,
-                    "eliminado": row.eliminado,
-                    "suspendido": row.suspendido,
-                    "username": row.username,
-                    "email": row.email
-                }
-                res.append(usuario)   """
-                                       
-    #print("Encontrados:",len(res))
-    return usrs
+   
 
 
 def get_grupos_recursivo():
