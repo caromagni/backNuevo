@@ -52,7 +52,6 @@ def is_redis_available():
         return False
 
 def create_app():
-
     print("Creating app..")
     app = APIFlask(__name__)
     # app.config['CACHE_TYPE'] = 'RedisCache'  # Tipo de caché
