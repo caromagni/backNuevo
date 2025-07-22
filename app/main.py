@@ -60,7 +60,7 @@ def create_app():
         print("******************************************")
         setup = DatabaseSetup()
         # If you have a run() or setup() method, call it here:
-        # setup.run()
+        setup.run()
         # For now, just instantiate as a placeholder
     print("Creating app..")
     app = APIFlask(__name__)
