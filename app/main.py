@@ -54,13 +54,9 @@ def is_redis_available():
 
 def create_app():
     # Optionally run database setup before app starts
-    if Config.RUN_DB_SETUP:
-        print("******************************************")
-        print("Running DatabaseSetup before app starts...")
-        print("******************************************")
-        setup = DatabaseSetup()
+    
         # If you have a run() or setup() method, call it here:
-        setup.run()
+        
         # For now, just instantiate as a placeholder
     print("Creating app..")
     app = APIFlask(__name__)
@@ -232,8 +228,24 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    with app.app_context():
+        print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        if Config.RUN_DB_SETUP:
+            print("******************************************")
+            print("Running DatabaseSetup before app starts...")
+            print("******************************************")
+            setup = DatabaseSetup()
+            setup.run()
     app.run()
 else:
+    print("going to run the app in else block")
     app = create_app()
-   
     application = app
+    with app.app_context():
+        print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        if Config.RUN_DB_SETUP:
+            print("******************************************")
+            print("Running DatabaseSetup before app starts...")
+            print("******************************************")
+            setup = DatabaseSetup()
+            setup.run()
