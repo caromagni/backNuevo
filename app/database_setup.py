@@ -33,7 +33,7 @@ class DatabaseSetup:
         existing_domain = session.query(Dominio).filter_by(descripcion="General").first()
         if existing_domain:
             print("Domain 'General' already exists")
-            return existing_domain
+            return existing_domain 
         domain = Dominio(
             id=uuid.uuid4(),
             id_dominio_ext=uuid.uuid4(),
