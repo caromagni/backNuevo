@@ -13,9 +13,15 @@ import common.error_handling as error_handling
 def get_all_tipo_nota(page=1, per_page=10):
     print("get_tipo_notas - ", page, "-", per_page)
     
-    todo = db.session.query(TipoNota).all()
-    total= len(todo)
-    res = db.session.query(TipoNota).order_by(TipoNota.nombre).offset((page-1)*per_page).limit(per_page).all()
+    # Create base query
+    query = db.session.query(TipoNota).filter(TipoNota.eliminado == False)
+    
+    # Get total count efficiently
+    total = query.count()
+    
+    # Get paginated results
+    res = query.order_by(TipoNota.nombre).offset((page-1)*per_page).limit(per_page).all()
+    
     return res, total
 
 def insert_tipo_nota(username=None, id='', nombre='', id_user_actualizacion='', habilitado=True, eliminado=False):
