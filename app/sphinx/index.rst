@@ -5,19 +5,27 @@ Documentación de Tareas
    :maxdepth: 2
    :caption: Contenido:
 
+   Fundamentos del Sistema
+   -----------------------
    ./modulos/introduccion
    ./modulos/arquitectura
-   ./modulos/alertas
    ./modulos/roles
+
+   Gestión de Organización
+   -----------------------
    ./modulos/grupos
+   ./modulos/alertas
+
+   Gestión de Tareas
+   ------------------
+   ./modulos/creacion_tarea
+   ./modulos/estado_tareas
+   ./modulos/tareas_tipo_subtipo
    ./modulos/asignacion_usuarios_tareas
    ./modulos/tareas_asignacion_y_control
-   ./modulos/etiquetas
-   ./modulos/notas
-   ./modulos/bandeja_principal
-   ./modulos/estado_tareas
-   ./modulos/creacion_tarea
-   ./modulos/contenido_multimedia
+
+   Funcionalidades Avanzadas
+   --------------------------
    ./modulos/tareas_anidadas
    ./modulos/tareas_automaticas
    ./modulos/tareas_fechas_intermedias
@@ -25,7 +33,19 @@ Documentación de Tareas
    ./modulos/tareas_programadas
    ./modulos/tareas_recurrentes
    ./modulos/visibilidad_externa
-   ./modulos/tareas_tipo_subtipo
+
+   Elementos de Soporte
+   --------------------
+   ./modulos/etiquetas
+   ./modulos/notas
+   ./modulos/contenido_multimedia
+
+   Interfaz de Usuario
+   -------------------
+   ./modulos/bandeja_principal
+
+   Referencia Técnica
+   ------------------
    ./modulos/referencia_api
 
 Índices y tablas
