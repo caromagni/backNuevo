@@ -33,10 +33,13 @@ html_theme = 'alabaster'
 html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
+# Configuración para incluir CSS personalizado
+html_css_files = [
+    'custom.css',
+]
+
 # Configuración de las páginas del manual
 master_doc = 'index'
-
-
 
 # Leer el contenido de index_content.txt
 with open(os.path.join(os.path.dirname(__file__), 'index.rst'), 'r') as f:
