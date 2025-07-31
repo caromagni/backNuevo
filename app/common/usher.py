@@ -65,7 +65,9 @@ def get_roles(username=''):
         logger_config.logger.info("time taken to get roles from pusher: %s", ending_time - starting_time)
         if 'lista_roles_cus' in resp:
             logger_config.logger.info("user roles count from P-USHER: %s", str(len(resp['lista_roles_cus'])))
-        
+        else:
+            logger_config.logger.error("Error de conexión con P-USHER ")
+            #raise Exception(f"No se encontraron roles para el usuario {username}")
         return resp
     #except requests.exceptions.RequestException as e:
     except Exception as err:
