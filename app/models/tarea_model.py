@@ -188,9 +188,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if id_tipo_tarea is not None:
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
-            logger_config.logger.error("Tipo de tarea no encontrado")
-            raise Exception("Tipo de tarea no encontrado")
+            #Busco por id_ext
+            tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea, TipoTarea.eliminado==False).first()
+            if tipo_tarea is None:
+                logger_config.logger.error("Tipo de tarea no encontrado:%s" + id_tipo_tarea)
+                raise Exception("Tipo de tarea no encontrado")
+            
+            
         nombre_tipo=tipo_tarea.nombre
+        id_tipo_tarea = tipo_tarea.id
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
@@ -246,14 +252,14 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
 
    
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
+    """   tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
        #Busco por id_ext
-       tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
-       if tipo_tarea is None:
+       tipo_tarea_ext = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
+       if tipo_tarea_ext is None:
            logger_config.logger.error("Tipo de tarea no encontrado")
            msg = "Tipo de tarea no encontrado"
-           return None, msg
+           return None, msg """
       
     
     print("DATES FORMATS TO BE INSERTED")
