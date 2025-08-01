@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
-from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt
+from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
 from models.alch_model import Auditoria_TareaAsignadaUsuario 
 import common.functions as functions
 import common.utils as utils
@@ -117,7 +117,7 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
     return tareas_vencer, total
 
 
-def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None):
+def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actuacion=None, titulo='', cuerpo='', id_expediente=None, caratula_expediente='', nro_expte='', nombre_actuacion='', id_tipo_tarea=None, id_subtipo_tarea=None, eliminable=True, fecha_eliminacion=None, id_user_actualizacion=None, fecha_inicio=None, fecha_fin=None, plazo=0, usuario=None, grupo=None, username=None, url=None, url_descripcion=None):
     
     print("##############Validaciones Insert de Tarea################")
     id_grupo=None
@@ -188,9 +188,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     if id_tipo_tarea is not None:
         tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea, TipoTarea.eliminado==False).first()
         if tipo_tarea is None:
-            logger_config.logger.error("Tipo de tarea no encontrado")
-            raise Exception("Tipo de tarea no encontrado")
+            #Busco por id_ext
+            tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea, TipoTarea.eliminado==False).first()
+            if tipo_tarea is None:
+                logger_config.logger.error("Tipo de tarea no encontrado:%s" + id_tipo_tarea)
+                raise Exception("Tipo de tarea no encontrado")
+            
+            
         nombre_tipo=tipo_tarea.nombre
+        id_tipo_tarea = tipo_tarea.id
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
             if subtipo_tarea is None:
@@ -246,10 +252,15 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
 
 
    
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
+    """   tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
     if tipo_tarea is None:
-       msg = "Tipo de tarea no encontrado"
-       return None, msg
+       #Busco por id_ext
+       tipo_tarea_ext = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
+       if tipo_tarea_ext is None:
+           logger_config.logger.error("Tipo de tarea no encontrado")
+           msg = "Tipo de tarea no encontrado"
+           return None, msg """
+      
     
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
@@ -271,6 +282,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         titulo=titulo,
         cuerpo=cuerpo,
         id_expediente=id_expediente,
+        caratula_expediente=caratula_expediente if caratula_expediente is not None and caratula_expediente.strip() != "" else None,
         id_tipo_tarea=id_tipo_tarea,
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
@@ -284,6 +296,19 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
     )
 
     db.session.add(nueva_tarea) 
+
+    if url is not None and url.strip() != "":
+      
+        nuevo_url = URL(
+            id=uuid.uuid4(),
+            id_tarea=nuevoID_tarea,
+            url=url,
+            descripcion=url_descripcion if url_descripcion is not None and url_descripcion.strip() != "" else None,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+
+        db.session.add(nuevo_url)
 
     usuariosxdefault = []
 

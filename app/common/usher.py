@@ -63,7 +63,11 @@ def get_roles(username=''):
         resp=r.json()
         ending_time = datetime.now()
         logger_config.logger.info("time taken to get roles from pusher: %s", ending_time - starting_time)
-        logger_config.logger.info("user roles count from P-USHER: %s", str(len(resp['lista_roles_cus'])))
+        if 'lista_roles_cus' in resp:
+            logger_config.logger.info("user roles count from P-USHER: %s", str(len(resp['lista_roles_cus'])))
+        else:
+            logger_config.logger.error("Error de conexión con P-USHER ")
+            #raise Exception(f"No se encontraron roles para el usuario {username}")
         return resp
     #except requests.exceptions.RequestException as e:
     except Exception as err:
@@ -177,6 +181,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             else:
                 logger_config.logger.error("Error al obtener roles desde P-USHER")
                 pusher_ok = False
+                pull_roles = False
 
             print ("pull_roles:", pull_roles)
 

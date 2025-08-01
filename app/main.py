@@ -15,6 +15,7 @@ from blueprints.nota import nota_b
 from blueprints.label import label_b
 from blueprints.alerta import alerta_b
 from blueprints.endpoint import ep_b
+from blueprints.dominio import dominio_b
 # from blueprints.endpoint_json import ep_bj
 from blueprints.fix_stuck_in_idle_connections import fix_b
 from blueprints.URL import ep_url
@@ -36,7 +37,7 @@ import common.exceptions as exceptions
 from database_setup import DatabaseSetup
 
 
-def is_redis_available():
+def is_redis_available(): 
     """One-liner Redis availability check"""
     try:
         print("testing redis connection")
@@ -145,9 +146,9 @@ def create_app():
     app.config['RABBITMQ_VHOST'] = Config.RABBITMQ_VHOST
     
     # Initialize the SQLAlchemy engine and session
-    print("##############################")
+    print("#####################")
     print("SQLAlchemy:",app.config['SQLALCHEMY_DATABASE_URI'])
-    print("##############################")
+    print("######################")
       # Create tables based on the models defined in Base
     db.init_app(app)
     
@@ -178,6 +179,7 @@ def create_app():
     app.register_blueprint(ai_assistant)
     app.register_blueprint(ep_b)
     app.register_blueprint(ep_url)
+    app.register_blueprint(dominio_b)
 
     # Kubernetes liveness probe
     @app.route('/livez')
