@@ -94,6 +94,13 @@ class OrganismoOut(Schema):
     instancia = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+
+################URL####################
+class URLOut(Schema):
+    id = String()
+    url = String()
+    descripcion = String()
+
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
     id = String()
@@ -1068,6 +1075,7 @@ class TareaAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
+    url = List(Nested(URLOut, only=("url", "descripcion")))
 
 
 class TareaPatchLoteV2Out(Schema):

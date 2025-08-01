@@ -1715,17 +1715,6 @@ def get_tarea_grupo_by_id(username=None, page=1, per_page=10):
 @cache.memoize(CACHE_TIMEOUT_LONG)
 def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='', labels=None, id_expediente=None, id_expte_ext=None, id_actuacion=None, id_actuacion_ext=None, id_tipo_tarea=None, id_usuario_asignado=None, grupos=None, id_tarea=None, fecha_desde=None, fecha_hasta=None, fecha_fin_desde=None, fecha_fin_hasta=None, prioridad=0, estado=0, eliminado=None, tiene_notas=None):
     
-    """logger_config.logger.info("username: %s", username)
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
-
-    if id_user_actualizacion is not None:
-        utils.verifica_usr_id(id_user_actualizacion)
-    else:
-        raise Exception("Usuario no ingresado")
-    
-    logger_config.logger.info("ID usuario actualizacion: %s", id_user_actualizacion) """
-
     def make_cache_key():
         # Generate a unique cache key based on the function arguments
         return f"get_all_tarea_detalle:{page}:{per_page}:{titulo}:{label}:{labels}:{id_expediente}:{id_actuacion}:{id_tipo_tarea}:{id_usuario_asignado}:{grupos}:{id_tarea}:{fecha_desde}:{fecha_hasta}:{fecha_fin_desde}:{fecha_fin_hasta}:{prioridad}:{estado}:{eliminado}:{tiene_notas}"
@@ -1754,9 +1743,19 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())    
 
+    """ query = db.session.query(Tarea.id, Tarea.titulo, Tarea.fecha_creacion, Tarea.fecha_fin,
+                             Tarea.fecha_inicio, Tarea.plazo, Tarea.prioridad, Tarea.estado, 
+                             Tarea.id_tipo_tarea, Tarea.id_subtipo_tarea, Tarea.id_actuacion,
+                             Tarea.id_expediente, Tarea.cuerpo, Tarea.eliminable, 
+                             Tarea.tipo_tarea, Tarea.subtipo_tarea, Tarea.actuacion,
+                             Tarea.expediente, 
+                             Tarea.eliminado, Tarea.fecha_eliminacion, Tarea.fecha_actualizacion,
+                             Tarea.id_user_actualizacion, Tarea.tiene_notas_desnz,
+                             Tarea.fecha_creacion, Tarea.caratula_expediente,
+                             URL.url, URL.descripcion
+                             ).outerjoin(URL, Tarea.id == URL.id_tarea
+                             ).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta)) """
     query = db.session.query(Tarea).filter(Tarea.fecha_creacion.between(fecha_desde, fecha_hasta))
-    logger_config.logger.info(f"Total de tareas: {query.count()}")
-
     if fecha_fin_desde is not None and fecha_fin_hasta is not None:
         fecha_fin_desde = datetime.strptime(fecha_fin_desde, '%d/%m/%Y').date()
         fecha_fin_hasta = datetime.strptime(fecha_fin_hasta, '%d/%m/%Y')
@@ -1814,7 +1813,6 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             g.strip().replace('"', '').replace("'", '') 
             for g in grupos.split(',') if g.strip()
         ]
-        #grupos = grupos.split(",")
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
                 ).distinct()         
@@ -1824,6 +1822,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     
     # Pagination with eager loading for associated users and groups
     res_tareas = query.order_by(desc(Tarea.fecha_creacion)).offset((page - 1) * per_page).limit(per_page).all()
+    print("Total de tareas:", total)
 
     # Process each task in paginated results
     results = []
@@ -1832,6 +1831,10 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     # Using aliased subqueries to reduce the number of queries for users and groups
     usuario_alias = aliased(Usuario)
     grupo_alias = aliased(Grupo)
+    if res_tareas is None:
+        return results, total
+    for res in res_tareas:
+        print("Tarea:", res.id, res.titulo, res.fecha_creacion, res.fecha_fin, res.plazo, res.prioridad, res.estado)
 
     for res in res_tareas:
         usuarios = []
@@ -1879,6 +1882,16 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 reasignada_grupo = True
             grupos.append(grupo)            
         
+        res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
+        if res_url is not None:
+            url = []
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
+
         # Prepare result dictionary
         result = {
             "id": res.id,
@@ -1914,7 +1927,8 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
-            "reasignada_grupo": reasignada_grupo
+            "reasignada_grupo": reasignada_grupo,
+            "url": url  # Assuming URL is a field in Tarea
         }
         results.append(result)
     # print("time taken for this task:", datetime.now() - exec_time)
