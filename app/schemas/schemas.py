@@ -94,6 +94,16 @@ class OrganismoOut(Schema):
     instancia = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+################Dominio####################
+class DominioOut(Schema):
+    id = String()
+    descripcion = String()
+    habilitado = Boolean()
+    id_user_actualizacion = String()
+    fecha_actualizacion = String()
+    descripcion_corta = String()
+    prefijo = String()
+    id_dominio_ext = String()
 
 ################URL####################
 class URLOut(Schema):
@@ -184,6 +194,7 @@ class GroupIn(Schema):
     id_padre = String() 
     base = Boolean(default=False)
     id_organismo = String()
+    id_dominio = String()
 
 class GroupPatchIn(Schema):
     base = Boolean(default=False)
