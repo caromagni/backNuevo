@@ -111,6 +111,7 @@ def get_grupo_by_id(id):
             "id_dominio": res.id_dominio,
             "id_organismo": res.id_organismo,
             "organismo": res.organismo,
+            "dominio": res.dominio,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
             "fecha_actualizacion": res.fecha_actualizacion
@@ -488,7 +489,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
             "base": grupo.base,
             "id_dominio": grupo.id_dominio,
             "id_organismo": grupo.id_organismo,
-            "organismo": grupo.organismo
+            "organismo": grupo.organismo,
+            "dominio": grupo.dominio
         }
         for grupo in result_paginated
     ]
@@ -1189,7 +1191,8 @@ def insert_grupo(username=None, id='', nombre='', descripcion='', id_user_actual
         "path_name": cursor[0].path_name if cursor else "",
         "id_dominio": nuevo_grupo.id_dominio,
         "id_organismo": nuevo_grupo.id_organismo,
-        "organismo": nuevo_grupo.organismo 
+        "organismo": nuevo_grupo.organismo,
+        "dominio": nuevo_grupo.dominio
     }
 
     return data

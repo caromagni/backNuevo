@@ -262,6 +262,7 @@ class GetGroupOut(Schema):
     fecha_actualizacion = String()
     fecha_creacion = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     id_organismo= String()
     id_dominio= String()
     eliminado = Boolean()
@@ -454,8 +455,8 @@ class TipoTareaIn(Schema):
         validate_char
     ])
     eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
     base = Boolean(default=False)
-    inactivo = Boolean(default=True)
     nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
     
@@ -470,8 +471,8 @@ class TipoTareaPatchIn(Schema):
         validate_char
     ])
     eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
     base = Boolean(default=False)
-    habilitado = Boolean(default=False)
     origen_externo = Boolean(default=False)
     id_ext = String()
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
@@ -487,7 +488,7 @@ class TipoTareaOut(Schema):
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
-    habilitado = Boolean()
+    suspendido = Boolean()
     base = Boolean()
     origen_externo = Boolean()
 
@@ -497,7 +498,7 @@ class TipoTareaGetIn(Schema):
     origen_externo = Boolean(default=False)
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"})    
     eliminado = Boolean(default=False)
-    inactivo = Boolean(default=False)
+    suspendido = Boolean(default=False)
     nombre = String(default="")
 
 class SubtipoTareaIn(Schema):
@@ -510,6 +511,8 @@ class SubtipoTareaIn(Schema):
         validate.Length(min=6, max=50, error="El campo debe ser mayor a 6 y menor a 50 caracteres"),
         validate_char
     ])
+    eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
 
 class SubtipoTareaPatchIn(Schema):
     id_tipo = String()
@@ -523,13 +526,15 @@ class SubtipoTareaPatchIn(Schema):
     ])
     base = Boolean(default=False)
     origen_externo = Boolean(default=False)
-    habilitado = Boolean(default=False)
+    eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
 
 class SubtipoTareaGetIn(Schema):
     page = Integer(default=1)
     per_page = Integer(default=10)
     id_tipo_tarea = String()
     eliminado = Boolean(default=False)
+    suspendido = Boolean(default=False)
     origen_externo = Boolean(default=False)
 
 class SubtipoTareaOut(Schema):
@@ -540,7 +545,7 @@ class SubtipoTareaOut(Schema):
     nombre = String()
     nombre_corto = String()
     eliminado = Boolean()
-    habilitado = Boolean()
+    suspendido = Boolean()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
     base = Boolean()
@@ -551,7 +556,7 @@ class SubtipoTareaShortOut(Schema):
     nombre = String()
     nombre_corto = String()
     eliminado = Boolean()
-    inactivo = Boolean()
+    suspendido = Boolean()
     base = Boolean()
     origen_Externo = Boolean()
 
@@ -563,7 +568,7 @@ class TipoTareaSubtipoOut(Schema):
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     eliminado = Boolean()
-    inactivo = Boolean()
+    suspendido = Boolean()
     base = Boolean()
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
@@ -615,6 +620,7 @@ class GroupIdOut(Schema):
     id_dominio = String()
     id_organismo = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     hijos = List(Nested(HerarquiaGroupOut, only=("id_hijo","nombre_hijo", "eliminado")))
     padre = List(Nested(HerarquiaGroupOut, only=("id_padre","nombre_padre", "eliminado")))
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))

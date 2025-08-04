@@ -935,11 +935,10 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, inactivo=None, eliminado=None, nombre=None):
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
-    print("inactivo:", inactivo)
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
@@ -949,8 +948,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, ina
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
         query = query.filter(TipoTarea.origen_externo == origen_externo)
-    if inactivo is not None:
-        query = query.filter(TipoTarea.inactivo == inactivo )
+    if suspendido is not None:
+        query = query.filter(TipoTarea.suspendido == suspendido)
     if eliminado is not None:
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
@@ -977,7 +976,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, ina
                         "nombre_corto": subtipo.nombre_corto,
                         "base": subtipo.base,
                         "origen_externo": subtipo.origen_externo,
-                        "inactivo": subtipo.inactivo,
+                        "suspendido": subtipo.suspendido,
                         "eliminado": subtipo.eliminado
                     }
                     subtipo_list.append(subtipo)
@@ -992,7 +991,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, ina
                 "subtipo_tarea": subtipo_list,
                 "user_actualizacion": tipo.user_actualizacion,
                 "fecha_actualizacion": tipo.fecha_actualizacion,
-                "inactivo": tipo.inactivo,
+                "suspendido": tipo.suspendido,
                 "eliminado": tipo.eliminado,
                 "nivel": tipo.nivel,
                 "id_ext": tipo.id_ext
@@ -1003,7 +1002,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, ina
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, inactivo=False, eliminado=False):
+def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
     
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1022,8 +1021,8 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
         nivel=nivel,
         base=False,
         origen_externo=False,
-        inactivo=inactivo,
-        eliminado=False,
+        suspendido=suspendido,
+        eliminado=eliminado,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -1043,7 +1042,7 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
     else:
         raise Exception("Usuario no ingresado")
 
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False, TipoTarea.inactivo == False).first()
+    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False, TipoTarea.suspendido == False).first()
     
     if tipo_tarea is None:
         raise Exception("Tipo de tarea no encontrado")
@@ -1056,10 +1055,10 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         tipo_tarea.eliminado = kwargs['eliminado']
     else:
         tipo_tarea.eliminado = False
-    if 'inactivo' in kwargs:
-        tipo_tarea.inactivo = kwargs['inactivo']
+    if 'suspendido' in kwargs:
+        tipo_tarea.suspendido = kwargs['suspendido']
     else:
-        tipo_tarea.inactivo = False
+        tipo_tarea.suspendido = False
     if 'nivel' in kwargs:
         tipo_tarea.nivel = kwargs['nivel']
     if 'id_ext' in kwargs:
@@ -1095,20 +1094,22 @@ def delete_tipo_tarea(username=None, id=None):
     
 #########################SUBTIPO TAREA############################################
 @cache.memoize(CACHE_TIMEOUT_LONG)
-def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None):
+def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=None, suspendido=None):
 
     query = db.session.query(SubtipoTarea)
     if id_tipo_tarea is not None:
         query = query.filter(SubtipoTarea.id_tipo==id_tipo_tarea)
     if eliminado is not None:
         query = query.filter(SubtipoTarea.eliminado==eliminado)
+    if suspendido is not None:
+        query = query.filter(SubtipoTarea.suspendido==suspendido)    
 
     total= len(query.all())
 
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion=''):
+def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', eliminado=False, suspendido=False):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1124,6 +1125,11 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
         if tipo_tarea is None:
             raise Exception("Tipo de tarea no encontrado")
 
+    if eliminado is not None:
+        eliminado = eliminado
+
+    if suspendido is not None:
+        suspendido = suspendido
 
     nuevoID=uuid.uuid4()
     nuevo_subtipo_tarea = SubtipoTarea(
@@ -1133,8 +1139,8 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
         nombre_corto=nombre_corto,
         base=False,
         origen_externo=False,
-        eliminado=False,
-        inactivo=False,
+        eliminado=eliminado,
+        suspendido=suspendido,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
@@ -1169,10 +1175,11 @@ def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
     else:
         subtipo_tarea.eliminado = False
 
-    if 'inactivo' in kwargs:
-        subtipo_tarea.inactivo = kwargs['inactivo']
+    if 'suspendido' in kwargs:
+        subtipo_tarea.suspendido = kwargs['suspendido']
     else:
-        subtipo_tarea.inactivo = False              
+        subtipo_tarea.suspendido = False    
+            
         
     subtipo_tarea.base = False
     subtipo_tarea.origen_externo = False
