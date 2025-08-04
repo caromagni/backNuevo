@@ -95,7 +95,7 @@ class OrganismoOut(Schema):
     id_user_actualizacion = String()
     fecha_actualizacion = String()
 ################Dominio####################
-class DominioOut(Schema):
+class DominioOut1(Schema):
     id = String()
     descripcion = String()
     habilitado = Boolean()
@@ -111,6 +111,21 @@ class URLOut(Schema):
     url = String()
     descripcion = String()
 
+
+############Dominios####################
+class DominioOut(Schema):
+    id = String()
+    id_dominio_ext = String()
+    descripcion = String()
+    descripcion_corta = String()
+    prefijo = String()
+    fecha_actualizacion = String()
+    habilitado = Boolean()
+    id_user_actualizacion = String()
+
+class DominioCountOut(Schema):
+    count = Integer()
+    data = Nested(DominioOut, many=True)
 ################Actuaciones####################
 class TipoActuacionOut(Schema):
     id = String()

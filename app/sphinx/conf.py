@@ -33,50 +33,24 @@ html_theme = 'alabaster'
 html_theme_path = [sphinx_pdj_theme.get_html_theme_path()]
 html_static_path = ['_static']
 
+# Configuración para incluir CSS personalizado
+html_css_files = [
+    'custom.css',
+]
+
 # Configuración de las páginas del manual
 master_doc = 'index'
 
-
-
-# Leer el contenido de index_content.txt
-with open(os.path.join(os.path.dirname(__file__), 'index.rst'), 'r') as f:
-    index_content = f.read()
-
-# # Crear el contenido para el archivo index.rst
-# index_content = '''
-# Documentación de Tareas
-# =========================================
-
-# .. toctree::
-#    :maxdepth: 2
-#    :caption: Contenido:
-
-#    introduccion
-#    arquitectura
-#    referencia_api
-#    /modulos/alertas
-#    /modulos/bandeja_principal
-#    /modulos/calendario
-#    /modulos/contenido_multimedia
-#    /modulos/creacion_tarea
-#    /modulos/grupos
-#    /modulos/tareas_anidadas
-#    /modulos/tareas_automaticas
-#    /modulos/tareas_fechas_intermedias
-#    /modulos/tareas_personales
-#    /modulos/tareas_programadas
-#    /modulos/tareas_recurrentes
-#    /modulos/visibilidad_externa
-
-# Índices y tablas
-# ================
-
-# * :ref:`genindex`
-# * :ref:`modindex`
-# * :ref:`search`
-# '''
-
-
+# Configuración del tema para mejorar la navegación
+html_theme_options = {
+    'navigation_depth': 2,
+    'collapse_navigation': False,
+    'sticky_navigation': True,
+    'includehidden': True,
+    'titles_only': False,
+    'globaltoc_collapse': False,
+    'globaltoc_maxdepth': 2,
+}
 
 # Configurar el idioma a español
 language = 'es'
