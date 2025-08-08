@@ -200,9 +200,9 @@ class GroupIn(Schema):
     ])
     id_user_asignado_default= String()
     id_padre = String() 
-    base = Boolean(default=False)
-    id_organismo = String()
-    id_dominio = String()
+    #base = Boolean(default=False)
+    #id_organismo = String()
+    #id_dominio = String()
 
 class GroupPatchIn(Schema):
     base = Boolean(default=False)
@@ -452,6 +452,7 @@ class TipoTareaIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
+    id_organismo = String()
     """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                     validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
                     default ='int') """
@@ -504,7 +505,6 @@ class TipoTareaGetIn(Schema):
     nombre = String(default="")
     id_dominio = String()
     id_organismo = String()
-    dominio_propio = Boolean(default = True)
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)

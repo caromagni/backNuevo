@@ -940,7 +940,7 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None, dominio_propio=None):
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
@@ -976,15 +976,14 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
         query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))
-    print("Dominio propio:", dominio_propio)    
-    if dominio_propio == True or dominio_propio == 'true':       
-        if dominio is not None:
-            query = query.filter(TipoTarea.id_dominio == dominio)
-    else:
-        if id_dominio is not None:
-            query = query.filter(TipoTarea.id_dominio == id_dominio)
-        if id_organismo is not None:
-            query = query.filter(TipoTarea.id_organismo == id_organismo)     
+    #if dominio is not None:
+    #    query = query.filter(TipoTarea.id_dominio == dominio)
+    #if organismo is not None:
+    #    query = query.filter(TipoTarea.id_organismo == organismo)
+    if id_dominio is not None:
+        query = query.filter(TipoTarea.id_dominio == id_dominio)
+    if id_organismo is not None:
+        query = query.filter(TipoTarea.id_organismo == id_organismo)     
 
     total= query.count()
     res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
@@ -1038,7 +1037,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1048,6 +1047,12 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     else:
         raise Exception("Usuario no ingresado")
            
+    if id_organismo is None:
+       id_organismo_tipo = organismo
+    else:
+        id_organismo_tipo = id_organismo    
+
+
     nuevoID=uuid.uuid4()
 
     nuevo_tipo_tarea = TipoTarea(
@@ -1055,12 +1060,12 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
         codigo_humano=codigo_humano,
         nombre=nombre,
         nivel='int',
-        base=False,
+        base= base,
         origen_externo=False,
         suspendido=suspendido,
         eliminado=eliminado,
         id_dominio=dominio,
-        id_organismo=organismo,
+        id_organismo=id_organismo_tipo,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
