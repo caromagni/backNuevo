@@ -76,15 +76,15 @@ def post_usuario(json_data: dict):
     
 #################UPDATE####################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Usuario', summary='Update de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@usuario_b.patch('/usuario/<string:usuario_id>')
+@usuario_b.patch('/usuario/<string:id_usuario>')
 @usuario_b.input(schema.UsuarioInPatch)
 @verify.check_fields()
 @rol.require_role()
-def patch_usuario(usuario_id: str, json_data: dict):
+def patch_usuario(id_usuario: str, json_data: dict):
     try:
         username=g.username
         print("Username usuario.py:",username)
-        res = usuario_model.update_usuario(usuario_id, username, **json_data)
+        res = usuario_model.update_usuario(id_usuario, username, **json_data)
         if res is None:
             print("No hay datos que modificar")  
             result={

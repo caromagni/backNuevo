@@ -3,6 +3,7 @@ import models.tarea_model as tarea_model
 import common.error_handling as error_handling
 import common.exceptions as exceptions
 import decorators.role as rol
+import decorators.verify as verify
 import common.auth as auth_token
 import traceback
 from common.logger_config import logger
@@ -33,6 +34,7 @@ def before_request():
 @tarea_b.get('/tipo_tarea')
 @tarea_b.output(schema.TipoTareaSubtipoCountOut)
 @tarea_b.input(schema.TipoTareaGetIn, location='query')
+@verify.check_fields()
 @rol.require_role()
 def get_tipoTareas(query_data: dict):
     try:
@@ -88,6 +90,7 @@ def get_tipoTareas(query_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/tipo_tarea')
 @tarea_b.input(schema.TipoTareaIn)
+@verify.check_fields()
 @rol.require_role()
 def post_tipo_tarea(json_data: dict):
     try:
@@ -114,13 +117,14 @@ def post_tipo_tarea(json_data: dict):
     
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Modificación de un Tipos de Tarea', summary='Modificación de un Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.patch('/tipo_tarea/<string:tipo_tarea_id>')
+@tarea_b.patch('/tipo_tarea/<string:id_tipo_tarea>')
 @tarea_b.input(schema.TipoTareaPatchIn)
+@verify.check_fields()
 @rol.require_role()
-def update_tipotarea(tipo_tarea_id:str,json_data: dict):
+def update_tipotarea(id_tipo_tarea:str,json_data: dict):
     try:
         username=g.username
-        res = tarea_model.update_tipo_tarea(username, tipo_tarea_id,**json_data)
+        res = tarea_model.update_tipo_tarea(username, id_tipo_tarea,**json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -140,6 +144,7 @@ def update_tipotarea(tipo_tarea_id:str,json_data: dict):
     
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tipo de Tarea', summary='Baja de tipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/tipo_tarea/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 #@tarea_b.output(MsgErrorOut)
 def del_tipo_tarea(id: str):
@@ -167,6 +172,7 @@ def del_tipo_tarea(id: str):
 @tarea_b.get('/subtipo_tarea')
 @tarea_b.output(schema.SubtipoTareaCountOut)
 @tarea_b.input(schema.SubtipoTareaGetIn, location='query')
+@verify.check_fields()
 @rol.require_role()
 def get_subtipoTarea(query_data: dict):
     try:
@@ -209,6 +215,7 @@ def get_subtipoTarea(query_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Subtipos de Tarea', summary='Alta de Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.post('/subtipo_tarea')
 @tarea_b.input(schema.SubtipoTareaIn)
+@verify.check_fields()
 @rol.require_role()
 def post_subtipo_tarea(json_data: dict):
     try:
@@ -232,13 +239,14 @@ def post_subtipo_tarea(json_data: dict):
         raise exceptions.ValidationError(err)  
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Modificación de un Subtipos de Tarea', summary='Modificación de un Subtipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@tarea_b.patch('/subtipo_tarea/<string:subtipo_id>')
+@tarea_b.patch('/subtipo_tarea/<string:id_subtipo>')
 @tarea_b.input(schema.SubtipoTareaPatchIn)
+@verify.check_fields()
 @rol.require_role()
-def update_subtipotarea(subtipo_id:str,json_data: dict):
+def update_subtipotarea(id_subtipo:str,json_data: dict):
     try:
         username = g.username
-        res = tarea_model.update_subtipo_tarea(username, subtipo_id,**json_data)
+        res = tarea_model.update_subtipo_tarea(username, id_subtipo,**json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -258,6 +266,7 @@ def update_subtipotarea(subtipo_id:str,json_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Subtipo de Tarea', summary='Baja de subtipo de tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.delete('/subtipo_tarea/<string:id>')
 #@tarea_b.output(MsgErrorOut)
+@verify.check_fields()
 @rol.require_role()
 def del_subtipo_tarea(id: str):
     try:
@@ -284,6 +293,7 @@ def del_subtipo_tarea(id: str):
 @tarea_b.get('/tarea_notas')
 @tarea_b.input(schema.TareaNotasGetIn, location='query')
 @tarea_b.output(schema.TareaCountOut)
+@verify.check_fields()
 @rol.require_role()
 def get_tareas(query_data: dict):
     try:
@@ -330,6 +340,7 @@ def get_tareas(query_data: dict):
 @tarea_b.get('/tarea')
 @tarea_b.input(schema.TareaGetIn, location='query')
 @tarea_b.output(schema.TareaCountAllOut)
+@verify.check_fields()
 @rol.require_role()
 def get_tareas_detalle(query_data: dict):
     try:
@@ -383,6 +394,7 @@ def get_tareas_detalle(query_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_detalle/<string:id_tarea>')
 @tarea_b.output(schema.TareaIdOut(many=True))
+@verify.check_fields()
 @rol.require_role()
 def get_tarea(id_tarea:str):
     try:
@@ -400,6 +412,7 @@ def get_tarea(id_tarea:str):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}],description='Consulta de usuarios x tarea por ID', summary='Tarea por ID', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_historia_usr/<string:id_tarea>')
 @tarea_b.output(schema.TareaHIstoriaUserIdOut(many=True))
+@verify.check_fields()
 @rol.require_role()
 def get_tarea_historia_usr(id_tarea:str):
     try:
@@ -417,6 +430,8 @@ def get_tarea_historia_usr(id_tarea:str):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de tarea por ID de grupo', summary='Tarea por Grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/tarea_grupo')
 @tarea_b.output(schema.TareaCountAllOut)
+@verify.check_fields()
+@verify.check_fields()
 @rol.require_role()
 def get_tareas_grupo():    
     try:
@@ -444,6 +459,7 @@ def get_tareas_grupo():
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Usuarios asignados', summary='Usuario asignado a una Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @tarea_b.get('/usuario_tarea/<string:tarea_id>')
 @tarea_b.output(schema.TareaUsuarioOut(many=True))
+@verify.check_fields()
 @rol.require_role()
 def get_usuarios_asignados(tarea_id:str):
     try:    
@@ -487,14 +503,15 @@ def post_usuario_tarea(json_data: dict):
         raise exceptions.ValidationError(err)    
 
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Tarea', summary='Update de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
-@tarea_b.patch('/tarea/<string:tarea_id>')
+@tarea_b.patch('/tarea/<string:id_tarea>')
 @tarea_b.input(schema.TareaPatchIn)
+@verify.check_fields()
 @rol.require_role()
-def patch_tarea(tarea_id: str, json_data: dict):
+def patch_tarea(id_tarea: str, json_data: dict):
     try:
         username = g.get('username')
 
-        res = tarea_model.update_tarea(tarea_id, username, **json_data)
+        res = tarea_model.update_tarea(id_tarea, username, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -513,6 +530,7 @@ def patch_tarea(tarea_id: str, json_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/lote_tareas')
 @tarea_b.input(schema.TareaPatchLoteIn)
+@verify.check_fields()
 @rol.require_role()
 def patch_lote_tareas(json_data: dict):
     try:
@@ -540,6 +558,7 @@ def patch_lote_tareas(json_data: dict):
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de Lote de Tareas', summary='Update de Lote de Tareas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.patch('/lote_tareas_v2')
 @tarea_b.input(schema.TareaPatchLoteV2In)
+@verify.check_fields()
 @rol.require_role()
 def patch_lote_tareasv2(json_data: dict):
     try:
@@ -569,6 +588,7 @@ def patch_lote_tareasv2(json_data: dict):
 @tarea_b.post('/tarea')
 @tarea_b.input(schema.TareaIn)
 @tarea_b.output(schema.TareaOut)
+@verify.check_fields()
 @rol.require_role()
 def post_tarea(json_data: dict):
     try:
@@ -611,6 +631,7 @@ def post_tarea(json_data: dict):
 #################DELETE########################
 @tarea_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Baja de Tarea', summary='Baja de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided', 800: '{"code": 800,"error": "DataNotFound", "error_description": "Datos no encontrados"}'})
 @tarea_b.delete('/tarea/<string:id>')
+@verify.check_fields()
 @rol.require_role()
 def del_tarea(id: str):
     try:

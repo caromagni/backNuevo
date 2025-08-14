@@ -529,6 +529,19 @@ def update_tarea(id_t='', username=None, **kwargs):
                 
     tarea.id_user_actualizacion = id_user_actualizacion  
     tarea.fecha_actualizacion = datetime.now()
+
+    
+    if 'url' in kwargs and kwargs['url'].strip() != "":
+        nuevo_url = URL(
+            id=uuid.uuid4(),
+            id_tarea=id_t,
+            url=kwargs['url'],
+            descripcion=kwargs['url_descripcion'] if 'url_descripcion' in kwargs else None,
+            fecha_actualizacion=datetime.now(),
+            id_user_actualizacion=id_user_actualizacion
+        )
+
+        db.session.add(nuevo_url)    
     
     usuarios=[]
     grupos=[]
@@ -1149,7 +1162,7 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     return nuevo_tipo_tarea
 
 
-def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
+def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
 
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -1160,7 +1173,7 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
         raise Exception("Usuario no ingresado")
 
     tipo_tarea = db.session.query(TipoTarea).filter(
-        TipoTarea.id == tipo_tarea_id,
+        TipoTarea.id == id_tipo_tarea,
         TipoTarea.eliminado == False
         ).first()
 

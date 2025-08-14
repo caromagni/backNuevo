@@ -34,6 +34,7 @@ def before_request():
 @nota_b.get('/tipo_nota')
 @nota_b.output(schema.TipoNotaCountOut)
 @nota_b.input(schema.PageIn, location='query')
+@verify.check_fields()
 @rol.require_role()
 def get_tipoNotas(query_data: dict):
     try:
