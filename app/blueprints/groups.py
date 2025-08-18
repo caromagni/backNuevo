@@ -21,6 +21,8 @@ def before_request():
     g.username = jsonHeader.get('user_name', '')
     g.type = jsonHeader.get('type', '')
     g.rol = jsonHeader.get('user_rol', '')
+    g.dominio = jsonHeader.get('dominio', None)
+    g.organismo = jsonHeader.get('organismo', None)
 
 
 @groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Update de un grupo', summary='Update de un grupo', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
@@ -180,7 +182,10 @@ def get_usrsbygrupo(query_data: dict):
 def post_grupo(json_data: dict):
     try:
         username=g.username
-        res = grupo_model.insert_grupo(username, **json_data)
+        dominio=g.dominio
+        organismo=g.organismo
+        
+        res = grupo_model.insert_grupo(username, dominio, organismo, **json_data)
         if res is None:
             result={
                     "valido":"fail",
@@ -246,7 +251,7 @@ def restaura_grupo(id: str):
 @groups_b.input(schema.GroupsBaseIn, location='query')
 @groups_b.output(schema.GroupsBaseOut)
 @groups_b.get('/grupo_base/<string:id>')
-@rol.require_role()
+#@rol.require_role()
 def getGrupoBase(id: str):
     try:
         usuarios =False
@@ -262,24 +267,5 @@ def getGrupoBase(id: str):
         raise exceptions.ValidationError(err)
     
 
-@groups_b.get('/organismo')
-@groups_b.output(schema.OrganismoOut(many=True))
-@groups_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Listado de Organismo', summary='Listado de organismos', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Server error'})
-def get_organismos():
-    try:
-        res = grupo_model.get_all_organismos()
-        if res is None:
-            result = {
-                "valido": "fail",
-                "ErrorCode": 800,
-                "ErrorDesc": "Organismos no encontrados",
-                "ErrorMsg": "No se encontraron datos de organismos"
-            }
-            return result
-            
-        return res
-
-    except Exception as err:
-        raise exceptions.ValidationError(err)    
     
 

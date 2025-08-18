@@ -88,12 +88,16 @@ class OrganismoOut(Schema):
     circunscripcion_judicial = String()
     id_fuero = String()
     descripcion = String()
-    habilitado= Boolean()
+    eliminado = Boolean()
     descripcion_corta = String()
     id_tarea_grupo_base = String()
     instancia = String()
     id_user_actualizacion = String()
     fecha_actualizacion = String()
+
+class OrganismoCountOut(Schema):
+    count = Integer()
+    data = Nested(OrganismoOut, many=True)    
 
 ################URL####################
 class URLOut(Schema):
@@ -108,8 +112,8 @@ class DominioOut(Schema):
     descripcion = String()
     descripcion_corta = String()
     prefijo = String()
+    eliminado = String()
     fecha_actualizacion = String()
-    habilitado = Boolean()
     id_user_actualizacion = String()
 
 class DominioCountOut(Schema):
@@ -196,9 +200,9 @@ class GroupIn(Schema):
     ])
     id_user_asignado_default= String()
     id_padre = String() 
-    base = Boolean(default=False)
-    id_organismo = String()
-    id_dominio = String()
+    #base = Boolean(default=False)
+    #id_organismo = String()
+    #id_dominio = String()
 
 class GroupPatchIn(Schema):
     base = Boolean(default=False)
@@ -213,6 +217,7 @@ class GroupPatchIn(Schema):
     id_user_asignado_default= String(allow_none=True)
     id_padre = String()  
     id_organismo = String()
+    id_dominio = String()
     suspendido = Boolean()
     usuario = List(Nested(ListUsuario))
 
@@ -396,7 +401,8 @@ class UsuarioOut(Schema):
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
-    
+
+
 class GroupsBaseUsrOut(Schema):
     #id_usuario = String()
     #nombre = String()
@@ -446,8 +452,10 @@ class TipoTareaIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     base = Boolean(default=False)
-    nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
-                   validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    id_organismo = String()
+    """ nivel = String(required=True, metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
+                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")],
+                    default ='int') """
     
 
 class TipoTareaPatchIn(Schema):
@@ -466,6 +474,8 @@ class TipoTareaPatchIn(Schema):
     id_ext = String()
     nivel = String(metadata={"description": "expte (expediente), act (actuacion), int (interna)"},
                    validate=[validate.OneOf(['expte', 'act', 'int'], error="El campo debe ser expte, act o int")])
+    id_dominio = String()
+    id_organismo = String()
 
 class TipoTareaOut(Schema):
     id = String()
@@ -480,6 +490,10 @@ class TipoTareaOut(Schema):
     suspendido = Boolean()
     base = Boolean()
     origen_externo = Boolean()
+    id_dominio = String()
+    id_organismo = String()
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
 
 class TipoTareaGetIn(Schema):
     page = Integer(default=1)
@@ -489,6 +503,8 @@ class TipoTareaGetIn(Schema):
     eliminado = Boolean(default=False)
     suspendido = Boolean(default=False)
     nombre = String(default="")
+    id_dominio = String()
+    id_organismo = String()
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
@@ -562,6 +578,10 @@ class TipoTareaSubtipoOut(Schema):
     origen_externo = Boolean()
     subtipo_tarea = List(Nested(SubtipoTareaShortOut))
     nivel = String()
+    id_dominio = String()
+    id_organismo = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
 
 class TareaxGroupOut(Schema):
     id = String()    
@@ -583,6 +603,10 @@ class GroupsBaseOut(Schema):
     id = String()
     id_padre = String()
     id_hijo = String()
+    id_organismo = String()
+    id_dominio = String()
+    organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     parent_name = String()
     child_name = String()
     path = String()
@@ -594,6 +618,7 @@ class GroupsBaseOut(Schema):
     usuarios = List(Nested(UsuariosGroupOut))
     id_organismo = String()
     id_dominio = String()
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
     
 class GroupIdOut(Schema):
@@ -615,24 +640,6 @@ class GroupIdOut(Schema):
     usuarios = List(Nested(UsuarioGOut, only=("id", "nombre", "apellido","activo")))
     tareas = List(Nested(TareaxGroupOut))     
 
-class UsuarioOut(Schema):
-    id = String()
-    fecha_actualizacion = String()
-    id_user_actualizacion = String()
-    nombre = String()
-    apellido = String()
-    id_ext = String()
-    nombre_completo = String(dump_only=True)  
-    username = String()
-    email = String()
-    dni = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
-
-    @post_dump
-    def add_nombre_completo(self, data, **kwargs):
-        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
-        return data
 
 class TareaIn(Schema):
     prioridad = Integer(required=True, metadata={"description": "1 (alta), 2 (media), 3 (baja)"}, validate=[
@@ -802,6 +809,8 @@ class TareaOut(Schema):
     reasignada_grupo = Boolean(default=False)
     notas = List(Nested(NotaTareaOut))
     tiene_notas = Boolean()
+    url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaxGrupoOut(Schema):
     id = String()
@@ -871,6 +880,7 @@ class GroupAllOut(Schema):
     id_dominio = String()
     id_organismo = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))
+    dominio = Nested(DominioOut, only=("id", "descripcion"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
@@ -926,7 +936,6 @@ class UsuarioInPatch(Schema):
     grupo = List(Nested(ListUsrGrupo))
     dni = String(validate=[validate.Length(min=6, max=8, error="El campo documento debe tener entre 6 y 8 números") ,validate_num])
     email = String(validate=[validate.Length(min=6, max=254, error="El campo debe ser mayor a 6 y menor a 254 caracteres"), validate_email])
-    #username = String(validate=[validate.Length(min=4, max=15, error="El campo debe ser mayor a 4 y menor a 15 caracteres")])
  
 
 class UsuarioGetIn(Schema):
@@ -934,7 +943,6 @@ class UsuarioGetIn(Schema):
     per_page = Integer(default=10)
     nombre = String(default="")
     apellido = String(default="")
-    #id_grupo = String()
     dni = String()  
     username = String()
     eliminado = Boolean()
@@ -1055,6 +1063,8 @@ class TareaPatchAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
+    url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaAllOut(Schema):
     id = String()
@@ -1097,6 +1107,7 @@ class TareaAllOut(Schema):
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
     url = List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 
 class TareaPatchLoteV2Out(Schema):
@@ -1219,6 +1230,8 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
+    url= List(Nested(URLOut, only=("url", "descripcion")))
+    editable_externo = Boolean()
 
 class TareaHIstoriaUserIdOut(Schema):
     id_task = String()
@@ -1330,7 +1343,6 @@ class TipoNotaIn(Schema):
         validate.Length(min=3, max=25, error="El campo debe ser mayor a 6 y menor a 25 caracteres"),
         validate_char
     ])
-    habilitado = Boolean()
     eliminado = Boolean()
 
 class TipoNotaOut(Schema):
@@ -1338,7 +1350,6 @@ class TipoNotaOut(Schema):
     nombre = String()
     id_user_actualizacion = String()
     eliminado = Boolean()
-    habilitado = Boolean()
 
 class TipoNotaCountOut(Schema):
     count = Integer()

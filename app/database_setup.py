@@ -18,7 +18,8 @@ class DatabaseSetup:
                 "apellido": "Diaz",
                 "username": "cristiandiaz@jus.mendoza.gov.ar",
                 "email": "cristiandiaz@jus.mendoza.gov.ar",
-                "habilitado": True
+                "eliminado": False,
+                "suspendido": False
             }
             # Add more users here as needed
             # {
@@ -45,7 +46,8 @@ class DatabaseSetup:
                 apellido=user_data["apellido"],
                 username=user_data["username"],
                 email=user_data["email"],
-                habilitado=user_data["habilitado"],
+                eliminado=user_data["eliminado"],
+                suspendido=user_data["suspendido"],
                 fecha_actualizacion=datetime.now()
             )
             session.add(user)
@@ -172,6 +174,14 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-tarea"}],
                 'metodo': 'GET'
             },
+            
+            {
+                'id': 'd1b1b706-506b-44c6-bc07-8c458accc6fc',
+                'url': '/tarea',
+                'descripcion': 'Get tarea',
+                'caso_uso': [{"codigo": "consultar-tarea"}],
+                'metodo': 'GET'
+            },
             {
                 'id': '34773fe7-063e-4edf-98ba-1c5168471277',
                 'url': '/groups_with_base',
@@ -269,11 +279,41 @@ class DatabaseSetup:
                 'descripcion': 'GET alertas',
                 'caso_uso': [{"codigo": "consultar-usuario"}],
                 'metodo': 'GET'
-            }
+            },
+            {
+                'id': '',
+                'url': '/endpoint',
+                'descripcion': 'POST ep',
+                'caso_uso': [{"codigo": "crear-tarea"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/dominio',
+                'descripcion': 'GET dominio',
+                'caso_uso': [{"codigo": "crear-tarea"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/ep',
+                'descripcion': 'GET ep',
+                'caso_uso': [{"codigo": "consultar-tarea"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/lote_tarea_v2',
+                'descripcion': 'PATCH lote_tareas_v2',
+                'caso_uso': [{"codigo": "modificar-tarea"}],
+                'metodo': 'PATCH'
+            },
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()
             if not exists:
+                if ep['id'] == '':
+                    ep['id'] = uuid.uuid4()
                 endpoint = EP(
                     id=ep['id'],
                     url=ep['url'],

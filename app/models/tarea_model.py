@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
-from models.alch_model import Auditoria_TareaAsignadaUsuario 
+from models.alch_model import Auditoria_TareaAsignadaUsuario, Organismo, Dominio 
 import common.functions as functions
 import common.utils as utils
 import common.logger_config as logger_config
@@ -251,17 +251,6 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         fecha_fin = calcular_fecha_vencimiento(fecha_inicio, plazo)
 
 
-   
-    """   tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == id_tipo_tarea).first()
-    if tipo_tarea is None:
-       #Busco por id_ext
-       tipo_tarea_ext = db.session.query(TipoTarea).filter(TipoTarea.id_ext == id_tipo_tarea).first()
-       if tipo_tarea_ext is None:
-           logger_config.logger.error("Tipo de tarea no encontrado")
-           msg = "Tipo de tarea no encontrado"
-           return None, msg """
-      
-    
     print("DATES FORMATS TO BE INSERTED")
     print("fecha_inicio:", fecha_inicio)
     print("fecha_fin:", fecha_fin)
@@ -631,7 +620,21 @@ def update_tarea(id_t='', username=None, **kwargs):
                 "fecha_asignacion": row.fecha_asignacion
             }
             usuarios.append(usuario)
+    url = []
+    res_url = db.session.query(URL).filter(URL.id_tarea == tarea.id).all()
+    if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
 
+    editable_externo = False
+    res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tarea.id_tipo_tarea).first()
+    if res_tipo_tarea is not None:
+        if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+            editable_externo = True
 
     ###################Formatear el resultado####################
     prioridad = {"id": tarea.prioridad, "descripcion": nombre_prioridad(tarea.prioridad)}
@@ -661,7 +664,9 @@ def update_tarea(id_t='', username=None, **kwargs):
         "fecha_creacion": tarea.fecha_creacion,
         "id_grupo": tarea.id_grupo,
         "grupo": grupos,
-        "usuario": usuarios
+        "usuario": usuarios,
+        "url": url,
+        "editable_externo": editable_externo
     }
 
     db.session.commit()
@@ -675,6 +680,8 @@ def update_lote_tareas_v2(username=None, **kwargs):
             utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
+                if not(functions.es_uuid(kwargs['id_user_actualizacion'])):
+                    raise Exception("El id_user_actualizacion debe ser un UUID: " + kwargs['id_user_actualizacion'])
                 utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
@@ -686,6 +693,8 @@ def update_lote_tareas_v2(username=None, **kwargs):
         datos = []
         datos_error = []
         for tareas_update in upd_tarea:
+           if not(functions.es_uuid(tareas_update['id_tarea'])):
+               raise Exception("El id de la tarea debe ser un UUID: " + tareas_update['id_tarea'])
            resp = update_tarea(tareas_update['id_tarea'], username, **tareas_update)
            if resp is None:
                 datos_error.append("Tarea no procesada:"+tareas_update['id_tarea'])
@@ -739,6 +748,8 @@ def update_lote_tareas(username=None, **kwargs):
             utils.verifica_usr_id(id_user_actualizacion)
         else:
             if 'id_user_actualizacion' in kwargs:
+                if not(functions.es_uuid(kwargs['id_user_actualizacion'])):
+                    raise Exception("El id_user_actualizacion debe ser un UUID")
                 utils.verifica_usr_id(kwargs['id_user_actualizacion'])
                 id_user_actualizacion = kwargs['id_user_actualizacion']
               
@@ -746,21 +757,29 @@ def update_lote_tareas(username=None, **kwargs):
                 raise Exception("Debe ingresar username o id_user_actualizacion")
             
     if 'id_actuacion' in kwargs:
+        if not(functions.es_uuid(kwargs['id_actuacion'])):
+            raise Exception("El id_actuacion debe ser un UUID")
         actuacion = db.session.query(ActuacionExt).filter(ActuacionExt.id == kwargs['id_actuacion']).first()
         if actuacion is None:
             raise Exception("Actuacion no encontrada")
         
     if 'id_expediente' in kwargs:
+        if not(functions.es_uuid(kwargs['id_expediente'])):
+            raise Exception("El id_expediente debe ser un UUID")
         expediente = db.session.query(ExpedienteExt).filter(ExpedienteExt.id == kwargs['id_expediente']).first()
         if expediente is None:
             raise Exception("Expediente no encontrado")
         
     if 'id_tipo_tarea' in kwargs:
+        if not(functions.es_uuid(kwargs['id_tipo_tarea'])):
+            raise Exception("El id_tipo_tarea debe ser un UUID")
         tipo = db.session.query(TipoTarea).filter(TipoTarea.id == kwargs['id_tipo_tarea'], TipoTarea.eliminado==False).first()
         if tipo is  None:
             raise Exception("Tipo de tarea no encontrado")
                      
         if 'id_subtipo_tarea' in kwargs:
+            if not(functions.es_uuid(kwargs['id_subtipo_tarea'])):
+                raise Exception("El id_subtipo_tarea debe ser un UUID")
             subtipo = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == kwargs['id_subtipo_tarea'], SubtipoTarea.eliminado==False).first()
             if subtipo is None:
                 raise Exception("Subtipo de tarea no encontrado")
@@ -770,6 +789,8 @@ def update_lote_tareas(username=None, **kwargs):
                     raise Exception("El tipo de tarea y el subtipo de tarea no se corresponden")
     if 'grupo' in kwargs:
         for group in kwargs['grupo']:
+            if not(functions.es_uuid(group['id_grupo'])):
+                raise Exception("El id_grupo debe ser un UUID:" + group['id_grupo'])
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == group['id_grupo']).first()
             if existe_grupo is None:
                 logger_config.logger.error("Grupo no encontrado")
@@ -784,6 +805,8 @@ def update_lote_tareas(username=None, **kwargs):
                 raise Exception("Error en el ingreso de grupos. Grupo suspendido: " + existe_grupo.nombre + '-id:' + str(existe_grupo.id))
     if 'usuario' in kwargs:
         for user in kwargs['usuario']:
+            if not(functions.es_uuid(user['id_usuario'])):
+                raise Exception("El id_usuario debe ser un UUID: " + user['id_usuario'])
             existe_usuario = db.session.query(Usuario).filter(Usuario.id == user['id_usuario']).first()
             if existe_usuario is None:
                 raise Exception("Error en el ingreso de usuarios. Usuario no existente: ") +  user['id_usuario']
@@ -797,6 +820,8 @@ def update_lote_tareas(username=None, **kwargs):
     if 'tareas' in kwargs:
         for tareas_update in kwargs['tareas']:
             if 'id' in tareas_update:
+                if not(functions.es_uuid(tareas_update['id'])):
+                    raise Exception("El id de la tarea debe ser un UUID: " + tareas_update['id'])
                 id_tarea=tareas_update['id']
                 tarea = db.session.query(Tarea).filter(Tarea.id == id_tarea).first()
                 if tarea is None:
@@ -935,15 +960,32 @@ def update_lote_tareas(username=None, **kwargs):
     return result
 
 #@cache.cached(CACHE_TIMEOUT_LONG)
-def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None):
+def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, suspendido=None, eliminado=None, nombre=None, id_dominio=None, id_organismo=None, dominio=None, organismo=None):
     #print("get_tipo_tareas - ", page, "-", per_page)
     # print("MOSTRANDO EL CACHE DEL TIPO DE TAREAS")
     # print(cache.cache._cache)
     print("eliminado:", eliminado)
     print("nivel:", nivel)
     print("nombre:", nombre)
-    query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
     
+    """  query = db.session.query(TipoTarea.base,
+                            TipoTarea.id,
+                            TipoTarea.codigo_humano,
+                            TipoTarea.nombre,
+                            TipoTarea.nivel,
+                            TipoTarea.origen_externo,
+                            TipoTarea.suspendido,
+                            TipoTarea.eliminado,
+                            TipoTarea.id_ext,
+                            TipoTarea.id_user_actualizacion,
+                            TipoTarea.fecha_actualizacion,
+                            TipoTareaDominio.id_dominio.label('id_dominio'),
+                            TipoTareaDominio.id_organismo.label('id_organismo')                           
+                            ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
+                            ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
+     """
+    query = db.session.query(TipoTarea).order_by(TipoTarea.nombre)
+                            
     if nivel is not None:
         query = query.filter(TipoTarea.nivel == nivel)
     if origen_externo is not None:
@@ -953,8 +995,19 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
     if eliminado is not None:
         query = query.filter(TipoTarea.eliminado == eliminado)
     if nombre:
-        print("Filtrando por nombre:", nombre)
-        query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))    
+        query = query.filter(TipoTarea.nombre.ilike(f"%{nombre}%"))
+    #if dominio is not None:
+    #    query = query.filter(TipoTarea.id_dominio == dominio)
+    #if organismo is not None:
+    #    query = query.filter(TipoTarea.id_organismo == organismo)
+    if id_dominio is not None:
+        if(not(functions.es_uuid(id_dominio))):
+            raise Exception("El id_dominio debe ser un UUID")
+        query = query.filter(TipoTarea.id_dominio == id_dominio)
+    if id_organismo is not None:
+        if(not(functions.es_uuid(id_organismo))):
+            raise Exception("El id_organismo debe ser un UUID")
+        query = query.filter(TipoTarea.id_organismo == id_organismo)     
 
     total= query.count()
     res = query.order_by(TipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
@@ -978,6 +1031,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                         "origen_externo": subtipo.origen_externo,
                         "suspendido": subtipo.suspendido,
                         "eliminado": subtipo.eliminado
+                      
                     }
                     subtipo_list.append(subtipo)
 
@@ -989,12 +1043,17 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                 "base": tipo.base,
                 "origen_externo": tipo.origen_externo,
                 "subtipo_tarea": subtipo_list,
-                "user_actualizacion": tipo.user_actualizacion,
+                "id_user_actualizacion": tipo.id_user_actualizacion,
+                #"user_actualizacion": tipo.user_actualizacion,
                 "fecha_actualizacion": tipo.fecha_actualizacion,
                 "suspendido": tipo.suspendido,
                 "eliminado": tipo.eliminado,
                 "nivel": tipo.nivel,
-                "id_ext": tipo.id_ext
+                "id_ext": tipo.id_ext,
+                "id_dominio": tipo.id_dominio,
+                "id_organismo": tipo.id_organismo,
+                "dominio": tipo.dominio,
+                "organismo": tipo.organismo
             }
             tipo_list.append(tipo_tarea)
 
@@ -1002,8 +1061,8 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', nivel=0, base=False, origen_externo=False, suspendido=False, eliminado=False):
-    
+def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None):
+
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
 
@@ -1012,22 +1071,56 @@ def insert_tipo_tarea(username=None, id='', codigo_humano='', nombre='', id_user
     else:
         raise Exception("Usuario no ingresado")
            
+    if id_organismo is None:
+       
+       id_organismo_tipo = organismo
+    else:
+        if not(functions.es_uuid(id_organismo)):
+            raise Exception("El id_organismo debe ser un UUID")
+        
+        query_organismo = db.session.query(Organismo).filter(Organismo.id == id_organismo, Organismo.eliminado==False).first()
+        if query_organismo is None:
+            raise Exception("Organismo no encontrado")
+        query_dominio = db.session.query(Dominio).filter(Dominio.id == dominio, Dominio.eliminado==False).first()
+        if query_dominio is None:
+            raise Exception("Dominio no encontrado")
+        if query_organismo.id_fuero != query_dominio.id_dominio_ext:
+            raise Exception("El organismo ingresado no corresponde al dominio actual")
+        
+        id_organismo_tipo = id_organismo    
+
+
     nuevoID=uuid.uuid4()
 
     nuevo_tipo_tarea = TipoTarea(
         id=nuevoID,
         codigo_humano=codigo_humano,
         nombre=nombre,
-        nivel=nivel,
-        base=False,
+        nivel='int',
+        base= base,
         origen_externo=False,
         suspendido=suspendido,
         eliminado=eliminado,
+        id_dominio=dominio,
+        id_organismo=id_organismo_tipo,
         id_user_actualizacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now()
     )
 
     db.session.add(nuevo_tipo_tarea)
+
+    """ nuevo_tipo_tareaxdominio = TipoTareaDominio(
+        id=uuid.uuid4(),
+        id_tipo_tarea=nuevoID,
+        id_dominio=dominio,
+        id_organismo=organismo,
+        eliminado=False,
+        id_user_actualizacion=id_user_actualizacion,
+        fecha_actualizacion=datetime.now()
+    )
+
+    db.session.add(nuevo_tipo_tareaxdominio) """
+
     db.session.commit()
     return nuevo_tipo_tarea
 
@@ -1042,29 +1135,90 @@ def update_tipo_tarea(username=None, tipo_tarea_id='', **kwargs):
     else:
         raise Exception("Usuario no ingresado")
 
-    tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tipo_tarea_id, TipoTarea.eliminado == False, TipoTarea.suspendido == False).first()
-    
-    if tipo_tarea is None:
+    tipo_tarea = db.session.query(TipoTarea).filter(
+        TipoTarea.id == tipo_tarea_id,
+        TipoTarea.eliminado == False
+        ).first()
+
+    if not tipo_tarea:
         raise Exception("Tipo de tarea no encontrado")
-    
+
+    # Validar que organismo y dominio se correspondan
+    # Determinar valores finales de dominio y organismo (ingresados o actuales)
+    if 'id_dominio' in kwargs:
+        if not(functions.es_uuid(kwargs['id_dominio'])):
+            raise Exception("El id_dominio debe ser un UUID")
+    if 'id_organismo' in kwargs:
+        if not(functions.es_uuid(kwargs['id_organismo'])):
+            raise Exception("El id_organismo debe ser un UUID")
+
+    id_dominio_final = kwargs.get('id_dominio', tipo_tarea.id_dominio)
+    id_organismo_final = kwargs.get('id_organismo', tipo_tarea.id_organismo)
+
+    # Validar dominio si existe
+    dominio = None
+    if id_dominio_final is not None:
+        dominio = db.session.query(Dominio).filter(
+            Dominio.id == id_dominio_final,
+            Dominio.eliminado == False
+        ).first()
+        if dominio is None:
+            raise Exception("Dominio no encontrado")
+
+    # Validar organismo si existe
+    organismo = None
+    if id_organismo_final is not None:
+        organismo = db.session.query(Organismo).filter(
+            Organismo.id == id_organismo_final,
+            Organismo.eliminado == False
+        ).first()
+        if organismo is None:
+            raise Exception("Organismo no encontrado")
+
+    # Validar relación solo si tenemos ambos
+    if dominio and organismo:
+        if organismo.id_fuero != dominio.id_dominio_ext:
+            raise Exception("Dominio y Organismo no corresponden")
+
+    # Asignar cambios
+    if 'id_dominio' in kwargs:
+        tipo_tarea.id_dominio = kwargs['id_dominio']
+
+    if 'id_organismo' in kwargs:
+        tipo_tarea.id_organismo = kwargs['id_organismo']
+        if id_dominio_final is None:
+            query_organismo = db.session.query(Organismo).filter(
+                Organismo.id == kwargs['id_organismo'],
+                Organismo.eliminado == False
+            ).first()
+            if query_organismo:
+                query_dominio = db.session.query(Dominio).filter(
+                    Dominio.id_dominio_ext == query_organismo.id_fuero,
+                    Dominio.eliminado == False
+                ).first()
+                if query_dominio is not None:
+                    tipo_tarea.id_dominio = query_dominio.id
+
+    if tipo_tarea.suspendido == True:
+        if 'suspendido' in kwargs:
+            tipo_tarea.suspendido = kwargs['suspendido']
+        else:
+            raise Exception("Tipo de tarea suspendido, no se puede modificar")    
+
     if 'codigo_humano' in kwargs:
         tipo_tarea.codigo_humano = kwargs['codigo_humano']
     if 'nombre' in kwargs:
         tipo_tarea.nombre = kwargs['nombre']
-    if 'eliminado' in kwargs:
-        tipo_tarea.eliminado = kwargs['eliminado']
-    else:
-        tipo_tarea.eliminado = False
-    if 'suspendido' in kwargs:
-        tipo_tarea.suspendido = kwargs['suspendido']
-    else:
-        tipo_tarea.suspendido = False
     if 'nivel' in kwargs:
         tipo_tarea.nivel = kwargs['nivel']
     if 'id_ext' in kwargs:
-        tipo_tarea.id_ext = kwargs['id_ext']          
-    #if 'base' in kwargs:
-    tipo_tarea.base =False
+        tipo_tarea.id_ext = kwargs['id_ext'] 
+    if 'suspendido' in kwargs:
+        tipo_tarea.suspendido = kwargs['suspendido'] 
+    if 'eliminado' in kwargs:
+        tipo_tarea.eliminado = kwargs['eliminado']            
+    if 'base' in kwargs:
+        tipo_tarea.base =kwargs['base']
     tipo_tarea.origen_externo = False
     tipo_tarea.id_user_actualizacion = id_user_actualizacion
     tipo_tarea.fecha_actualizacion = datetime.now()
@@ -1098,6 +1252,8 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
 
     query = db.session.query(SubtipoTarea)
     if id_tipo_tarea is not None:
+        if not(functions.es_uuid(id_tipo_tarea)):
+            raise Exception("El id_tipo_tarea debe ser un UUID: " + id_tipo_tarea)
         query = query.filter(SubtipoTarea.id_tipo==id_tipo_tarea)
     if eliminado is not None:
         query = query.filter(SubtipoTarea.eliminado==eliminado)
@@ -1311,6 +1467,22 @@ def get_tarea_by_id(id):
         if res_actuacion is not None:
             id_actuacion_ext = res_actuacion.id_ext
 
+        url = []
+        res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
+        if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
+
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == res.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+
         usuarios=[]
         grupos=[]
         notas=[]    
@@ -1403,7 +1575,9 @@ def get_tarea_by_id(id):
             "id_user_actualizacion": res.id_user_actualizacion,
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
-            "reasignada_grupo": reasignada_grupo
+            "reasignada_grupo": reasignada_grupo,
+            "editable_externo": editable_externo,
+            "url": url 
         }
 
         results.append(result)
@@ -1517,6 +1691,22 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
         nota_id, nota, nota_tipo_id, nota_tipo, nota_titulo, nota_fecha_creacion, nota_user_creacion, nota_user_actualizacion,
         asignada_usuario, asignada_grupo
     ) in res_tareas:
+        url = []
+        res_url = db.session.query(URL).filter(URL.id_tarea == tarea.id).all()
+        if res_url is not None:
+            for row in res_url:
+                url.append({
+                    "id": row.id,
+                    "url": row.url,
+                    "descripcion": row.descripcion
+                })
+
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == tarea.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+
         # Agrupar información de la tarea
         if tarea.id not in tareas_agrupadas:
             tareas_agrupadas[tarea.id] = {
@@ -1548,7 +1738,9 @@ def get_tarea_grupo(username=None, page=1, per_page=10):
                 "usuarios": [],
                 "notas": [],
                 "reasignada_usuario": False,
-                "reasignada_grupo": False
+                "reasignada_grupo": False,
+                "editable_externo": editable_externo,
+                "url": url
             }
         
         # Añadir información de grupos
@@ -1840,9 +2032,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     grupo_alias = aliased(Grupo)
     if res_tareas is None:
         return results, total
-    for res in res_tareas:
-        print("Tarea:", res.id, res.titulo, res.fecha_creacion, res.fecha_fin, res.plazo, res.prioridad, res.estado)
-
+    
     for res in res_tareas:
         usuarios = []
         grupos = []
@@ -1889,16 +2079,21 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 reasignada_grupo = True
             grupos.append(grupo)            
         
+        url = []
         res_url = db.session.query(URL).filter(URL.id_tarea == res.id).all()
         if res_url is not None:
-            url = []
             for row in res_url:
                 url.append({
                     "id": row.id,
                     "url": row.url,
                     "descripcion": row.descripcion
                 })
-
+        editable_externo = False
+        res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == res.id_tipo_tarea).first()
+        if res_tipo_tarea is not None:
+            if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                editable_externo = True
+         
         # Prepare result dictionary
         result = {
             "id": res.id,
@@ -1935,11 +2130,10 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             "user_actualizacion": res.user_actualizacion,
             "reasignada_usuario": reasignada_usuario,
             "reasignada_grupo": reasignada_grupo,
-            "url": url  # Assuming URL is a field in Tarea
+            "url": url,  # Assuming URL is a field in Tarea
+            "editable_externo": editable_externo
         }
         results.append(result)
-    # print("time taken for this task:", datetime.now() - exec_time)
-    #print("Resultado:", result)
 
     result = (results, total)
     #cache.set(cache_key, result, CACHE_TIMEOUT_LONG)
@@ -2041,6 +2235,21 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                         "eliminado": row.eliminado
                     }
                     notas.append(nota)  
+            url = []
+            res_url = db.session.query(URL).filter(URL.id_tarea == reg.id).all()
+            if res_url is not None:
+                    for row in res_url:
+                        url.append({
+                            "id": row.id,
+                            "url": row.url,
+                            "descripcion": row.descripcion
+                        })
+
+            editable_externo = False
+            res_tipo_tarea = db.session.query(TipoTarea).filter(TipoTarea.id == reg.id_tipo_tarea).first()
+            if res_tipo_tarea is not None:
+                if res_tipo_tarea.origen_externo==True and res_tipo_tarea.nivel != 'int':
+                    editable_externo = True
 
             result = {
                 "caratula_expediente": reg.caratula_expediente,
@@ -2070,7 +2279,9 @@ def get_all_tarea(page=1, per_page=10, titulo='', id_expediente=None, id_actuaci
                 "reasignada_usr": reasignada_usr,
                 "reasignada_grupo": reasignada_grupo,
                 "notas": notas,
-                "tiene_notas": reg.tiene_notas_desnz
+                "tiene_notas": reg.tiene_notas_desnz,
+                "url": url,
+                "editable_externo": editable_externo
             }
             results.append(result)
 
