@@ -20,15 +20,31 @@ class DatabaseSetup:
                 "email": "cristiandiaz@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "Silvia",
+                "apellido": "Imperiale",
+                "username": "simperiale@jus.mendoza.gov.ar",
+                "email": "simperiale@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Mauro",
+                "apellido": "Bonadeo",
+                "username": "mbonadeo@jus.mendoza.gov.ar",
+                "email": "mbonadeo@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Carolina",
+                "apellido": "Magni",
+                "username": "cmagni@jus.mendoza.gov.ar",
+                "email": "cmagni@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
-            # Add more users here as needed
-            # {
-            #     "nombre": "Another",
-            #     "apellido": "User",
-            #     "username": "anotheruser",
-            #     "email": "anotheruser@jus.mendoza.gov.ar",
-            #     "habilitado": True
-            # }
         ]
         
         created_users = []
