@@ -239,9 +239,11 @@ if __name__ == "__main__":
    
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        print("HARDCODING RUN_DB_SETUP to true")
+        Config.RUN_DB_SETUP = True
         if Config.RUN_DB_SETUP:
             print("******************************************")
-            print("Running DatabaseSetup before app starts...")
+            print("Running DatabaseSetup before app starts... __name__ == __main__")
             print("******************************************")
             setup = DatabaseSetup()
             setup.run()
@@ -251,9 +253,11 @@ else:
     
     with app.app_context():
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
+        print("HARDCODING RUN_DB_SETUP to true")
+        Config.RUN_DB_SETUP = True
         if Config.RUN_DB_SETUP:
             print("******************************************")
-            print("Running DatabaseSetup before app starts...")
+            print("Running DatabaseSetup before app starts... Else block")
             print("******************************************")
             setup = DatabaseSetup()
             setup.run()
