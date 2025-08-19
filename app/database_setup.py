@@ -254,12 +254,19 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-usuario"}],
                 'metodo': 'GET'
             },
+            
             {
                 'id': '5c984baf-75b8-425c-8271-c9de803582f8',
                 'url': '/usuario',
                 'descripcion': 'DELETE usuario',
                 'caso_uso': [{"codigo": "eliminar-usuario"}],
                 'metodo': 'DELETE'
+            }, {
+                'id': '5c984baf-75b8-425c-8271-c9de803582f8',
+                'url': '/usuario',
+                'descripcion': 'GET usuario',
+                'caso_uso': [{"codigo": "consultar-usuario"}],
+                'metodo': 'GET'
             },
             {
                 'id': '5cb16bd7-c475-4897-8161-c5d9c4c931b0',
