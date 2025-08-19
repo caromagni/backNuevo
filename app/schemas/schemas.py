@@ -699,6 +699,7 @@ class TareaPatchIn(Schema):
         error="El campo debe ser 1 (pendiente), 2 (en proceso), 3 (realizada) o 4 (cancelada)"
     ))
     url = String()
+    url_descripcion = String()
 
 class TareaPatchV2In(Schema):
     id_tarea = String(required=True)
