@@ -1543,8 +1543,9 @@ class LabelCountOut(Schema):
 class LabelXTareaIn(Schema):  
     ids_labels = List(String(),required=True, many=True)
     id_tarea = String(required=True)
-    # id_user_actualizacion = String(required=True)
-    # fecha_actualizacion = String(validate=validate_fecha)
+
+class LabelxGroupsIn(Schema):
+    ids_grupos_base = String(metadata={"description": "ids separados por comas. Ej: id1, id2, id3"})
 
 class LabelXTareaPatchIn(Schema):
     id_tarea = String(required=True)

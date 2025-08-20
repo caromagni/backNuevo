@@ -233,9 +233,10 @@ def get_active_labels(ids_grupos_base):
     if ids_grupos_base is None:
         raise Exception("Debe ingresar por lo menos un id de grupo base")
     ids_list = ids_grupos_base.split(',')
-
-    # ids_list = [ids_grupos_base]
+    #quitar espacios
+    ids_list = [v.strip() for v in ids_list if v.strip()]
     print('ids_list:', ids_list)
+   
     labels_group_array = []
     total = 0
     for id in ids_list:
@@ -259,7 +260,8 @@ def get_active_labels(ids_grupos_base):
     
 
 ############################## LABELS x TAREA ########################################
-def insert_label_tarea(username=None, **kwargs):
+#def insert_label_tarea(username=None, **kwargs):
+def insert_label_tarea(ids_labels=[], id_tarea=None, username=None):    
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
     elif id_user_actualizacion is not None:
@@ -267,14 +269,12 @@ def insert_label_tarea(username=None, **kwargs):
             raise Exception("El id del usuario de actualización debe ser un UUID: " + id_user_actualizacion)
         utils.verifica_usr_id(id_user_actualizacion)
     else:
-        raise Exception("Usuario no ingresado") 
-    
-    if 'id_tarea' in kwargs:
-        id_tarea = kwargs['id_tarea']
+        raise Exception("Usuario no ingresado")
+
+    if id_tarea is not None:
         if not(functions.es_uuid(id_tarea)):
             raise Exception("El id de la tarea debe ser un UUID: " + id_tarea)
-    if 'id_labels' in kwargs:
-        ids_labels = kwargs['ids_labels']
+    if ids_labels is not  None:
         for id_label in ids_labels:
             if not(functions.es_uuid(id_label)):
                 raise Exception("El id de la etiqueta debe ser un UUID: " + id_label)

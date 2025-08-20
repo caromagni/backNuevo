@@ -262,15 +262,15 @@ def delete_label_tarea(id: str):
 
 
 @label_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Busca todas las etiquetas que existen activas para un grupo base', summary='Búsqueda de labels activas', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
-@label_b.get('/label_grupo/<string:ids_grupos_base>')
+@label_b.get('/label_grupo/<string:id_grupos_base>')
 @verify.check_fields()
 @rol.require_role()
 @cache.cached(CACHE_TIMEOUT_LONG)
-def get_active_labels_grupo(ids_grupos_base: str):
+def get_active_labels_grupo(id_grupos_base: str):
     try:
         # Fetch active labels
-        print('ids_grupos_base:', ids_grupos_base)
-        res, cant = label_model.get_active_labels(ids_grupos_base)
+        print('ids_grupos_base:', id_grupos_base)
+        res, cant = label_model.get_active_labels(id_grupos_base)
 
         if res is None:
             result = {
