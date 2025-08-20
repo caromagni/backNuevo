@@ -6,7 +6,6 @@ from sqlalchemy import desc
 from sqlalchemy import func, cast
 from sqlalchemy.types import Boolean, TIMESTAMP
 import uuid
-from datetime import datetime, timedelta
 from db.alchemy_db import db
 from common.cache import *
 from models.alch_model import Tarea, TipoTarea, LabelXTarea, Usuario, Nota, TareaAsignadaUsuario, Grupo, TareaXGrupo, UsuarioGrupo, Inhabilidad, SubtipoTarea, ExpedienteExt, ActuacionExt, URL
@@ -17,6 +16,7 @@ import common.logger_config as logger_config
 import decorators.cache_error_wrapper as cache_error_wrapper
 import common.cache as cache_common
 import json
+from datetime import date, time, datetime, timedelta
 
 
 def nombre_estado(estado):
@@ -84,10 +84,13 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
         dias_aviso = 365  # Por defecto, 365 días de aviso
 
     # Consulta base con filtros comunes
+    fecha_actual =datetime.combine(date.today(), time.min)  
     query = (db.session.query(Tarea)
-            .filter(Tarea.fecha_fin >= datetime.now(),  # Solo tareas activas
+            .filter(Tarea.fecha_fin >= fecha_actual,  # Solo tareas activas
                     Tarea.eliminado == False,
-                    Tarea.estado != 3))
+                    Tarea.estado != 3)).order_by(Tarea.fecha_fin)
+    for tarea in query.all():
+        print("Tarea:", tarea.id, "Fecha de inicio:", tarea.fecha_inicio, "Fecha fin:", tarea.fecha_fin)
 
     if grupos_usr is not None and grupos_usr=='true' or grupos_usr==True:
         logger_config.logger.info("tareas_a_vencer asignadas a los grupos del usuario")
@@ -97,22 +100,37 @@ def tareas_a_vencer(username=None, dias_aviso=None, grupos_usr=None):
                 .join(Grupo, TareaXGrupo.id_grupo == Grupo.id)
                 .join(UsuarioGrupo, Grupo.id == UsuarioGrupo.id_grupo)
                 .filter(UsuarioGrupo.id_usuario == id_user,
-                        UsuarioGrupo.eliminado == False)
+                        UsuarioGrupo.eliminado == False).order_by(Tarea.fecha_fin).order_by(Tarea.fecha_fin)
                 .all())
     else:
         # Tareas asignadas directamente al usuario
         logger_config.logger.info("tareas_a_vencer asignadas al usuario")
+        logger_config.logger.info("id_user:" + str(id_user))
         tareas = (query
                 .join(TareaAsignadaUsuario, Tarea.id == TareaAsignadaUsuario.id_tarea)
                 .filter(TareaAsignadaUsuario.id_usuario == id_user,
-                        TareaAsignadaUsuario.eliminado == False)
+                        TareaAsignadaUsuario.eliminado == False).order_by(Tarea.fecha_fin)
                 .all())    
 
     if tareas is not None:
+        for tarea in tareas:
+            print("Tarea:", tarea.id, "Fecha de inicio:", tarea.fecha_inicio, "Fecha fin:", tarea.fecha_fin)
         total = len(tareas)
         logger_config.logger.info("Cantidad de tareas_a_vencer:" + str(total))    
 
-    tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    #tareas_vencer = [tarea for tarea in tareas if calcular_dias_vencimiento(tarea.fecha_fin) <= dias_aviso]
+    #calculo tareas por vencer
+    tareas_vencer = []
+    for tarea in tareas:
+        dias_vencimiento = calcular_dias_vencimiento(tarea.fecha_fin)
+        print("Fecha fin:", tarea.fecha_fin , "Dias vencimiento:", dias_vencimiento, "Dias aviso:", dias_aviso)
+        if dias_vencimiento <= dias_aviso:
+            """ tarea.dias_vencimiento = dias_vencimiento
+            tarea.nombre_estado = nombre_estado(tarea.estado)
+            tarea.nombre_prioridad = nombre_prioridad(tarea.prioridad) """
+            tareas_vencer.append(tarea)
+    
+    
     total = len(tareas_vencer)
     return tareas_vencer, total
 

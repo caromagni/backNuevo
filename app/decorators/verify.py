@@ -57,13 +57,6 @@ def validar_ids_str(key, value):
         
     return True, ids    
 
-    """  result = []
-    for idx, v in enumerate(ids):
-        uuid_obj = to_uuid(v)
-        if uuid_obj is None:
-            return False, f"{key}: {v}"
-        result.append(uuid_obj)
-    return True, result """
 
 def check_fields():
     def decorator(f):
@@ -84,7 +77,9 @@ def check_fields():
                             raise exceptions.ValidationError(
                                 f"El campo '{result}' no contiene un UUID válido."
                             )
-
+                    #if key.startswith('fecha') ..... validar fecha
+                       
+                #controla si un campo (key) es un json con id o id_XXX
                 """ elif isinstance(value, (dict, list)):
                     print("es un diccionario o lista:", value)
                     ok, campo_error = process_dict(value, key)
