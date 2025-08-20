@@ -63,7 +63,7 @@ def validar_ids_str(key, value):
     for idx, v in enumerate(ids):
         uuid_obj = to_uuid(v)
         if uuid_obj is None:
-            return False, f"{key}[{idx}]"
+            return False, f"{key}: {v}"
         result.append(uuid_obj)
     return True, result
 
@@ -101,7 +101,7 @@ def check_fields():
                     ok, result = validar_ids_str(key, value)
                     if not ok:
                         raise exceptions.ValidationError(
-                            f"El campo '{result}' no contiene un UUID válido. (kwargs)"
+                            f"El campo '{result}' no contiene un UUID válido."
                         )
 
                 elif isinstance(value, (dict, list)):
