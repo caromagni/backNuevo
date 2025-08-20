@@ -233,8 +233,11 @@ def get_active_labels(ids_grupos_base):
     if ids_grupos_base is None:
         raise Exception("Debe ingresar por lo menos un id de grupo base")
     ids_list = ids_grupos_base.split(',')
+    for i in range(len(ids_list)):
+        ids_list[i] = ids_list[i].strip()
+        if not(functions.es_uuid(ids_list[i])):
+            raise Exception("El id del grupo base debe ser un UUID: " + ids_list[i])
     #quitar espacios
-    ids_list = [v.strip() for v in ids_list if v.strip()]
     print('ids_list:', ids_list)
    
     labels_group_array = []

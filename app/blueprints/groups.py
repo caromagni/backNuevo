@@ -171,11 +171,7 @@ def get_all_grupobase(query_data: dict):
 @rol.require_role()
 def get_usrsbygrupo(query_data: dict):
     try:
-        grupos=None
-        if(request.args.get('grupos') is not None):
-            grupos = request.args.get('grupos')
-            grupos = [grupo.strip() for grupo in grupos.split(",")]
-        #res = get_usuarios_by_grupo(id_grupo)
+        grupos = request.args.get('grupos')
         res = grupo_model.get_usuarios_by_grupo(grupos)
        
         return res

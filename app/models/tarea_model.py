@@ -2089,27 +2089,23 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
    
     if labels:
         # Primero eliminás comillas dobles, simples y luego dividís por coma
-        labels = [
-            l.strip().replace('"', '').replace("'", '') 
-            for l in labels.split(',') if l.strip()
-        ]
-        for label in labels:
-            if not(functions.es_uuid(label)):
-                raise Exception("El id de la etiqueta debe ser un UUID: " + label)
-        #labels = labels.split(",")
+        labels = labels.split(",")
+        for i in range(len(labels)):
+            labels[i] = labels[i].strip()
+            if not(functions.es_uuid(labels[i])):
+                raise Exception("El id de la etiqueta debe ser un UUID: " + labels[i])
+            
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
     if grupos:
-        # Elimina comillas simples, dobles y espacios, luego separa por coma y limpia cada elemento
-        # Primero eliminás comillas dobles, simples y luego dividís por coma
-        grupos = [
-            g.strip().replace('"', '').replace("'", '') 
-            for g in grupos.split(',') if g.strip()
-        ]
-        for grupo in grupos:
-            if not(functions.es_uuid(grupo)):
-                raise Exception("El id del grupo debe ser un UUID: " + grupo)
+        grupos = grupos.split(",")
+        for i in range(len(grupos)):
+            grupos[i] = grupos[i].strip()
+            if not(functions.es_uuid(grupos[i])):
+                raise Exception("El id del grupo debe ser un UUID: " + grupos[i])
+        
+            
         query = query.join(TareaXGrupo, Tarea.id == TareaXGrupo.id_tarea
                 ).filter(TareaXGrupo.id_grupo.in_(grupos), TareaXGrupo.eliminado == False
                 ).distinct()         

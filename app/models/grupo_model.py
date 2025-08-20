@@ -160,6 +160,10 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
     fecha_hasta = datetime.strptime(fecha_hasta, '%d/%m/%Y') if fecha_hasta else datetime.now()
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
 
+    #valido que fecha_dsde no sea mayor a fecha_hasta
+    if fecha_desde > fecha_hasta:
+        raise ValueError("La fecha desde no puede ser mayor a la fecha hasta.")
+    
     print("TIMETRACK_INITIAL:", datetime.now())
     print("Fecha desde:", fecha_desde)
     print("Fecha hasta:", fecha_hasta)
@@ -756,6 +760,10 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
         fecha_hasta=datetime.now()
         #.date()
     fecha_hasta = datetime.combine(fecha_hasta, datetime.max.time())
+    #valido que fecha_dsde no sea mayor a fecha_hasta
+    if fecha_desde > fecha_hasta:
+        raise ValueError("La fecha desde no puede ser mayor a la fecha hasta.")
+    
     query= db.session.query(Grupo).filter(Grupo.fecha_creacion.between(fecha_desde, fecha_hasta))
 
     filters = []
@@ -1255,6 +1263,13 @@ def get_usuarios_by_grupo(grupos):
         logger_config.logger.error("No se han proporcionado grupos para conultar usuarios")
         raise Exception("No se han proporcionado grupos para conultar usuarios") 
 
+    grupos = grupos.split(",")
+    for i in range(len(grupos)):
+        grupos[i] = grupos[i].strip()
+        if not(functions.es_uuid(grupos[i])):
+            logger_config.logger.error("El id del grupo debe ser un UUID: " + grupos[i])
+            raise Exception("El id del grupo debe ser un UUID: " + grupos[i])
+        
     usrs = db.session.query(Grupo.id.label("id_grupo"),
             Grupo.nombre.label("nombre_grupo"),
             Usuario.nombre.label("nombre"),
