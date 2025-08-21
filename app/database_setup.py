@@ -331,6 +331,20 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "modificar-tarea"}],
                 'metodo': 'PATCH'
             },
+            {
+                'id': '',
+                'url': '/tipo_tarea',
+                'descripcion': 'POST tipo_tarea',
+                'caso_uso': [{"codigo": "crear-tipo-tarea"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/subtipo_tarea',
+                'descripcion': 'POST subtipo_tarea',
+                'caso_uso': [{"codigo": "crear-tipo-tarea"}],
+                'metodo': 'POST'
+            },
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()
