@@ -20,15 +20,31 @@ class DatabaseSetup:
                 "email": "cristiandiaz@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "Silvia",
+                "apellido": "Imperiale",
+                "username": "simperiale@jus.mendoza.gov.ar",
+                "email": "simperiale@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Mauro",
+                "apellido": "Bonadeo",
+                "username": "mbonadeo@jus.mendoza.gov.ar",
+                "email": "mbonadeo@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Carolina",
+                "apellido": "Magni",
+                "username": "cmagni@jus.mendoza.gov.ar",
+                "email": "cmagni@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
-            # Add more users here as needed
-            # {
-            #     "nombre": "Another",
-            #     "apellido": "User",
-            #     "username": "anotheruser",
-            #     "email": "anotheruser@jus.mendoza.gov.ar",
-            #     "habilitado": True
-            # }
         ]
         
         created_users = []
@@ -238,12 +254,19 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-usuario"}],
                 'metodo': 'GET'
             },
+            
             {
-                'id': '5c984baf-75b8-425c-8271-c9de803582f8',
+                'id': 'c60fd41c-3962-418d-b898-ef8595bd44f5',
                 'url': '/usuario',
                 'descripcion': 'DELETE usuario',
                 'caso_uso': [{"codigo": "eliminar-usuario"}],
                 'metodo': 'DELETE'
+            }, {
+                'id': '5c984baf-75b8-425c-8271-c9de803582f8',
+                'url': '/usuario',
+                'descripcion': 'GET usuario',
+                'caso_uso': [{"codigo": "consultar-usuario"}],
+                'metodo': 'GET'
             },
             {
                 'id': '5cb16bd7-c475-4897-8161-c5d9c4c931b0',
