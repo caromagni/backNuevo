@@ -33,41 +33,29 @@ def full_sync_tipos_tareas(id_user=None):
     tipos_data = response.json()
     print("tipos_data:",tipos_data)
     print("******************************")
- 
+   
+    success_count = 0
+    error_count = 0
+    
     
     if not tipos_data or 'data' not in tipos_data:
         logger_config.logger.error("No data received from Pusher for tipos de tareas")
         return 0, 1
 
     for tipo_data in tipos_data['data']:
-        print("tipo_data:",tipo_data)
-        print("******************************")
-        sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
-        time.sleep(0.5)
-
-
-    
-    
-    success_count = 0
-    error_count = 0
-    
-    for tipo_data in tipos_data['data']:
         try:
-            # Use existing sync function for each entity
-            # We need to construct the URL for individual sync
-
-            #https://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/?habilitado=H&rows=10&sortfield=descripcion&sortorder=ASC
-        
-            
-            sync.sync_tipo_tarea(tipo_data['id'], id_user)
+            print("tipo_data:",tipo_data)
+            print("******************************")
+            print('sending URL MOFO',sync_url_post)
+            sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
             success_count += 1
-            logger_config.logger.info(f"Successfully synced tipo tarea: {tipo_data.get('id', 'unknown')}")
         except Exception as e:
             logger_config.logger.error(f"Error syncing tipo tarea {tipo_data.get('id', 'unknown')}: {e}")
             error_count += 1
-    
+       
+        time.sleep(0.2)
     logger_config.logger.info(f"Full sync completed: {success_count} successful, {error_count} errors")
-    return success_count, error_count
+    
 
 def full_sync_usuarios(id_user=None):
     """Sync all usuarios from Pusher"""

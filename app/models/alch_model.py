@@ -283,7 +283,7 @@ class TipoTarea(Base):
     nombre = Column(String, nullable=False)
     eliminado = Column(Boolean, nullable=False, default=False)
     suspendido = Column(Boolean, default=False)
-    id_user_actualizacion  = Column(ForeignKey('tareas.usuario.id'))
+    id_user_actualizacion  = Column(ForeignKey('tareas.usuario.id'), nullable=True) #nullable=True because the first sync will not have a user
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
@@ -306,7 +306,7 @@ class SubtipoTarea(Base):
     nombre_corto = Column(String)
     eliminado = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
-    id_user_actualizacion = Column(UUID, nullable=False)
+    id_user_actualizacion = Column(UUID, nullable=True)
     fecha_actualizacion = Column(DateTime, nullable=False)
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)

@@ -17,8 +17,8 @@ class Config:
 
     PROPAGATE_EXCEPTIONS = True
 
-    # Run database setup before app starts (set to True to enable)
-    RUN_DB_SETUP = os.getenv('RUN_DB_SETUP', 'False').lower() == 'true'
+    # Run database setup before app starts (set to 1 to enable)
+    RUN_DB_SETUP = os.getenv('RUN_DB_SETUP', '0')
     SQLALCHEMY_POOL_SIZE = os.getenv('SQLALCHEMY_POOL_SIZE')
     #SQLALCHEMY_DATABASE_URI = os.getenv("SETTINGS_CONECTION")
     SQLALCHEMY_TRACK_MODIFICATIONS = True

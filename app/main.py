@@ -243,7 +243,7 @@ if __name__ == "__main__":
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
        
-        if Config.RUN_DB_SETUP==1:
+        if Config.RUN_DB_SETUP=='1':
             print("******************************************")
             print("Running DatabaseSetup before app starts... __name__ == __main__")
             print("******************************************")
@@ -257,7 +257,7 @@ else:
         print("RUN_DB_SETUP: ", Config.RUN_DB_SETUP)
         print("HARDCODING RUN_DB_SETUP to true")
      
-        if Config.RUN_DB_SETUP==1:
+        if Config.RUN_DB_SETUP=='1':
             print("******************************************")
             print("Running DatabaseSetup before app starts... Else block")
             print("******************************************")

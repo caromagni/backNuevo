@@ -46,15 +46,12 @@ def sync_all_tipos_tareas():
         # Perform full sync
         print("calling full_sync_tipos_tareas")
         print("******************************")
-        success_count, error_count = full_sync.full_sync_tipos_tareas(id_user)
+        full_sync.full_sync_tipos_tareas(id_user)
         
         return {
             "success": True,
-            "message": f"Full sync completed: {success_count} successful, {error_count} errors",
-            "data": {
-                "success_count": success_count,
-                "error_count": error_count
-            }
+            "message": f"Batch job finished, see logs for more detail",
+           
         }
     
     except Exception as err:
