@@ -273,7 +273,7 @@ def insert_tarea(usr_header=None, id_grupo=None, prioridad=0, estado=1, id_actua
         fecha_fin = functions.controla_fecha(fecha_fin)
         if fecha_fin < fecha_inicio:
             raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin")
-        if fecha_fin < datetime.now():
+        if fecha_fin < datetime.now().date():
             raise Exception("La fecha de fin no puede ser menor la fecha actual")
 
 
@@ -1072,7 +1072,7 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                             TipoTarea.id_user_actualizacion,
                             TipoTarea.fecha_actualizacion,
                             TipoTareaDominio.id_dominio.label('id_dominio'),
-                            TipoTareaDominio.id_organismo.label('id_organismo')                           
+                            TipoTareaDominio.id_organismo.label('id_organismo')
                             ).outerjoin(TipoTareaDominio, TipoTarea.id == TipoTareaDominio.id_tipo_tarea
                             ).filter(TipoTarea.eliminado == False).order_by(TipoTarea.nombre)
      
@@ -1161,9 +1161,9 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
                 "nivel": tipo.nivel,
                 "id_ext": tipo.id_ext,
                 "id_dominio": tipo.id_dominio,
-                "id_organismo": tipo.id_organismo,
-                "dominio": tipo.dominio,
-                "organismo": tipo.organismo
+                "id_organismo": tipo.id_organismo
+                #"dominio": tipo.dominio,
+                #"organismo": tipo.organismo
             }
             tipo_list.append(tipo_tarea)
 

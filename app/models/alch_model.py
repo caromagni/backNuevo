@@ -293,8 +293,8 @@ class TipoTarea(Base):
     id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
 
     user_actualizacion = relationship('Usuario')
-    dominio = relationship('Dominio')
-    organismo = relationship('Organismo')
+    #dominio = relationship('Dominio')
+    #organismo = relationship('Organismo')
     
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'
