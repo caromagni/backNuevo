@@ -160,12 +160,7 @@ class DatabaseSetup:
             descripcion_corta="ORG",
             habilitado=True,
             fecha_actualizacion=datetime.now(),
-<<<<<<< HEAD
             id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
-=======
-            #id_dominio tiene que coincidir con id_dominio_ext de dominio
-            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded dominio juz paz lavalle
->>>>>>> 5db31751f2736364c270111fb7625d9d186be35b
         )
         session.add(organismo)
         session.commit()
