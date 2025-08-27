@@ -47,6 +47,9 @@ def full_sync_tipos_tareas(id_user=None):
             logger_config.logger.debug(f"tipo_data: {tipo_data}")
             logger_config.logger.debug("******************************")
             logger_config.logger.debug(f'sending URL: {sync_url_post}')
+            logger_config.logger.debug(f'id_user: {id_user}')
+            logger_config.logger.debug('USER FROM CONTROLLER BEFORE SYNC')
+           
             sync.sync_tipo_tarea(tipo_data['id'],sync_url_post, id_user)
             success_count += 1
         except Exception as e:
@@ -178,26 +181,26 @@ def full_sync_dominios(id_user=None):
     logger_config.logger.debug("******************************")
     response = requests.get(headers=headers,url=sync_url)
   
-    fueros_data = response.json()
-    logger_config.logger.debug(f"fueros_data: {fueros_data}")
+    dominios_data = response.json()
+    logger_config.logger.debug(f"fueros_data: {dominios_data}")
     logger_config.logger.debug("******************************")
    
     success_count = 0
     error_count = 0
-    if not fueros_data or 'data' not in fueros_data:
+    if not dominios_data or 'data' not in dominios_data:
         logger_config.logger.error("No data received from Pusher for fueros")
         return 0, 1
 
-    for organismo_data in fueros_data['data']:
+    for dominio_data in dominios_data['data']:
         try:
-            logger_config.logger.debug(f"fueros_data: {organismo_data}")
+            logger_config.logger.debug(f"fueros_data: {dominio_data}")
             logger_config.logger.debug("******************************")
             logger_config.logger.debug(f'sending URL: {sync_url_post}')
             
-            sync.sync_dominio(organismo_data['id'],sync_url_post, id_user)
+            sync.sync_dominio(dominio_data['id'],sync_url_post, id_user)
             success_count += 1
         except Exception as e:
-            logger_config.logger.error(f"Error syncing usuario {organismo_data.get('id', 'unknown')}: {e}")
+            logger_config.logger.error(f"Error syncing usuario {dominio_data.get('id', 'unknown')}: {e}")
             error_count += 1
        
         time.sleep(0.1)

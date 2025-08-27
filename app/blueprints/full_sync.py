@@ -262,7 +262,7 @@ def sync_all_entities():
 
         logger_config.logger.info("Syncing fuero/DOMINIOS...")
         try:
-            success_count, error_count = full_sync.full_sync_fuero(id_user)
+            success_count, error_count = full_sync.full_sync_dominios(id_user)
             results['fuero'] = {"status": "completed", "success": True, "success_count": success_count, "error_count": error_count}
             total_success += 1
         except Exception as e:

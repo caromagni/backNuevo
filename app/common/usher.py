@@ -174,6 +174,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 logger_config.logger.info("before delete expired roles")
                 #needs to delete first the entry in usuario_rol as it has a foreign key to rol_ext
                 for role in current_user_expired_roles:
+                    print("Borra role.id:", role.id)
                     db.session.query(UsuarioRol).filter(UsuarioRol.id_rol_ext == role.id).delete()
                 logger_config.logger.info("after delete expired roles")
                 current_user_expired_roles = db.session.query(RolExt).filter(RolExt.email == email, RolExt.fecha_actualizacion + tiempo_vencimiento < datetime.now()).delete()
@@ -221,10 +222,11 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         email=email,
                         fecha_actualizacion=current_time,
                         rol=r['descripcion_rol'],
-                        id_rol_ext=r['id_usuario_sistema_rol'],
+                        id_rol_ext=r['id_usuario_sistema_rol_organismo'],
                         descripcion_ext=caso_uso['descripcion_corta_cu']
                     )
                     nuevos_roles.append(nuevo_rol)
+                    print("nuevo_rol:", nuevo_rol)
 
                     # Create UsuarioRol object (don't add to session yet)
                     nuevo_usuarioRol = UsuarioRol(
@@ -237,6 +239,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                         id_dominio=id_dominio
                     )
                     nuevos_usuarios_roles.append(nuevo_usuarioRol)
+                    print("nuevo_usuarioRol:", nuevo_usuarioRol)
             
             # Bulk insert all RolExt objects at once
             if nuevos_roles:

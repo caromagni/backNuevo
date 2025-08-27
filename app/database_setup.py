@@ -44,7 +44,56 @@ class DatabaseSetup:
                 "email": "cmagni@jus.mendoza.gov.ar",
                 "eliminado": False,
                 "suspendido": False
+            },
+            {
+                "nombre": "Fernanda",
+                "apellido": "Diaz",
+                "username": "fdiaz@jus.mendoza.gov.ar",
+                "email": "fdiaz@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Miguel Humberto",
+                "apellido": "Ragusa",
+                "username": "mragusa@jus.mendoza.gov.ar",
+                "email": "mragusa@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Daniel",
+                "apellido": "Zaera",
+                "username": "dzaera@jus.mendoza.gov.ar",
+                "email": "dzaera@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Carlos Daniel",
+                "apellido": "Solanilla",
+                "username": "csolanilla@jus.mendoza.gov.ar",
+                "email": "csolanilla@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Oscar David",
+                "apellido": "Ceballos",
+                "username": "dceballos@jus.mendoza.gov.ar",
+                "email": "dceballos@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
+            },
+            {
+                "nombre": "Raúl",
+                "apellido": "Guillot",
+                "username": "rguillot@jus.mendoza.gov.ar",
+                "email": "rguillot@jus.mendoza.gov.ar",
+                "eliminado": False,
+                "suspendido": False
             }
+            
         ]
         
         created_users = []
@@ -82,7 +131,9 @@ class DatabaseSetup:
             return existing_domain 
         domain = Dominio(
             id=dominio_id,
-            id_dominio_ext=uuid.uuid4(),
+            #id_dominio_ext=uuid.uuid4(),
+            #id_dominio_ext tiene que ser el mismo que id_dominio de organismo
+            id_dominio_ext=dominio_id, #must match harcoded id dominio from usher.py untill we have a proper domain setup
             descripcion="General",
             descripcion_corta="GEN",
             prefijo="GEN",
@@ -109,7 +160,8 @@ class DatabaseSetup:
             descripcion_corta="ORG",
             habilitado=True,
             fecha_actualizacion=datetime.now(),
-            id_fuero="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded fuero juz paz lavalle
+            #id_dominio tiene que coincidir con id_dominio_ext de dominio
+            id_dominio="06737c52-5132-41bb-bf82-98af37a9ed80" #harcoded dominio juz paz lavalle
         )
         session.add(organismo)
         session.commit()
@@ -330,6 +382,20 @@ class DatabaseSetup:
                 'descripcion': 'PATCH lote_tareas_v2',
                 'caso_uso': [{"codigo": "modificar-tarea"}],
                 'metodo': 'PATCH'
+            },
+            {
+                'id': '',
+                'url': '/tipo_tarea',
+                'descripcion': 'POST tipo_tarea',
+                'caso_uso': [{"codigo": "crear-tipo-tarea"}],
+                'metodo': 'POST'
+            },
+            {
+                'id': '',
+                'url': '/subtipo_tarea',
+                'descripcion': 'POST subtipo_tarea',
+                'caso_uso': [{"codigo": "crear-tipo-tarea"}],
+                'metodo': 'POST'
             },
         ]
         for ep in endpoints_data:

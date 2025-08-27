@@ -86,7 +86,7 @@ class Organismo(Base):
     id = Column(UUID, primary_key=True)
     id_organismo_ext = Column(UUID, nullable=False)
     circunscripcion_judicial = Column(String, nullable=False)
-    id_fuero = Column(UUID)
+    id_dominio = Column(UUID)
     descripcion = Column(String)
     descripcion_corta = Column(String)
     habilitado = Column(Boolean, nullable=False)
@@ -216,6 +216,7 @@ class Label(Base):
     fecha_creacion = Column(DateTime, nullable=False)
     fecha_eliminacion = Column(DateTime, nullable=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
+    #id = Column(UUID, primary_key=True)
     id_label = Column('id', UUID, primary_key=True)
     id_grupo_base = Column(UUID)
     id_user_creacion = Column(UUID, nullable=False)
@@ -292,8 +293,8 @@ class TipoTarea(Base):
     id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
 
     user_actualizacion = relationship('Usuario')
-    dominio = relationship('Dominio')
-    organismo = relationship('Organismo')
+    #dominio = relationship('Dominio')
+    #organismo = relationship('Organismo')
     
 class SubtipoTarea(Base):
     __tablename__ = 'subtipo_tarea'
@@ -312,6 +313,8 @@ class SubtipoTarea(Base):
     origen_externo = Column(Boolean, default=False)
     tipo_tarea = relationship('TipoTarea')
 
+
+
 class Dominio(Base):
     __tablename__ = 'dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados. id_user_actualizacion es nullable porque el full sync no tiene un usuario'}
@@ -326,7 +329,7 @@ class Dominio(Base):
     eliminado = Column(Boolean, default=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=True) 
 
-""" class TipoTareaDominio(Base):
+class TipoTareaDominio(Base):
     __tablename__ = 'tipo_tarea_x_dominio'
     __table_args__ = {'schema': 'tareas', 'comment': 'relaciona los tipos de tarea con los dominios, para que cada tipo de tarea y subtipo se pueda clasificar y puede existir para mas de un dominio(fuero) y grupo.'}
 
@@ -336,11 +339,11 @@ class Dominio(Base):
     id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
     eliminado = Column(Boolean, nullable=False, default=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
-    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=True)
 
     tipo_tarea = relationship('TipoTarea')
     dominio = relationship('Dominio')
-    organismo = relationship('Organismo') """
+    organismo = relationship('Organismo')
 
 
 
