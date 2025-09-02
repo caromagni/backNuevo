@@ -233,7 +233,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                 #############################################################################################
                 #######BORRAR - SOLO PARA PRUEBAS - SI NO EXISTE EL TIPO DE TAREA, CORRER FULL SYNC##########
                 #############################################################################################
-                #agrego el tipo de tarea si no existe
+                 #agrego el tipo de tarea si no existe
                 nuevoID_tipo_tarea=uuid.uuid4()
                 nuevo_tipo_tarea = TipoTarea(id=nuevoID_tipo_tarea,
                                                id_ext=id_tipo_tarea,
@@ -258,7 +258,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                 db.session.commit()
             else:
                 print("Tipo de tarea encontrado por id_ext", query_tipo_tarea.id)
-
+            
 
         nombre_tipo=query_tipo_tarea.nombre
         id_tipo_tarea = query_tipo_tarea.id
