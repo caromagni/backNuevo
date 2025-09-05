@@ -321,7 +321,7 @@ class Dominio(Base):
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados. id_user_actualizacion es nullable porque el full sync no tiene un usuario'}
 
     id = Column(UUID, primary_key=True)
-    id_dominio_ext = Column(UUID, nullable=False)
+    id_dominio_ext = Column(UUID, unique=True, nullable=False)
     descripcion = Column(String, nullable=False)
     descripcion_corta = Column(String, nullable=False)
     prefijo = Column(String, nullable=False)
@@ -581,7 +581,7 @@ class UsuarioRol(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
     eliminado = Column(Boolean, default=False)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_dominio_ext = Column(ForeignKey('tareas.dominio.id_dominio_ext'), nullable=False)
     id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=True)
 
     usuario_grupo = relationship('UsuarioGrupo')
