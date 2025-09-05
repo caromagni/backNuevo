@@ -1,5 +1,5 @@
 import requests
-from models.alch_model import Usuario, RolExt, EP, UsuarioRol, UsuarioGrupo, Organismo, Dominio
+from models.alch_model import Usuario, RolExt, EP, UsuarioRol, UsuarioGrupo, Organismo, Dominio,Grupo
 from datetime import date, timedelta, datetime
 import common.logger_config as logger_config
 import uuid
@@ -10,6 +10,7 @@ import json
 import common.utils as utils
 from common.cache import *
 import traceback
+
 def migrar_cu(username):
     if username is not None:
         id_user_actualizacion = utils.get_username_id(username)
@@ -133,8 +134,8 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
         
     pull_roles = False
     pusher_ok = True
-    id_grupo = 'cb08f738-7590-4331-871e-26f0f09ff4ca'  # Organismo por defecto
-    id_dominio = '06737c52-5132-41bb-bf82-98af37a9ed80'  # Dominio por defecto
+    id_grupo = ''  
+    id_dominio = '' 
     
     #tiempo_vencimiento = timedelta(days=1)
     #tiempo_vencimiento = timedelta(hours=1)
@@ -220,7 +221,9 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
                 id_organismo = r['id_organismo']
                 query_organismo = db.session.query(Organismo).filter(Organismo.id_organismo_ext == id_organismo).first()
                 if query_organismo is not None:
-                    id_grupo = query_organismo.id_organismo_ext
+                    query_grupo=db.session.query(Grupo).filter(Grupo.id_organismo == id_organismo).first()
+                    id_grupo = query_grupo.id
+                    #id_grupo = query_organismo.id_organismo_ext
                     query_dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext == query_organismo.id_dominio).first()
                     if query_dominio is not None:
                         id_dominio = query_dominio.id 
