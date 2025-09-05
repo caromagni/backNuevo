@@ -208,10 +208,10 @@ def sync_all_tipo_tarea_parte():
                 id_user = None
         else:
             id_user = None
-        #url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
-        #clasificacion="tipo_act_parte"
-        url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
-        clasificacion="tipo_act_juzgado"
+        url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/"
+        clasificacion="tipo_act_parte"
+        #url_post="http://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/"
+        #clasificacion="tipo_act_juzgado"
         success_count, error_count = full_sync.full_sync_tipos_tareas(clasificacion, id_user,url_post,False)
 
         return {

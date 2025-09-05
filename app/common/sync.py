@@ -170,7 +170,7 @@ def sync_fuero(entity_id, url,id_user):
     resp = sync_request(url, entity_id)
     print("json roles:",resp)    
     if resp and resp['data']['id'] is not None:
-        query_fuero = db.session.query(Dominio).filter(Dominio.id == resp['data']['id']).first()
+        query_fuero = db.session.query(Dominio).filter(Dominio.id_dominio_ext == resp['data']['id']).first()
         if query_fuero is None:
             nuevo_fuero = Dominio(id=uuid.uuid4(),
                                id_dominio_ext=resp['data']['id'],   
