@@ -481,6 +481,7 @@ class TipoTareaPatchIn(Schema):
 class TipoTareaOut(Schema):
     id = String()
     id_ext = String()
+    clasificacion_ext= String()
     base = Boolean()
     nombre = String()
     nivel = String()
@@ -567,6 +568,7 @@ class SubtipoTareaShortOut(Schema):
 class TipoTareaSubtipoOut(Schema):
     id = String()
     id_ext = String()
+    clasificacion_ext= String()
     nombre = String()
     codigo_humano = String()
     user_actualizacion= Nested(UsuarioOut, only=("id", "nombre", "apellido", "nombre_completo"))
@@ -1363,7 +1365,7 @@ class NotaIn(Schema):
         validate_char
     ])
     nota = String(validate=validate.Length(min=6, max=250, error="El campo debe ser mayor a 6 y menor a 250 caracteres")) 
-    id_tipo_nota = String(required=True)
+    id_tipo_nota = String()
     eliminado = Boolean(default=False)
     id_tarea = String()
 
