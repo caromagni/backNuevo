@@ -203,8 +203,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     g.suspendido AS suspendido_hijo,    
                     g.nombre AS nombre_hijo,
                     g.descripcion AS descripcion_hijo,
-                    g.id_dominio AS id_dominio_hijo,
-                    g.id_organismo AS id_organismo_hijo,
+                    g.id_dominio_ext AS id_dominio_hijo,
+                    g.id_organismo_ext AS id_organismo_hijo,
                     g.fecha_actualizacion AS fecha_actualizacion_hijo,
                     g.fecha_creacion AS fecha_creacion_hijo,    
                     g.base AS base_hijo,    
@@ -222,8 +222,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR g.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR g.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR g.suspendido = :suspendido)
-                    AND (:id_dominio IS NULL OR g.id_dominio = :id_dominio)
-                    AND (:id_organismo IS NULL OR g.id_organismo = :id_organismo)
+                    AND (:id_dominio IS NULL OR g.id_dominio_ext = :id_dominio)
+                    AND (:id_organismo IS NULL OR g.id_organismo_ext = :id_organismo)
                     AND (:fecha_desde IS NULL OR g.fecha_actualizacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR g.fecha_actualizacion <= :fecha_hasta)         
 
@@ -244,8 +244,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_hijo.suspendido AS suspendido_hijo,    
                     gp_hijo.nombre AS nombre_hijo,
                     gp_hijo.descripcion AS descripcion_hijo,
-                    gp_hijo.id_dominio AS id_dominio_hijo,
-                    gp_hijo.id_organismo AS id_organismo_hijo,
+                    gp_hijo.id_dominio_ext AS id_dominio_hijo,
+                    gp_hijo.id_organismo_ext AS id_organismo_hijo,
                     gp_hijo.fecha_actualizacion AS fecha_actualizacion_hijo,
                     gp_hijo.fecha_creacion AS fecha_creacion_hijo,
                     gp_hijo.base AS base_hijo,    
@@ -253,8 +253,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     gp_padre.suspendido AS suspendido_padre,    
                     gp_padre.nombre AS nombre_padre,
                     gp_padre.descripcion AS descripcion_padre,
-                    gp_padre.id_dominio AS id_dominio_padre,
-                    gp_padre.id_organismo AS id_organismo_padre,
+                    gp_padre.id_dominio_ext AS id_dominio_padre,
+                    gp_padre.id_organismo_ext AS id_organismo_padre,
                     gp_padre.fecha_actualizacion AS fecha_actualizacion_padre,
                     gp_padre.fecha_creacion AS fecha_creacion_padre,    
                     gp_padre.base AS base_padre    
@@ -266,10 +266,10 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                     (:nombre IS NULL OR gp_hijo.nombre ILIKE '%' || :nombre || '%')
                     AND (:eliminado IS NULL OR gp_hijo.eliminado = :eliminado)
                     AND (:suspendido IS NULL OR gp_hijo.suspendido = :suspendido)
-                    AND (:id_dominio IS NULL OR gp_hijo.id_dominio = :id_dominio)
-                    AND (:id_organismo IS NULL OR gp_hijo.id_organismo = :id_organismo)    
+                    AND (:id_dominio IS NULL OR gp_hijo.id_dominio_ext = :id_dominio)
+                    AND (:id_organismo IS NULL OR gp_hijo.id_organismo_ext = :id_organismo)    
                 FROM tareas.herarquia_grupo_grupo hgg
-                INNER JOIN GroupTree gt ON gtL OR gp_hijo.id_organismo = :id_organismo)
+                INNER JOIN GroupTree gt ON gtL OR gp_hijo.id_organismo_ext = :id_organismo)
                     AND (:fecha_desde IS NULL OR gp_hijo.fecha_actualizacion >= :fecha_desde)
                     AND (:fecha_hasta IS NULL OR gp_hijo.fecha_actualizacion <= :fecha_hasta)         
             )
@@ -282,8 +282,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.descripcion_padre,
                 gt.eliminado_padre,
                 gt.suspendido_padre,     
-                gt.id_dominio AS id_dominio_padre,
-                gt.id_organismo AS id_organismo_padre,   
+                gt.id_dominio_ext AS id_dominio_padre,
+                gt.id_organismo_ext AS id_organismo_padre,   
                 gt.fecha_actualizacion_padre,
                 gt.fecha_creacion_padre,
                 gt.base_padre,        
@@ -293,8 +293,8 @@ def get_all_grupos_nivel(username=None, page=1, per_page=10, nombre="", fecha_de
                 gt.descripcion_hijo as descripcion,
                 gt.eliminado_hijo as eliminado,
                 gt.suspendido_hijo as suspendido, 
-                gt.id_dominio AS id_dominio_hijo,
-                gt.id_organismo AS id_organismo_hijo,       
+                gt.id_dominio_ext AS id_dominio_hijo,
+                gt.id_organismo_ext AS id_organismo_hijo,       
                 gt.fecha_actualizacion_hijo as fecha_actualizacion,
                 gt.fecha_creacion_hijo as fecha_creacion,        
                 gt.base_hijo as base,        
@@ -566,8 +566,8 @@ def get_all_base(id, usuarios=False):
                 g.base AS is_base,
                 g.eliminado AS eliminado,
                 g.suspendido AS suspendido,
-                g.id_dominio AS id_dominio,
-                g.id_organismo AS id_organismo
+                g.id_dominio_ext AS id_dominio,
+                g.id_organismo_ext AS id_organismo
             FROM 
                 tareas.grupo g
             LEFT JOIN 
@@ -591,8 +591,8 @@ def get_all_base(id, usuarios=False):
                 gp_padre.base AS is_base,
                 gp_hijo.eliminado AS eliminado,
                 gp_hijo.suspendido AS suspendido,
-                gp_hijo.id_dominio AS id_dominio,
-                gp_hijo.id_organismo AS id_organismo
+                gp_hijo.id_dominio_ext AS id_dominio,
+                gp_hijo.id_organismo_ext AS id_organismo
             FROM 
                 tareas.herarquia_grupo_grupo hgg
             INNER JOIN 
@@ -616,8 +616,8 @@ def get_all_base(id, usuarios=False):
             gt.group_id,
             gt.eliminado,
             gt.suspendido,
-            gt.id_dominio,
-            gt.id_organismo,
+            gt.id_dominio_ext,
+            gt.id_organismo_ext,
             gt.is_base
         FROM 
             GroupTree gt
@@ -644,8 +644,8 @@ def get_all_base(id, usuarios=False):
             "path_name": reg.path_name,
             "eliminado": reg.eliminado,
             "suspendido": reg.suspendido,
-            "id_dominio": reg.id_dominio,
-            "id_organismo": reg.id_organismo,
+            "id_dominio": reg.id_dominio_ext,
+            "id_organismo": reg.id_organismo_ext,
             "organismo": reg.organismo if hasattr(reg, 'organismo') else None,
             "dominio": reg.dominio if hasattr(reg, 'dominio') else None,
             "is_base": reg.is_base,
@@ -774,9 +774,9 @@ def get_all_grupos_detalle(page=1, per_page=10, nombre=None, eliminado=None, sus
     if suspendido:
         filters.append(Grupo.suspendido == suspendido)
     if id_dominio:
-        filters.append(Grupo.id_dominio == id_dominio)
+        filters.append(Grupo.id_dominio_ext == id_dominio)
     if id_organismo:
-        filters.append(Grupo.id_organismo == id_organismo)
+        filters.append(Grupo.id_organismo_ext == id_organismo)
 
     # Apply all filters at once
     if filters:
@@ -1074,7 +1074,7 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
         organismo = db.session.query(Organismo).filter(Organismo.id==id_organismo, Organismo.habilitado==True).first()
         if organismo is None: 
             raise Exception("Organismo no encontrado")
-        dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext==organismo.id_dominio, Dominio.habilitado==True).first()
+        dominio = db.session.query(Dominio).filter(Dominio.id_dominio_ext==organismo.id_dominio_ext, Dominio.habilitado==True).first()
         if dominio is not None:
             id_dominio = dominio.id
     ##################### REVISAR ESTO ######################
@@ -1099,8 +1099,6 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
                     id_base = grupo['id']
                     print("#"* 30)
                     print("Grupo base encontrado:", id_base)
-                    #print("DOminio:", grupo['id_dominio'])
-                    #print("Organismo:", grupo['id_organismo'])
                     print("#"* 30)
                     break
             query_base = db.session.query(Grupo).filter(Grupo.id==id_base).first()

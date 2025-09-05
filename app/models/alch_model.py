@@ -84,7 +84,7 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_organismo_ext = Column(UUID, nullable=False)
+    id_organismo_ext = Column(UUID, nullable=False, unique=True)
     circunscripcion_judicial = Column(String, nullable=False)
     id_dominio_ext = Column(UUID)
     descripcion = Column(String)
@@ -321,7 +321,7 @@ class Dominio(Base):
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados. id_user_actualizacion es nullable porque el full sync no tiene un usuario'}
 
     id = Column(UUID, primary_key=True)
-    id_dominio_ext = Column(UUID, unique=True, nullable=False)
+    id_dominio_ext = Column(UUID, nullable=False, unique=True)
     descripcion = Column(String, nullable=False)
     descripcion_corta = Column(String, nullable=False)
     prefijo = Column(String, nullable=False)
