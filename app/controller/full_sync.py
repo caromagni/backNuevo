@@ -8,25 +8,40 @@ from datetime import datetime
 import traceback    
 import json
 import time
+import re
 
-def full_sync_tipos_tareas(id_user=None,url_post=None,is_subtipo=False):
+def full_sync_tipos_tareas(clasificacion=None, id_user=None,url_post=None,is_subtipo=False):
     """Sync all tipos de tareas from Pusher"""
     logger_config.logger.info("Starting full sync of tipos de tareas...")
+    
     #getting all the records at once and then pass them one by one to the sync_tipo_tarea function
     usher_apikey = os.environ.get('PUSHER_API_KEY')
     system_apikey = os.environ.get('PUSHER_API_SYSTEM')
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     headers = {'x-api-key': usher_apikey, 'x-api-system':system_apikey}
-    if is_subtipo:
+    url_post=""
+    if clasificacion=="parte":
+        print("clasificacion from controller: ",clasificacion)
+        #https://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-parte/
         base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE', '')
-    else:
-        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS', '')
-    
+        url_post = os.environ.get('PUSHER_URL_TIPOS_TAREAS_PARTE_POST', '')
+        print("BASE URL: ",base_url)
+        print("URL POST: ",url_post)
+        entity="TIPO_ACT_PARTE"
+    if clasificacion=="juzgado":
+        print("clasificacion from controller: ",clasificacion)
+        #https://dev-backend.usher.pjm.gob.ar/api/v1/tipo-act-juzgado/
+        base_url = os.environ.get('PUSHER_URL_TIPOS_TAREAS_JUZGADO', '')
+        url_post=os.environ.get('PUSHER_URL_TIPOS_TAREAS_JUZGADO_POST', '')
+        entity="TIPO_ACT_JUZGADO"
+        print("BASE URL: ",base_url)
+        print("URL POST: ",url_post)
+   
     usuario_consulta = os.environ.get('PUSHER_USUARIO_CONSULTA')
     sync_url = f"{base_url}{usuario_consulta}"
-    
     logger_config.logger.info("Obtained records from pusher")
     logger_config.logger.debug(f"sync_url: {sync_url}")
+    logger_config.logger.debug(f"url_post: {url_post}")
     logger_config.logger.debug(f"usuario_consulta: {usuario_consulta}")
     logger_config.logger.debug(f"headers: {headers}")
     logger_config.logger.debug(f"id_user: {id_user}")
@@ -50,11 +65,11 @@ def full_sync_tipos_tareas(id_user=None,url_post=None,is_subtipo=False):
         try:
             logger_config.logger.debug(f"tipo_data: {tipo_data}")
             logger_config.logger.debug("******************************")
-            logger_config.logger.debug(f'sending URL: {url_post}')
+            logger_config.logger.info(f'sending URL: {url_post}')
             logger_config.logger.debug(f'id_user: {id_user}')
             logger_config.logger.debug('USER FROM CONTROLLER BEFORE SYNC')
            
-            sync.sync_tipo_tarea(tipo_data['id'],url_post, id_user)
+            sync.sync_tipo_tarea(clasificacion,entity, tipo_data['id'],url_post, id_user)
             success_count += 1
         except Exception as e:
             logger_config.logger.error(f"Error syncing tipo tarea {tipo_data.get('id', 'unknown')}: {e}")

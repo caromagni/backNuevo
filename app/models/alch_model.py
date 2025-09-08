@@ -84,9 +84,9 @@ class Organismo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_organismo_ext = Column(UUID, nullable=False)
+    id_organismo_ext = Column(UUID, nullable=False, unique=True)
     circunscripcion_judicial = Column(String, nullable=False)
-    id_dominio = Column(UUID)
+    id_dominio_ext = Column(UUID)
     descripcion = Column(String)
     descripcion_corta = Column(String)
     habilitado = Column(Boolean, nullable=False)
@@ -177,8 +177,8 @@ class Grupo(Base):
     __table_args__ = {'schema': 'tareas'}
 
     id = Column(UUID, primary_key=True)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    id_dominio_ext = Column(ForeignKey('tareas.dominio.id_dominio_ext'), nullable=False)
+    id_organismo_ext = Column(ForeignKey('tareas.organismo.id_organismo_ext'), nullable=False)
     nombre = Column(String, nullable=False)
     descripcion = Column(String, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
@@ -191,8 +191,8 @@ class Grupo(Base):
     base = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
-    organismo = relationship('Organismo', foreign_keys=[id_organismo])
-    dominio = relationship('Dominio', foreign_keys=[id_dominio])
+    organismo = relationship('Organismo', foreign_keys=[id_organismo_ext])
+    dominio = relationship('Dominio', foreign_keys=[id_dominio_ext])
 
 class HerarquiaGrupoGrupo(Base):
     __tablename__ = 'herarquia_grupo_grupo'
@@ -280,6 +280,7 @@ class TipoTarea(Base):
 
     id = Column(UUID, primary_key=True)
     id_ext = Column(UUID)
+    clasificacion_ext = Column(String)
     codigo_humano = Column(String)
     nombre = Column(String, nullable=False)
     eliminado = Column(Boolean, nullable=False, default=False)
@@ -289,8 +290,8 @@ class TipoTarea(Base):
     base = Column(Boolean, default=False)
     origen_externo = Column(Boolean, default=False)
     nivel = Column(String)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'))
-    id_organismo = Column(ForeignKey('tareas.organismo.id'))
+    id_dominio_ext = Column(ForeignKey('tareas.dominio.id_dominio_ext'))
+    id_organismo_ext = Column(ForeignKey('tareas.organismo.id_organismo_ext'))
 
     user_actualizacion = relationship('Usuario')
     #dominio = relationship('Dominio')
@@ -320,7 +321,7 @@ class Dominio(Base):
     __table_args__ = {'schema': 'tareas', 'comment': 'los dominios son los fuero judiciales, por ejemplo civil, penal, laboral, etc. cada dominio puede tener uno o mas tipos de tarea asociados. id_user_actualizacion es nullable porque el full sync no tiene un usuario'}
 
     id = Column(UUID, primary_key=True)
-    id_dominio_ext = Column(UUID, nullable=False)
+    id_dominio_ext = Column(UUID, nullable=False, unique=True)
     descripcion = Column(String, nullable=False)
     descripcion_corta = Column(String, nullable=False)
     prefijo = Column(String, nullable=False)
@@ -335,8 +336,8 @@ class TipoTareaDominio(Base):
 
     id = Column(UUID, primary_key=True)
     id_tipo_tarea = Column(ForeignKey('tareas.tipo_tarea.id'), nullable=False)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
-    id_organismo = Column(ForeignKey('tareas.organismo.id'), nullable=False)
+    id_dominio_ext = Column(ForeignKey('tareas.dominio.id_dominio_ext'), nullable=False)
+    id_organismo_ext = Column(ForeignKey('tareas.organismo.id_organismo_ext'), nullable=False)
     eliminado = Column(Boolean, nullable=False, default=False)
     fecha_actualizacion = Column(DateTime, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'), nullable=True)
@@ -524,7 +525,7 @@ class Nota(Base):
     fecha_eliminacion = Column(DateTime, nullable=False)
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'), nullable=False)
-    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'), nullable=False)
+    id_tipo_nota = Column(ForeignKey('tareas.tipo_nota.id'))
     id_user_creacion = Column(ForeignKey('tareas.usuario.id'), nullable=False)
     id_user_actualizacion = Column(UUID)
     nota = Column(String)
@@ -580,7 +581,7 @@ class UsuarioRol(Base):
     fecha_actualizacion = Column(DateTime)
     id_user_actualizacion = Column(UUID)
     eliminado = Column(Boolean, default=False)
-    id_dominio = Column(ForeignKey('tareas.dominio.id'), nullable=False)
+    id_dominio_ext = Column(ForeignKey('tareas.dominio.id_dominio_ext'), nullable=False)
     id_grupo = Column(ForeignKey('tareas.grupo.id'), nullable=True)
 
     usuario_grupo = relationship('UsuarioGrupo')
