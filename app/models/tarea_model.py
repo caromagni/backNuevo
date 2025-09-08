@@ -381,7 +381,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
             existe_grupo = db.session.query(Grupo).filter(Grupo.id == id_grupo, Grupo.eliminado==False).first()
             if existe_grupo is None:
                 # Busco el id_organismo 
-                existe_grupo = db.session.query(Grupo).filter(Grupo.id_organismo == id_grupo, Grupo.eliminado==False).first()
+                existe_grupo = db.session.query(Grupo).filter(Grupo.id_organismo_ext == id_grupo, Grupo.eliminado==False, Grupo.base==True).first()
                 if existe_grupo is None:
                     logger_config.logger.error("Busco el grupo en organismo")
                     raise Exception("Error en el ingreso de grupos. Grupo no existente")
