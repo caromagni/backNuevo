@@ -3,7 +3,7 @@ from datetime import datetime
 import common.utils as utils
 import common.logger_config as logger_config
 from db.alchemy_db import db
-from models.alch_model import Usuario, UsuarioGrupo, Grupo, TareaAsignadaUsuario, Tarea, RolExt
+from models.alch_model import Usuario, UsuarioGrupo, Grupo, Dominio, TareaAsignadaUsuario, Tarea, RolExt
 from collections import defaultdict
 from common.cache import *
 
@@ -425,7 +425,38 @@ def get_rol_usuario(username=None):
     
     return res
 
+@cache.memoize(CACHE_TIMEOUT_LONG)
+def get_dominio_usuario(username=None):
+    if username is not None:
+        id_user_actualizacion = utils.get_username_id(username)
+        if id_user_actualizacion is not None:
+            utils.verifica_usr_id(id_user_actualizacion)
+    else:
+        logger_config.logger.error("Usuario no ingresado")
+        raise Exception("Usuario no ingresado")        
+        
+    #res = db.session.query(RolExt.email, RolExt.rol).filter(RolExt.email == username).distinct().all()
+    res_dominio = db.session.query(UsuarioGrupo, Grupo, Dominio).filter(UsuarioGrupo.id_usuario == id_user_actualizacion
+                 ).join(Grupo, UsuarioGrupo.id_grupo == Grupo.id
+                 ).join(Dominio, Grupo.id_dominio_ext == Dominio.id
+                 ).order_by(Dominio.descripcion).all()
     
+    if res_dominio is None:
+        raise Exception("El usuario no pertenece a ningún grupo ni dominio")
+    
+    dominios = []
+    for row in res_dominio:
+        dominio ={
+            "id_dominio": row.Dominio.id,
+            "dominio": row.Dominio.descripcion,
+            "id_grupo": row.Grupo.id,
+            "grupo": row.Grupo.nombre
+        }
+        dominios.append(dominio)
+
+    print("dominios: ", dominios)
+    return dominios
+
 def delete_usuario(username=None, id=None):
     
     if username is not None:

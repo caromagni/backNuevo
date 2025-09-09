@@ -1029,10 +1029,19 @@ class UsuarioRolOut(Schema):
     rol= String()
     usuario_cu = List(Nested(CasoUsoOut))
 
+class UsuarioDominioOut(Schema):
+    id_dominio = String()
+    dominio = String()
+    id_grupo = String()
+    grupo = String()
 
 class UsuarioCountRolOut(Schema):
     count = Integer()
     data = Nested(UsuarioRolOut, many=True)
+
+class UsuarioCountDominioOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioDominioOut, many=True)    
     
 class TareaPatchAllOut(Schema):
     id = String()
