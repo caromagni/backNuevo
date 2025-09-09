@@ -171,6 +171,7 @@ def get_usr_cu(username=None, rol_usuario='', casos=None):
             roles = get_roles(username)
             #print("roles:", roles)
             if 'lista_roles_cus' in roles:
+                pull_roles = True
             #Borro todos los registros del usuario si existen roles nuevos desde P-USHER
                 logger_config.logger.info("ROLES VENCIDOS")
                
