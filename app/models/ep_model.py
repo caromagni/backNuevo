@@ -30,7 +30,7 @@ def insert_EP(username, **kwargs):
     url = kwargs.get('url', '')
     descripcion = kwargs.get('descripcion', '')
     metodo = kwargs.get('metodo', '')
-    existe = db.session.query(EP).filter(EP.url == url, metodo == metodo).first()
+    existe = db.session.query(EP).filter(EP.url == url, EP.metodo == metodo).first()
     if existe is not None:
         raise Exception(f"Ya existe un endpoint con la URL {url} y el método {metodo}")
     #caso_uso = kwargs.get('caso_uso', [])  # <-- directamente guardamos la lista de dicts
