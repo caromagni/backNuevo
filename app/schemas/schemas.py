@@ -509,6 +509,7 @@ class TipoTareaGetIn(Schema):
     nombre = String(default="")
     id_dominio = String()
     id_organismo = String()
+    clasificacion_ext = String(metadata={"description": "TIPO_ACT_JUZGADO, TIPO_ACT_PARTE"})
 
 class SubtipoTareaIn(Schema):
     id_tipo = String(required=True)
@@ -1031,10 +1032,19 @@ class UsuarioRolOut(Schema):
     rol= String()
     usuario_cu = List(Nested(CasoUsoOut))
 
+class UsuarioDominioOut(Schema):
+    id_dominio = String()
+    dominio = String()
+    id_grupo = String()
+    grupo = String()
 
 class UsuarioCountRolOut(Schema):
     count = Integer()
     data = Nested(UsuarioRolOut, many=True)
+
+class UsuarioCountDominioOut(Schema):
+    count = Integer()
+    data = Nested(UsuarioDominioOut, many=True)    
     
 class TareaPatchAllOut(Schema):
     id = String()
