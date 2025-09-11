@@ -467,7 +467,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
     db.session.commit()
     return nueva_tarea
 
-def update_tarea(id_t='', username=None, **kwargs):
+def update_tarea(id_t='', usr_header=None, **kwargs):
     ################################
 
     if id_t is None:
@@ -477,8 +477,8 @@ def update_tarea(id_t='', username=None, **kwargs):
     
     tarea = db.session.query(Tarea).filter(Tarea.id == id_t, Tarea.eliminado==False).first()
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
@@ -580,9 +580,10 @@ def update_tarea(id_t='', username=None, **kwargs):
     ####CONTROLES DE FECHAS DE INICIO Y FIN SI SE INGRESA UNA DE LAS DOS , O LAS DOS ###########    
     if 'fecha_inicio' in kwargs:
         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
-        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_inicio < datetime.now():
-            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+        #fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=0, second=0, microsecond=0)
+        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
+        if fecha_inicio < datetime.now().date():
+            raise Exception("La fecha de inicio no puede ser menor a la fecha actual")  
         tarea.fecha_inicio = fecha_inicio
     else:
         fecha_inicio = None
@@ -590,8 +591,9 @@ def update_tarea(id_t='', username=None, **kwargs):
     if 'fecha_fin' in kwargs:
         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
         fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-        if fecha_fin < datetime.now():
-            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
+        if fecha_fin < datetime.now().date():
+            raise Exception("La fecha de fin no puede ser menor a la fecha actual")
         tarea.fecha_fin = fecha_fin     
     else:
         fecha_fin = None       
@@ -800,10 +802,10 @@ def update_tarea(id_t='', username=None, **kwargs):
     db.session.commit()
     return result
 
-def update_lote_tareas_v2(username=None, **kwargs):
-    
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+def update_lote_tareas_v2(usr_header=None, **kwargs):
+
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
         else:
@@ -868,10 +870,10 @@ def update_lote_tareas_v2(username=None, **kwargs):
 
 #     return result
 
-def update_lote_tareas(username=None, **kwargs):
-    
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+def update_lote_tareas(usr_header=None, **kwargs):
+
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
         if id_user_actualizacion is not None:
             utils.verifica_usr_id(id_user_actualizacion)
         else:
@@ -983,15 +985,15 @@ def update_lote_tareas(username=None, **kwargs):
                         tarea.id_subtipo_tarea = kwargs['id_subtipo_tarea']
                     if 'fecha_inicio' in kwargs:
                         fecha_inicio = functions.controla_fecha(kwargs['fecha_inicio'])
-                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-                        if fecha_inicio <= datetime.now():
-                            raise Exception("La fecha de inicio no puede ser menor o igual a la fecha actual")  
+                        fecha_inicio = datetime.strptime(kwargs['fecha_inicio'], "%d/%m/%Y").date()
+                        if fecha_inicio < datetime.now().date():
+                            raise Exception("La fecha de inicio no puede ser menor a la fecha actual")  
                         tarea.fecha_inicio = fecha_inicio    
                     if 'fecha_fin' in kwargs:
                         fecha_fin = functions.controla_fecha(kwargs['fecha_fin'])
-                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").replace(hour=0, minute=1, second=0, microsecond=0)
-                        if fecha_fin <= datetime.now():
-                            raise Exception("La fecha de fin no puede ser menor o igual a la fecha actual")
+                        fecha_fin = datetime.strptime(kwargs['fecha_fin'], "%d/%m/%Y").date()
+                        if fecha_fin < datetime.now().date():
+                            raise Exception("La fecha de fin no puede ser menor  a la fecha actual")
                         tarea.fecha_fin = fecha_fin
 
                  
@@ -1199,10 +1201,10 @@ def get_all_tipo_tarea(page=1, per_page=10, nivel=None, origen_externo=None, sus
 
     return tipo_list, total
 
-def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
+def insert_tipo_tarea(usr_header=None, dominio=None, organismo=None, id='', codigo_humano='', nombre='', id_user_actualizacion='', base=False, suspendido=False, eliminado=False, id_organismo=None, nivel=None):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         utils.verifica_usr_id(id_user_actualizacion)
@@ -1266,10 +1268,10 @@ def insert_tipo_tarea(username=None, dominio=None, organismo=None, id='', codigo
     return query_tipo_tarea
 
 
-def update_tipo_tarea(username=None, id_tipo_tarea='', **kwargs):
+def update_tipo_tarea(usr_header=None, id_tipo_tarea='', **kwargs):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         utils.verifica_usr_id(id_user_actualizacion)
@@ -1450,10 +1452,10 @@ def get_all_subtipo_tarea(page=1, per_page=10, id_tipo_tarea=None, eliminado=Non
     res = query.order_by(SubtipoTarea.nombre).offset((page-1)*per_page).limit(per_page).all()
     return res, total    
 
-def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', eliminado=False, suspendido=False):
+def insert_subtipo_tarea(usr_header=None, id_tipo='', nombre='', nombre_corto='', id_user_actualizacion='', eliminado=False, suspendido=False):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         if not(functions.es_uuid(id_user_actualizacion)):
@@ -1494,10 +1496,10 @@ def insert_subtipo_tarea(username=None, id_tipo='', nombre='', nombre_corto='', 
     db.session.commit()
     return nuevo_subtipo_tarea
 
-def update_subtipo_tarea(username=None, subtipo_id='', **kwargs):
+def update_subtipo_tarea(usr_header=None, subtipo_id='', **kwargs):
 
-    if username is not None:
-        id_user_actualizacion = utils.get_username_id(username)
+    if usr_header is not None:
+        id_user_actualizacion = utils.get_username_id(usr_header)
 
     if id_user_actualizacion is not None:
         if not(functions.es_uuid(id_user_actualizacion)):
