@@ -243,7 +243,7 @@ def del_usuario(id: str):
         raise exceptions.ValidationError(err)
 
 ##########Prueba Roles################
-@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Alta de un nuevo Tipos de Tarea', summary='Alta de Tipo de Tarea', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta del rol de un usuario', summary='Consulta de Rol de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario_rol')
 @usuario_b.output(schema.UsuarioCountRolOut)
 #@rol.require_role()
@@ -329,4 +329,31 @@ def get_groups_base_by_usr(query_data: dict):
     except Exception as err:
         print(traceback.format_exc())
         raise exceptions.ValidationError(err)  
+
+
+@usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta de los dominios de un usuario|', summary='Consulta de Dominio de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
+@usuario_b.get('/usuario_dominio')
+@usuario_b.output(schema.UsuarioCountDominioOut)
+#@rol.require_role()
+@verify.check_fields()
+def get_dominio_usr():
+    username=g.username
+    res=usuario_model.get_dominio_usuario(username)
+
+    if res is None:
+            result={
+                    "valido":"fail",
+                    "code": 800,
+                    "error":"Error en insert de tipo de tarea",
+                    "error_description":"No se pudo insertar el tipo de tarea"
+                }
+            res = schema.MsgErrorOut().dump(result)
+            return res
+    
+    data = {
+                "count": len(res),
+                "data": schema.UsuarioDominioOut().dump(res, many=True)
+            }
+        
+    return data
     
