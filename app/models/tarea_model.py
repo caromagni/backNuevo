@@ -625,14 +625,16 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
         if 'plazo' in kwargs and kwargs['plazo'] > 0:
             tarea.fecha_fin = calcular_fecha_vencimiento(fecha_inicio, kwargs['plazo'])
         else:
-            if fecha_inicio > tarea.fecha_fin:
+            #compara con la fecha fin actual
+            print("Compara con la fecha fin actual")
+            if fecha_inicio > tarea.fecha_fin.date():
                 raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
     if fecha_inicio is None and fecha_fin is not None:
         #Si no se ingreso fecha inicio, calculo la fecha inicio
         if 'plazo' in kwargs and kwargs['plazo'] > 0:
             tarea.fecha_fin = calcular_fecha_vencimiento(fecha_fin, -kwargs['plazo'])
         else:
-            if tarea.fecha_inicio > fecha_fin:
+            if tarea.fecha_inicio.date() > fecha_fin:
                 raise Exception("La fecha de inicio no puede ser mayor a la fecha de fin actual")
 
 
