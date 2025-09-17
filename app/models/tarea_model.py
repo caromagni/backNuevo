@@ -2313,6 +2313,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
         query = query.join(LabelXTarea, Tarea.id == LabelXTarea.id_tarea
                 ).filter(LabelXTarea.id_label.in_(labels), LabelXTarea.activa == True
                 ).distinct()
+    reasignada = 'false'
     if grupos:
         grupos_consulta = grupos.split(",")
         for i in range(len(grupos_consulta)):
