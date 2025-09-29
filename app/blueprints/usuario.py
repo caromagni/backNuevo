@@ -245,8 +245,8 @@ def del_usuario(id: str):
 ##########Prueba Roles################
 @usuario_b.doc(security=[{'ApiKeyAuth': []}, {'ApiKeySystemAuth': []}, {'BearerAuth': []}, {'UserRoleAuth':[]}], description='Consulta del rol de un usuario', summary='Consulta de Rol de Usuario', responses={200: 'OK', 400: 'Invalid data provided', 500: 'Invalid data provided'})
 @usuario_b.get('/usuario_rol')
-@usuario_b.output(schema.UsuarioCountRolOut)
-@rol.require_role()
+@usuario_b.output(schema.UsuarioDominiosCountOut)
+#@rol.require_role()
 @verify.check_fields()
 def get_rol_usr():
     username=g.username
@@ -264,7 +264,7 @@ def get_rol_usr():
     
     data = {
                 "count": len(res),
-                "data": schema.UsuarioRolOut().dump(res, many=True)
+                "data": schema.UsuarioDominiosOut().dump(res, many=True)
             }
         
         
