@@ -12,3 +12,4 @@ Esta sección cubre todas las funcionalidades relacionadas con la creación, ges
    ./modulos/tareas_tipo_subtipo
    ./modulos/asignacion_usuarios_tareas
    ./modulos/tareas_asignacion_y_control
+   ./modulos/editar_en_lote
