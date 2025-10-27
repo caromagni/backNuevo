@@ -253,14 +253,15 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                                                              fecha_actualizacion=datetime.now(),
                                                              id_user_actualizacion=id_user_actualizacion)
                 db.session.add(nuevo_tipo_tarea_dominio)
-
+                nombre_tipo = titulo
                 logger_config.logger.info("tipo de tarea insertada")
                 db.session.commit()
             else:
+                nombre_tipo=query_tipo_tarea.nombre
                 print("Tipo de tarea encontrado por id_ext", query_tipo_tarea.id)
-            
+        else:
+            nombre_tipo=query_tipo_tarea.nombre    
 
-        nombre_tipo=query_tipo_tarea.nombre
         id_tipo_tarea = query_tipo_tarea.id
         if id_subtipo_tarea is not None:
             subtipo_tarea = db.session.query(SubtipoTarea).filter(SubtipoTarea.id == id_subtipo_tarea, SubtipoTarea.eliminado==False).first()
@@ -347,6 +348,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
         id_subtipo_tarea=id_subtipo_tarea,
         eliminable=eliminable,
         id_user_actualizacion=id_user_actualizacion,
+        id_user_creacion=id_user_actualizacion,
         fecha_eliminacion=fecha_eliminacion,
         fecha_actualizacion=datetime.now(),
         fecha_inicio=fecha_inicio,
@@ -424,6 +426,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                 id_grupo=id_grupo,
                 id_tarea=nuevoID_tarea,
                 id_user_actualizacion=id_user_actualizacion,
+                id_user_asignacion=id_user_actualizacion,
                 fecha_asignacion=datetime.now(),
                 fecha_actualizacion=datetime.now()
             ) 
@@ -456,6 +459,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                     id_tarea=nuevoID_tarea,
                     id_usuario=user['id_usuario'],
                     id_user_actualizacion=id_user_actualizacion,
+                    id_user_asignacion=id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now()
                 )
@@ -473,6 +477,7 @@ def insert_tarea(dominio=None, organismo=None, usr_header=None, id_grupo=None, p
                     id_tarea=nuevoID_tarea,
                     id_usuario=id_usuario_asignado,
                     id_user_actualizacion=id_user_actualizacion,
+                    id_user_asignacion=id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now()
                 )
@@ -728,6 +733,7 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                 id_grupo=group['id_grupo'],
                 id_tarea=id_t,
                 id_user_actualizacion= id_user_actualizacion,
+                id_user_asignacion= id_user_actualizacion,
                 fecha_asignacion=datetime.now(),
                 fecha_actualizacion=datetime.now()
             )
@@ -752,8 +758,10 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                     tareaxgrupo.fecha_actualizacion=datetime.now()
                     tareaxgrupo.id_user_actualizacion=id_user_actualizacion  """  
 
-    res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
-                                  ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea== id_t).order_by(TareaXGrupo.eliminado).all()
+    res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion, TareaXGrupo.id_user_asignacion, TareaXGrupo.user_asignacion.label('user_asignacion')
+                                  ).join(TareaXGrupo, Grupo.id==TareaXGrupo.id_grupo
+                                  ).outerjoin(Usuario, Usuario.id == TareaXGrupo.id_user_asignacion
+                                  ).filter(TareaXGrupo.id_tarea== id_t).order_by(TareaXGrupo.eliminado).all()
 
 
     if res_grupos is not None:
@@ -762,7 +770,9 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                 "id_grupo": row.id,
                 "nombre": row.nombre,
                 "asignada": not(row.reasignada),
-                "fecha_asignacion": row.fecha_asignacion
+                "fecha_asignacion": row.fecha_asignacion,
+                "id_user_asignacion": row.id_user_asignacion,
+                "user_asignacion": row.user_asignacion
             }
             
             grupos.append(grupo)        
@@ -792,6 +802,7 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                     id_tarea=id_t,
                     id_usuario=user['id_usuario'],
                     id_user_actualizacion= id_user_actualizacion,
+                    id_user_asignacion= id_user_actualizacion,
                     fecha_asignacion=datetime.now(),
                     fecha_actualizacion=datetime.now(),
                     eliminado = False
@@ -804,10 +815,14 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                     asigna_usuario.fecha_actualizacion=datetime.now()
                     asigna_usuario.fecha_actualizacion=datetime.now()
                     asigna_usuario.id_user_actualizacion=id_user_actualizacion
+                    asigna_usuario.id_user_asignacion=id_user_actualizacion
+    
+    usuario_alias = aliased(Usuario)
+    res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion, TareaAsignadaUsuario.id_user_asignacion, TareaAsignadaUsuario.user_asignacion.label('user_asignacion')
+                                  ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario
+                                  ).outerjoin(usuario_alias, usuario_alias.id == TareaAsignadaUsuario.id_user_asignacion
+                                  ).filter(TareaAsignadaUsuario.id_tarea== id_t).order_by(TareaAsignadaUsuario.eliminado).all()
 
-    res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
-                                  ).join(TareaAsignadaUsuario, Usuario.id==TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea== id_t).order_by(TareaAsignadaUsuario.eliminado).all()                
-                                  
     if res_usuarios is not None:
         for row in res_usuarios:
             usuario = {
@@ -815,7 +830,9 @@ def update_tarea(id_t='', usr_header=None, **kwargs):
                 "nombre": row.nombre,
                 "apellido": row.apellido,
                 "asignada": not(row.reasignada),
-                "fecha_asignacion": row.fecha_asignacion
+                "fecha_asignacion": row.fecha_asignacion,
+                "id_user_asignacion": row.id_user_asignacion,
+                "user_asignacion": row.user_asignacion
             }
             usuarios.append(usuario)
     url = []
@@ -2457,8 +2474,11 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 id_actuacion_ext = res_actuacion.id_ext    
 
         # Fetch assigned users for the task
-        res_usuarios = db.session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion
-                                     ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
+        res_usuarios = db.session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion, TareaAsignadaUsuario.id_user_asignacion,
+                                       TareaAsignadaUsuario.user_asignacion.label('user_asignacion')
+                                     ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario
+                                     ).outerjoin(Usuario, Usuario.id == TareaAsignadaUsuario.id_user_asignacion
+                                     ).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
         
         for row in res_usuarios:
             usuario = {
@@ -2466,17 +2486,22 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 "nombre": row.nombre,
                 "apellido": row.apellido,
                 "asignada": not row.reasignada,
-                "fecha_asignacion": row.fecha_asignacion
+                "fecha_asignacion": row.fecha_asignacion,
+                "id_user_asignacion": row.id_user_asignacion,
+                "user_asignacion" : row.user_asignacion
             }
             if row.reasignada:
                 reasignada_usuario = True
             usuarios.append(usuario)
 
         # Fetch assigned groups for the task
-        res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
-                                   ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.fecha_asignacion.desc()).all()
+        res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion,
+                                   TareaXGrupo.id_user_asignacion, TareaXGrupo.user_asignacion.label('user_asignacion')    
+                                   ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo
+                                   ).outerjoin(Usuario, Usuario.id == TareaXGrupo.id_user_asignacion
+                                   ).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.fecha_asignacion.desc()).all()
 
-
+        #TareaXGrupo.id_user_asignacion, TareaXGrupo.user_asignacion.label('user_asignacion') 
         if reasignada=='true':
             if len(res_grupos) > 1:
                 for row in res_grupos:
@@ -2484,7 +2509,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                         "id_grupo": row.id,
                         "nombre": row.nombre,
                         "asignada": not row.reasignada,
-                        "fecha_asignacion": row.fecha_asignacion
+                        "fecha_asignacion": row.fecha_asignacion,
+                        "id_user_asignacion": row.id_user_asignacion,
+                        "user_asignacion" : row.user_asignacion
                     }
                     if row.reasignada:
                         reasignada_grupo = True
@@ -2506,7 +2533,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                     "id_grupo": row.id,
                     "nombre": row.nombre,
                     "asignada": not row.reasignada,
-                    "fecha_asignacion": row.fecha_asignacion
+                    "fecha_asignacion": row.fecha_asignacion,
+                    "id_user_asignacion": row.id_user_asignacion,
+                    "user_asignacion": row.user_asignacion
                 }
                 if row.reasignada:
                     reasignada_grupo = True
@@ -2556,6 +2585,7 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             "fecha_eliminacion": res.fecha_eliminacion,
             "fecha_actualizacion": res.fecha_actualizacion,
             "fecha_creacion": res.fecha_creacion,
+            "user_creacion": res.user_creacion,
             "tiene_notas": res.tiene_notas_desnz,
             "grupo": grupos,
             "usuario": usuarios,

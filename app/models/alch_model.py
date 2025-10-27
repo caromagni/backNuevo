@@ -416,6 +416,7 @@ class Tarea(Base):
     fecha_eliminacion = Column(DateTime)
     id_usuario_asignado = Column(UUID)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
+    id_user_creacion = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     fecha_creacion = Column(DateTime)
     fecha_inicio = Column(DateTime)
@@ -430,7 +431,8 @@ class Tarea(Base):
     grupo = relationship('Grupo')
     expediente = relationship('ExpedienteExt')
     actuacion = relationship('ActuacionExt')
-    user_actualizacion = relationship('Usuario')
+    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    user_creacion = relationship('Usuario', foreign_keys=[id_user_creacion])
 
 class UsuarioGrupo(Base):
     __tablename__ = 'usuario_grupo'
@@ -547,11 +549,13 @@ class TareaAsignadaUsuario(Base):
     fecha_actualizacion = Column(DateTime, nullable=False)
     fecha_asignacion = Column(DateTime) 
     id_user_actualizacion= Column(UUID, nullable=False)
+    id_user_asignacion= Column(ForeignKey('tareas.usuario.id'))
     notas = Column(String)
     eliminado = Column(Boolean, default=False)
 
     tarea = relationship('Tarea')
-    usuario = relationship('Usuario')
+    usuario = relationship('Usuario', foreign_keys=[id_usuario])
+    user_asignacion = relationship('Usuario', foreign_keys=[id_user_asignacion])
 
 
 class TareaXGrupo(Base):
@@ -561,13 +565,16 @@ class TareaXGrupo(Base):
     id = Column(UUID, primary_key=True)
     id_tarea = Column(ForeignKey('tareas.tarea.id'))
     id_grupo = Column(ForeignKey('tareas.grupo.id'))
-    id_user_actualizacion = Column(UUID)
+    id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
+    id_user_asignacion = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime)
     fecha_asignacion = Column(DateTime)
     eliminado = Column(Boolean, default=False)
 
     grupo = relationship('Grupo')
     tarea = relationship('Tarea')
+    user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
+    user_asignacion = relationship('Usuario', foreign_keys=[id_user_asignacion])
  
 
 class UsuarioRol(Base):

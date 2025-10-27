@@ -325,13 +325,55 @@ class GroupDelOut(Schema):
     suspendido = Boolean()
     base = Boolean()
 
+class UsuarioOut(Schema):
+    id = String()
+    fecha_actualizacion = String()
+    id_user_actualizacion = String()
+    nombre = String()
+    apellido = String()
+    id_ext = String()
+    nombre_completo = String(dump_only=True)  
+    username = String()
+    email = String()
+    dni = String()
+    eliminado = Boolean()
+    suspendido = Boolean()
+
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data    
+
+class UsuarioAsignaOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo_asigna = String(dump_only=True)
+
+    @post_dump
+    def add_nombre_completo_asigna(self, data, **kwargs):
+        data['nombre_completo_asigna'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+    
 class GroupTareaOut(Schema):
     id_grupo = String()
     nombre = String()
     descripcion = String()
     asignada = Boolean()
     fecha_asignacion = String()
+    id_user_asignacion = String()
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
 
+    @post_dump
+    def build_user_asignacion(self, data, **kwargs):
+        # Si existen los campos base, los empaqueta en user_asignacion
+        if data.get("id_user_asignacion"):
+            data["user_asignacion"] = {
+                "id_user_asignacion": data.get("id"),
+                "nombre_asigna": data.get("nombre_asigna"),
+                "apellido_asigna": data.get("apellido_asigna"),
+            }
+        return data
 
 class UsuarioGroupIdOut(Schema):
     id = String()
@@ -382,24 +424,7 @@ class GroupsUsuarioOut(Schema):
     fecha_actualizacion= String()
     id_user_actualizacion= String()
     
-class UsuarioOut(Schema):
-    id = String()
-    fecha_actualizacion = String()
-    id_user_actualizacion = String()
-    nombre = String()
-    apellido = String()
-    id_ext = String()
-    nombre_completo = String(dump_only=True)  
-    username = String()
-    email = String()
-    dni = String()
-    eliminado = Boolean()
-    suspendido = Boolean()
 
-    @post_dump
-    def add_nombre_completo(self, data, **kwargs):
-        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
-        return data
 
 
 class GroupsBaseUsrOut(Schema):
@@ -795,6 +820,8 @@ class TareaOut(Schema):
     fecha_creacion = String()
     id_user_actualizacion = String()
     user_actualizacion= Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
+    id_user_creacion = String()
+    user_creacion= Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
@@ -940,17 +967,31 @@ class UsuarioGetIn(Schema):
     suspendido = Boolean()
 
 
+
 class UsuarioTareaOut(Schema):
     id_usuario = String()
     nombre = String()
     apellido = String()
     asignada = Boolean()
     fecha_asignacion = String()
+    id_user_asignacion = String()
+    user_asignacion = Nested(UsuarioAsignaOut, only=("id", "nombre_completo_asigna"))
 
     @post_dump
     def add_nombre_completo(self, data, **kwargs):
         data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
         return data
+
+    """ def build_user_asignacion(self, data, **kwargs):
+        if data.get("id_user_asignacion"):
+            data["user_asignacion"] = {
+                "id_user_asignacion": data.get("id_user_asignacion"),
+                "nombre_asigna": data.get("nombre"),
+                "apellido_asigna": data.get("apellido"),
+            }
+        return data """
+    
+
 
 class DetalleUsuarioAllOut(Schema):
     id = String()
@@ -1085,7 +1126,6 @@ class TareaPatchAllOut(Schema):
     fecha_actualizacion = String()
     fecha_creacion = String()
     id_user_actualizacion = String()
-    user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
@@ -1100,15 +1140,7 @@ class TareaPatchAllOut(Schema):
 
 class TareaAllOut(Schema):
     id = String()
-    #estado = Integer()
-    #prioridad = fields.Nested(PrioridadSchema, metadata={
-    #    "description": "1 (alta), 2 (media), 3 (baja)"
-    #})
     prioridad = fields.Nested(PrioridadSchema)
-    #prioridad = Integer()
-    #estado = fields.Nested(EstadoSchema, metadata={
-    #    "description": "1 (pendiente), 2 (en proceso), 3 (realizada), 4 (cancelada)"
-    #})
     estado = fields.Nested(EstadoSchema)
     id_actuacion = String()
     id_actuacion_ext = String()
@@ -1129,6 +1161,8 @@ class TareaAllOut(Schema):
     fecha_creacion = String()
     id_user_actualizacion = String()
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     plazo = Integer()
     fecha_creacion = String()
     tipo_tarea = Nested(TipoTareaOut, only=("id", "nombre")) 
