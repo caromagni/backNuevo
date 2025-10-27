@@ -424,6 +424,21 @@ class DatabaseSetup:
                 'caso_uso': [{"codigo": "consultar-grupo-usuario"}],
                 'metodo': 'GET'
             },
+            {
+                'id': '',
+                'url': '/label_tarea',
+                'descripcion': 'GET label_tarea',
+                'caso_uso': [{"codigo": "consultar-labela"}],
+                'metodo': 'GET'
+            },
+            {
+                'id': '',
+                'url': '/grupos_grupobase',
+                'descripcion': 'GET grupo base',
+                'caso_uso': [{"codigo": "consultar-grupo"}],
+                'metodo': 'GET'
+            }
+            
         ]
         for ep in endpoints_data:
             exists = session.query(EP).filter_by(url=ep['url'], metodo=ep['metodo']).first()
