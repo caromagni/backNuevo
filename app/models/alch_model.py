@@ -183,6 +183,7 @@ class Grupo(Base):
     descripcion = Column(String, nullable=False)
     id_user_actualizacion = Column(ForeignKey('tareas.usuario.id'))
     id_user_asignado_default = Column(ForeignKey('tareas.usuario.id'))
+    id_user_creacion = Column(ForeignKey('tareas.usuario.id'))
     fecha_actualizacion = Column(DateTime, nullable=False)
     eliminado  = Column(Boolean, default=False)
     suspendido = Column(Boolean, default=False)
@@ -191,6 +192,7 @@ class Grupo(Base):
     base = Column(Boolean, default=False)
     user_actualizacion = relationship('Usuario', foreign_keys=[id_user_actualizacion])
     user_asignado_default= relationship('Usuario', foreign_keys=[id_user_asignado_default])
+    user_creacion = relationship('Usuario', foreign_keys=[id_user_creacion])
     organismo = relationship('Organismo', foreign_keys=[id_organismo_ext])
     dominio = relationship('Dominio', foreign_keys=[id_dominio_ext])
 

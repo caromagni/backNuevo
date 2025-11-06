@@ -252,6 +252,8 @@ class GetGroupOut(Schema):
     user_actualizacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     id_user_asignado_default = String()
     user_asignado_default = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     fecha_actualizacion = String()
     fecha_creacion = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion")) 
@@ -646,7 +648,17 @@ class GroupBaseOutbyId(Schema):
     suspendido = Boolean()
     is_base = Boolean()
    
-
+class UsuarioDefaultOut(Schema):
+    id = String()
+    nombre = String()
+    apellido = String()
+    nombre_completo = String(dump_only=True)  # Indicar que es un campo solo de salida
+    
+    @post_dump
+    def add_nombre_completo(self, data, **kwargs):
+        data['nombre_completo'] = f"{data.get('nombre', '')} {data.get('apellido', '')}"
+        return data
+    
 class GroupIdOut(Schema):
     id = String()
     nombre = String()
@@ -657,6 +669,8 @@ class GroupIdOut(Schema):
     fecha_actualizacion = DateTime()
     id_user_actualizacion = String()
     id_user_asignado_default = String()
+    id_user_creacion = String()
+    user_creacion = Nested(UsuarioDefaultOut, only=("id", "nombre", "apellido", "nombre_completo"))
     id_dominio = String()
     id_organismo = String()
     organismo = Nested(OrganismoOut, only=("id", "descripcion"))

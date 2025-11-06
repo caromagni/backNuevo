@@ -115,6 +115,8 @@ def get_grupo_by_id(id):
             "dominio": res.dominio,
             "id_user_actualizacion": res.id_user_actualizacion,
             "id_user_asignado_default": res.id_user_asignado_default,
+            "id_user_creacion": res.id_user_creacion,
+            "user_creacion": res.user_creacion,
             "fecha_actualizacion": res.fecha_actualizacion
         }
         #print("Resultado:", results)
@@ -1120,11 +1122,8 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
             if query_base is not None:
                 id_dominio = query_base.id_dominio_ext
                 id_organismo = query_base.id_organismo_ext
-
-    """ if id_dominio is None:
-        id_dominio = dominio
-    if id_organismo is None:
-        id_organismo = organismo """
+        else:   
+            raise Exception("No se encontró el grupo padre o el grupo padre no tiene grupo base asignado")     
 
     nuevoID_grupo=uuid.uuid4()
     nuevoID=uuid.uuid4()
@@ -1139,6 +1138,7 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
         suspendido=False,
         id_user_actualizacion=id_user_actualizacion,
         id_user_asignado_default=id_user_asignado_default,
+        id_user_creacion=id_user_actualizacion,
         fecha_actualizacion=datetime.now(),
         fecha_creacion=datetime.now()
     )
@@ -1252,6 +1252,8 @@ def insert_grupo(username=None, dominio=None, organismo=None, nombre='', descrip
         "user_actualizacion": nuevo_grupo.user_actualizacion,
         "id_user_asignado_default": nuevo_grupo.id_user_asignado_default,
         "user_asignado_default": nuevo_grupo.user_asignado_default,
+        "id_user_creacion": nuevo_grupo.id_user_creacion,
+        "user_creacion": nuevo_grupo.user_creacion,
         "fecha_creacion": nuevo_grupo.fecha_creacion,
         "fecha_actualizacion": nuevo_grupo.fecha_actualizacion,
         "path": cursor[0].path if cursor else "",
