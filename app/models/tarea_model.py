@@ -2497,7 +2497,6 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
     id_actuacion_ext = ''
     id_expte_ext = ''
     # Using aliased subqueries to reduce the number of queries for users and groups
-    usuario_alias = aliased(Usuario)
     grupo_alias = aliased(Grupo)
     if res_tareas is None:
         # total = 0
@@ -2522,11 +2521,9 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
                 id_actuacion_ext = res_actuacion.id_ext    
 
         # Fetch assigned users for the task
-        res_usuarios = db.session.query(usuario_alias.id, usuario_alias.nombre, usuario_alias.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion, 
-                                     ).join(TareaAsignadaUsuario, usuario_alias.id == TareaAsignadaUsuario.id_usuario
-                                     ).outerjoin(Usuario, Usuario.id == TareaAsignadaUsuario.id_user_asignacion
+        res_usuarios = db.session.query(Usuario.id, Usuario.nombre, Usuario.apellido, TareaAsignadaUsuario.eliminado.label('reasignada'), TareaAsignadaUsuario.fecha_asignacion, 
+                                     ).join(TareaAsignadaUsuario, Usuario.id == TareaAsignadaUsuario.id_usuario
                                      ).filter(TareaAsignadaUsuario.id_tarea == res.id).order_by(TareaAsignadaUsuario.eliminado).all()
-        
         for row in res_usuarios:
             usuario = {
                 "id_usuario": row.id,
@@ -2540,9 +2537,8 @@ def get_all_tarea_detalle(username=None, page=1, per_page=10, titulo='', label='
             usuarios.append(usuario)
 
         # Fetch assigned groups for the task
-        res_grupos = db.session.query(grupo_alias.id, grupo_alias.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion    
-                                   ).join(TareaXGrupo, grupo_alias.id == TareaXGrupo.id_grupo
-                                   ).outerjoin(Usuario, Usuario.id == TareaXGrupo.id_user_asignacion
+        res_grupos = db.session.query(Grupo.id, Grupo.nombre, TareaXGrupo.eliminado.label('reasignada'), TareaXGrupo.fecha_asignacion
+                                   ).join(TareaXGrupo, Grupo.id == TareaXGrupo.id_grupo
                                    ).filter(TareaXGrupo.id_tarea == res.id).order_by(TareaXGrupo.fecha_asignacion.desc()).all()
 
         #TareaXGrupo.id_user_asignacion, TareaXGrupo.user_asignacion.label('user_asignacion') 
