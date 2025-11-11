@@ -1171,7 +1171,7 @@ class TareaAllOut(Schema):
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
     tiene_notas = Boolean()
-    url = List(Nested(URLOut, only=("url", "descripcion")))
+    url = List(Nested(URLOut, only=("id", "url", "descripcion")))
     editable_externo = Boolean()
 
 
@@ -1297,7 +1297,7 @@ class TareaIdOut(Schema):
     user_actualizacion = Nested(UsuarioOut, only=("id","nombre","apellido","nombre_completo"))
     reasignada_usuario = Boolean()
     reasignada_grupo = Boolean()
-    url= List(Nested(URLOut, only=("url", "descripcion")))
+    url= List(Nested(URLOut, only=("id", "url", "descripcion")))
     editable_externo = Boolean()
 
 class TareaHIstoriaUserIdOut(Schema):
