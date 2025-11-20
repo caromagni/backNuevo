@@ -23,7 +23,10 @@ def sync_request(url, entity_id):
     print("entity id:",entity_id)
     print("###########################################")
     r=requests.get(url,headers={'x-api-key': x_api_key, 'x-api-system': x_api_system})
-    
+    if r.status_code != 200:
+        print("Error en la solicitud HTTP:", r.status_code)
+        print("Response text:", r.text)
+        return None
     resp=r.json()
     print("json roles:",resp)
     return resp
@@ -116,7 +119,7 @@ def sync_tipo_tarea(clasificacion,entity, entity_id, url, id_user=None):
 
 
 
-def sync_usuario(entity_id, url,id_user):
+def sync_usuario(entity_id, url, id_user):
     resp = sync_request(url, entity_id)
     print("json roles:",resp)    
     if resp and resp['data']['username'] is not None:

@@ -18,7 +18,7 @@ def check_updates_new( rabbit_message: dict):
         entity_id = rabbit_message.get('entity_id')
         empty_stuff = rabbit_message.get('empty_stuff')
         url = rabbit_message.get('url').lower()
-        
+        print("rabbit_utils - url: ", url)
         if not entity:
             logger_config.logger.info("No se ha especificado una entidad.")
             return
