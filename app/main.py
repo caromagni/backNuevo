@@ -36,6 +36,8 @@ import common.cache as cache_common
 import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
+import requests
+from flask import Flask, jsonify
 # import base64]
 import os
 
@@ -197,6 +199,15 @@ def create_app():
     @app.route('/livez')
     def livez():
         return {'status': 'live'}, 200
+    
+
+    @app.route("/ip")
+    def get_ip():
+        try:
+            ip = requests.get("https://ifconfig.me", timeout=5).text.strip()
+            return jsonify({"ip_publica": ip})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     # Kubernetes readiness probe
     @app.route('/readyz')
