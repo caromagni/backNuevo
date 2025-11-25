@@ -194,14 +194,7 @@ def create_app():
     app.register_blueprint(organismo_b)
     app.register_blueprint(full_sync_b)
 
-    @app.route("/ip")
-    def get_ip():
-        try:
-            ip = requests.get("https://ifconfig.me", timeout=5).text.strip()
-            return jsonify({"ip_publica": ip})
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-    
+   
     # Kubernetes liveness probe
     @app.route('/livez')
     def livez():
