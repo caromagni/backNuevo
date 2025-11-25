@@ -1,44 +1,42 @@
-
-
-# from blueprints.endpoint_json import ep_bj
 from apiflask import APIFlask, HTTPTokenAuth
-from blueprints.actuacion import actuacion_b
-from blueprints.ai_assistant import ai_assistant
-from blueprints.alerta import alerta_b
-from blueprints.dominio import dominio_b
-from blueprints.endpoint import ep_b
-from blueprints.expediente import expediente_b
-from blueprints.fix_stuck_in_idle_connections import fix_b
-from blueprints.full_sync import full_sync_b
-from blueprints.groups import groups_b
-from blueprints.herarquia import herarquia_b
-from blueprints.label import label_b
-from blueprints.nota import nota_b
-from blueprints.organismo import organismo_b
-from blueprints.tarea import tarea_b
-from blueprints.URL import ep_url
-from blueprints.usuario import usuario_b
-from common.api_key import *
-from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
-from common.chk_messagges import *
-from common.error_handling import register_error_handlers
-from config.config import Config
-from database_setup import DatabaseSetup
-from db.alchemy_db import db
-from flask import Flask, jsonify
 from flask import send_from_directory
-from flask_caching import Cache
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from models.alch_model import Base
-import common.cache as cache_common
-import common.exceptions as exceptions
-import os
-import redis
-import requests
-import sys
 import threading
+from flask_cors import CORS
+
+from flask_sqlalchemy import SQLAlchemy
+
+from blueprints.groups import groups_b
+from blueprints.usuario import usuario_b
+from blueprints.tarea import tarea_b
+from blueprints.herarquia import herarquia_b
+from blueprints.actuacion import actuacion_b
+from blueprints.expediente import expediente_b
+from blueprints.nota import nota_b
+from blueprints.label import label_b
+from blueprints.alerta import alerta_b
+from blueprints.endpoint import ep_b
+from blueprints.dominio import dominio_b
+from blueprints.organismo import organismo_b
+from blueprints.full_sync import full_sync_b
+# from blueprints.endpoint_json import ep_bj
+from blueprints.fix_stuck_in_idle_connections import fix_b
+from blueprints.URL import ep_url
+from blueprints.ai_assistant import ai_assistant
+from common.auditoria  import after_flush  # Importa el archivo que contiene el evento after_flush
+from config.config import Config
+from common.error_handling import register_error_handlers
+from common.api_key import *
+from common.chk_messagges import *
+import sys
+from models.alch_model import Base
+from db.alchemy_db import db
+from flask_caching import Cache
 sys.setrecursionlimit(100)
+import common.cache as cache_common
+import redis
+import common.exceptions as exceptions
+from database_setup import DatabaseSetup
+import os
 
 def is_redis_available(): 
     """One-liner Redis availability check"""
@@ -194,7 +192,6 @@ def create_app():
     app.register_blueprint(organismo_b)
     app.register_blueprint(full_sync_b)
 
-   
     # Kubernetes liveness probe
     @app.route('/livez')
     def livez():
