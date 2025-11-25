@@ -36,6 +36,7 @@ import common.cache as cache_common
 import redis
 import common.exceptions as exceptions
 from database_setup import DatabaseSetup
+# import base64]
 import os
 
 def is_redis_available(): 
